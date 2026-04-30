@@ -199,36 +199,59 @@
 
 </div>
 
-<!-- QR generator: embedded fallback for offline / CDN for online -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" onerror="loadFallback()"></script>
+<!-- QR generator: 3 CDNs en cascada + fallback claro -->
 <script>
 const URL_APP = 'https://raulopezazueta-bit.github.io/registro_arboles_pa/';
+const QR_CDNS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js',
+  'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',
+  'https://unpkg.com/qrcode-generator@1.4.4/qrcode.js'
+];
+
 function renderQR() {
-  if (typeof qrcode === 'undefined') return;
-  /* type 0 = auto, error correction H = high (~30% redundancy, soporta logo y daño) */
-  const qr = qrcode(0, 'H');
-  qr.addData(URL_APP);
-  qr.make();
-  /* render como imagen base64 con módulos verde corporativo */
-  const cellSize = 12;
-  const margin = 2;
-  const tile = qr.getModuleCount() * cellSize + margin*2*cellSize;
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${tile} ${tile}" shape-rendering="crispEdges">`;
-  svg += `<rect width="${tile}" height="${tile}" fill="#FFFFFF"/>`;
-  for (let r=0; r<qr.getModuleCount(); r++) {
-    for (let c=0; c<qr.getModuleCount(); c++) {
-      if (qr.isDark(r,c)) {
-        svg += `<rect x="${(c+margin)*cellSize}" y="${(r+margin)*cellSize}" width="${cellSize}" height="${cellSize}" fill="#0F4514"/>`;
+  if (typeof qrcode === 'undefined') return false;
+  try {
+    var qr = qrcode(0, 'H');
+    qr.addData(URL_APP);
+    qr.make();
+    var cellSize = 12, margin = 2;
+    var tile = qr.getModuleCount() * cellSize + margin*2*cellSize;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'" shape-rendering="crispEdges">';
+    svg += '<rect width="'+tile+'" height="'+tile+'" fill="#FFFFFF"/>';
+    for (var r=0; r<qr.getModuleCount(); r++) {
+      for (var c=0; c<qr.getModuleCount(); c++) {
+        if (qr.isDark(r,c)) {
+          svg += '<rect x="'+((c+margin)*cellSize)+'" y="'+((r+margin)*cellSize)+'" width="'+cellSize+'" height="'+cellSize+'" fill="#0F4514"/>';
+        }
       }
     }
+    svg += '</svg>';
+    document.getElementById('qr').innerHTML = svg;
+    return true;
+  } catch(e) { console.error('QR render error:', e); return false; }
+}
+
+function tryLoadCDN(idx) {
+  if (idx >= QR_CDNS.length) {
+    document.getElementById('qr').innerHTML =
+      '<div style="padding:20px;text-align:center;color:#C62828;font-size:14px;line-height:1.5;">' +
+      '⚠️ QR no disponible<br>Abre manualmente:<br>' +
+      '<strong style="font-size:11px;word-break:break-all;font-family:monospace;color:#0F4514;">' + URL_APP + '</strong></div>';
+    return;
   }
-  svg += '</svg>';
-  document.getElementById('qr').innerHTML = svg;
+  var s = document.createElement('script');
+  s.src = QR_CDNS[idx];
+  s.async = true;
+  s.onload = function() { if (!renderQR()) tryLoadCDN(idx+1); };
+  s.onerror = function() { tryLoadCDN(idx+1); };
+  document.head.appendChild(s);
 }
-function loadFallback() {
-  document.getElementById('qr').innerHTML =
-    '<div style="padding:20px;text-align:center;color:#C62828;font-size:14px">' +
-    '⚠️ No se pudo cargar el generador QR.<br>Conecta a internet y recarga, o<br>' +
-    'abre <strong>' + URL_APP + '</strong> manualmente.</div>';
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function(){ tryLoadCDN(0); });
+} else {
+  tryLoadCDN(0);
 }
-window.addEventListener
+</script>
+</body>
+</html>
