@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cheat Sheet — Árboles PA</title>
+<style>
+  @page { size: letter; margin: 0; }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+    color: #0F1419;
+    background: #F5F5F5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 8.5in; height: 11in;
+    padding: 0.4in 0.5in;
+    background: #fff;
+    page-break-after: always;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 10px;
+  }
+  /* Header */
+  .header {
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid #1A5C20;
+  }
+  .header__logo { width: 56px; height: 56px; flex-shrink: 0; }
+  .header__logo img { width: 100%; height: 100%; object-fit: contain; }
+  .header__title { font-size: 22px; font-weight: 800; color: #0F4514; line-height: 1; }
+  .header__sub { font-size: 11px; color: #666; margin-top: 2px; }
+  .header__chip {
+    margin-left: auto;
+    background: #1A5C20; color: #fff;
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  /* URL Banner */
+  .url-banner {
+    background: linear-gradient(135deg, #F1F9F2, #D4EDDA);
+    border-left: 5px solid #1A5C20;
+    padding: 8px 14px;
+    border-radius: 6px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .url-banner__label { font-size: 10px; color: #666; font-weight: 700; text-transform: uppercase; }
+  .url-banner__url { font-family: ui-monospace, 'Courier New', monospace; font-size: 12px; color: #0F4514; font-weight: 700; }
+
+  /* Main grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 12px;
+  }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+
+  /* Box generic */
+  .box {
+    background: #fff;
+    border: 1.5px solid #D8DCDE;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .box--green { border-color: #2E8B35; background: #F1F9F2; }
+  .box--blue  { border-color: #1565C0; background: #E3F2FD; }
+  .box--orange{ border-color: #E65100; background: #FFF3E0; }
+
+  .box__title {
+    font-size: 12px; font-weight: 800; color: #0F4514;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+  .box--blue .box__title { color: #1565C0; }
+  .box--orange .box__title { color: #E65100; }
+
+  /* Steps */
+  .steps {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    font-size: 11px; line-height: 1.35;
+  }
+  .step__num {
+    width: 22px; height: 22px;
+    background: #1A5C20; color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 11px;
+    flex-shrink: 0;
+  }
+  .step__text strong { color: #0F4514; }
+
+  /* OS columns */
+  .os-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .os-card {
+    background: #fff;
+    border: 1.5px solid #D8DCDE;
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .os-card__head {
+    font-size: 11px; font-weight: 800; color: #0F4514;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .os-card ol { margin-left: 14px; font-size: 10.5px; line-height: 1.4; }
+
+  /* Field checklist */
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 12px;
+    font-size: 10.5px;
+    line-height: 1.45;
+  }
+  .check-grid div::before {
+    content: "☐  ";
+    color: #2E8B35;
+    font-weight: 800;
+  }
+
+  /* GPS table */
+  .gps-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 6px;
+    font-size: 10.5px;
+    padding: 3px 0;
+    border-bottom: 1px dashed #E5E7E9;
+  }
+  .gps-row:last-child { border: none; }
+  .gps-row__sig { font-weight: 700; }
+  .gps-row__sig.green  { color: #2E7D32; }
+  .gps-row__sig.orange { color: #E65100; }
+  .gps-row__sig.gray   { color: #888; }
+
+  /* Protocol */
+  .proto {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  }
+  .proto-item {
+    background: #fff;
+    border: 1.5px solid #2E8B35;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 10.5px;
+    text-align: center;
+  }
+  .proto-item strong { display: block; color: #0F4514; font-size: 11px; margin-bottom: 2px; }
+
+  /* Troubleshooting */
+  .trouble li {
+    font-size: 10.5px; line-height: 1.4;
+    margin-left: 14px;
+    margin-bottom: 3px;
+  }
+  .trouble li strong { color: #E65100; }
+
+  /* Footer */
+  .footer {
+    border-top: 2px solid #D4EDDA;
+    padding-top: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 9.5px; color: #666;
+  }
+  .footer strong { color: #0F4514; }
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header__logo"><img src="icon-512.png" alt="Logo PA"></div>
+    <div>
+      <div class="header__title">ÁRBOLES PA · Cheat Sheet</div>
+      <div class="header__sub">Reforestación 11K · Parques Alegres · Culiacán 2026</div>
+    </div>
+    <span class="header__chip">Comités vecinales</span>
+  </div>
+
+  <!-- URL -->
+  <div class="url-banner">
+    <span class="url-banner__label">App:</span>
+    <span class="url-banner__url">https://raulopezazueta-bit.github.io/registro_arboles_pa/</span>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="grid">
+
+    <!-- LEFT COLUMN -->
+    <div class="col">
+
+      <!-- Steps -->
+      <div class="box box--green">
+        <div class="box__title">🌳 Cómo registrar un árbol (5 pasos)</div>
+        <div class="steps">
+          <div class="step"><span class="step__num">1</span><div class="step__text"><strong>Permite GPS y cámara</strong> al abrir la app por primera vez.</div></div>
+          <div class="step"><span class="step__num">2</span><div class="step__text"><strong>Quédate quieto sobre el árbol</strong> hasta que el GPS llegue a verde (≤1.0 m efectivo). Toca "Bloquear GPS".</div></div>
+          <div class="step"><span class="step__num">3</span><div class="step__text"><strong>Llena las 7 secciones</strong> de arriba hacia abajo. Cada una tiene un contador X/N en su encabezado.</div></div>
+          <div class="step"><span class="step__num">4</span><div class="step__text"><strong>Toma las 2 fotos</strong>: cepa preparada y árbol finalizado.</div></div>
+          <div class="step"><span class="step__num">5</span><div class="step__text">Cuando la barra inferior diga <strong>"✅ Todo listo"</strong>, toca <strong>Guardar árbol</strong>.</div></div>
+        </div>
+      </div>
+
+      <!-- 17 fields checklist -->
+      <div class="box">
+        <div class="box__title">✅ Checklist de los 17 campos requeridos</div>
+        <div class="check-grid">
+          <div>GPS bloqueado verde</div>
+          <div>Número de árbol (consecutivo)</div>
+          <div>Sprint</div>
+          <div>Quién planta (Comité)</div>
+          <div>Zona</div>
+          <div>Tipo de zona</div>
+          <div>Parque o área</div>
+          <div>Especie (nombre común)</div>
+          <div>Vivero</div>
+          <div>DAP (cm)</div>
+          <div>Altura plantón (m)</div>
+          <div>Suelo circundante</div>
+          <div>% Copa viva</div>
+          <div>Condición general</div>
+          <div>Protocolo: Hoyo 60×60×60</div>
+          <div>Protocolo: Riego asentamiento</div>
+          <div>Comité responsable</div>
+          <div style="grid-column: 1 / -1; padding-top:2px; border-top:1px dashed #E5E7E9;">+ Foto 1 (cepa) y Foto 2 (finalizado)</div>
+        </div>
+      </div>
+
+      <!-- Protocol -->
+      <div class="box box--green">
+        <div class="box__title">🪴 Protocolo (solo 2 casillas)</div>
+        <div class="proto">
+          <div class="proto-item"><strong>Hoyo</strong>60 × 60 × 60 cm verificado</div>
+          <div class="proto-item"><strong>Riego</strong>De asentamiento, post-plantación</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col">
+
+      <!-- Install per OS -->
+      <div class="box box--blue">
+        <div class="box__title">📱 Instalar como app</div>
+        <div class="os-grid">
+          <div class="os-card">
+            <div class="os-card__head">🤖 Android (Chrome)</div>
+            <ol>
+              <li>Abre la URL.</li>
+              <li>Menú ⋮ → "Instalar app".</li>
+              <li>Confirma.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <div class="os-card__head">🍎 iPhone (Safari)</div>
+            <ol>
+              <li>Abre en <strong>Safari</strong> (no Chrome).</li>
+              <li>Botón Compartir ⬆️.</li>
+              <li>"Añadir a pantalla de inicio".</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- GPS states -->
+      <div class="box">
+        <div class="box__title">📍 Semáforo del GPS</div>
+        <div class="gps-row">
+          <div class="gps-row__sig gray">⏳ Gris</div>
+          <div>Acumulando lecturas. Quédate quieto.</div>
+        </div>
+        <div class="gps-row">
+          <div class="gps-row__sig orange">⚠️ Naranja</div>
+          <div>Mayor a 1 m. Sal a cielo abierto, activa WiFi (sin contraseña ok).</div>
+        </div>
+        <div class="gps-row">
+          <div class="gps-row__sig green">✅ Verde</div>
+          <div>≤ 1.0 m. Toca <strong>Bloquear GPS</strong>.</div>
+        </div>
+      </div>
+
+      <!-- Final del día -->
+      <div class="box box--green">
+        <div class="box__title">📤 Al final del día</div>
+        <div class="steps">
+          <div class="step"><span class="step__num">1</span><div class="step__text">Pestaña Registros → <strong>⬇️ CSV i-Tree</strong></div></div>
+          <div class="step"><span class="step__num">2</span><div class="step__text">Toca <strong>📷 Fotos</strong> para descargar todas.</div></div>
+          <div class="step"><span class="step__num">3</span><div class="step__text">Envía CSV + fotos al <strong>Asesor por WhatsApp</strong>.</div></div>
+          <div class="step"><span class="step__num">4</span><div class="step__text">Confirma envío y toca <strong>🗑 Limpiar</strong>.</div></div>
+        </div>
+      </div>
+
+      <!-- Troubleshooting -->
+      <div class="box box--orange">
+        <div class="box__title">🛟 Si algo falla</div>
+        <ul class="trouble">
+          <li><strong>GPS no llega a verde:</strong> sal a cielo abierto, activa WiFi, espera 30 s.</li>
+          <li><strong>"Fuera de Culiacán":</strong> activa modo avión 5 s y desactívalo.</li>
+          <li><strong>Almacenamiento lleno:</strong> exporta CSV + fotos, luego 🗑 Limpiar.</li>
+          <li><strong>Cámara no abre:</strong> Ajustes → Apps → Chrome/Safari → Cámara → Permitir.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div><strong>Reglas de oro:</strong> sin GPS bloqueado + 2 fotos = no cuenta · marca el protocolo solo si se hizo · CSV diario.</div>
+    <div><strong>Soporte:</strong> Ing. Raúl López Z. · Ecosistémica · v5 Mayo 2026</div>
+  </div>
+
+</div>
+</body>
+</html>

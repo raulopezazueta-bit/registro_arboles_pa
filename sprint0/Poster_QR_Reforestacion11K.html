@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Poster QR — Árboles PA</title>
+<style>
+  @page { size: letter; margin: 0; }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+    color: #0F1419;
+    background: #F5F5F5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 8.5in;
+    height: 11in;
+    padding: 0.6in 0.75in;
+    background: linear-gradient(180deg, #F1F9F2 0%, #FFFFFF 50%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+  }
+  /* Encabezado */
+  .header {
+    display: flex; align-items: center; gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 4px solid #1A5C20;
+  }
+  .header__logo {
+    width: 80px; height: 80px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 6px;
+    border: 2px solid #D4EDDA;
+    box-shadow: 0 4px 12px rgba(15,69,20,.18);
+    flex-shrink: 0;
+  }
+  .header__logo img { width: 100%; height: 100%; object-fit: contain; }
+  .header__title {
+    font-size: 28px; font-weight: 800; color: #0F4514; letter-spacing: 0.3px;
+  }
+  .header__sub {
+    font-size: 14px; color: #666; margin-top: 4px;
+  }
+  .header__chip {
+    margin-left: auto;
+    background: #1A5C20; color: #fff;
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  /* CTA principal */
+  .cta {
+    text-align: center;
+    margin-top: 28px;
+    margin-bottom: 18px;
+  }
+  .cta__hi {
+    font-size: 18px; color: #2E8B35; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .cta__title {
+    font-size: 38px; font-weight: 900; color: #0F4514;
+    margin-top: 8px; line-height: 1.1;
+  }
+  .cta__lead {
+    font-size: 17px; color: #3A3A3A;
+    margin-top: 14px; line-height: 1.5;
+    max-width: 6.5in; margin-left: auto; margin-right: auto;
+  }
+  /* QR card */
+  .qr-card {
+    background: #fff;
+    border: 2px solid #1A5C20;
+    border-radius: 18px;
+    padding: 24px;
+    margin: 22px auto;
+    width: 4.4in;
+    box-shadow: 0 6px 24px rgba(15,69,20,.18);
+    text-align: center;
+  }
+  .qr-canvas {
+    width: 3.6in;
+    height: 3.6in;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qr-canvas img, .qr-canvas canvas { max-width: 100%; max-height: 100%; }
+  .qr-card__hint {
+    font-size: 14px; color: #666;
+    margin-top: 14px; font-weight: 500;
+  }
+  .qr-card__url {
+    font-family: ui-monospace, 'Courier New', monospace;
+    font-size: 13px; color: #0F4514;
+    margin-top: 8px; font-weight: 700;
+    word-break: break-all;
+  }
+  /* Pasos */
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: auto;
+    margin-bottom: 14px;
+  }
+  .step {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    border-left: 4px solid #2E8B35;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .step__num {
+    width: 28px; height: 28px;
+    background: #1A5C20; color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .step__title {
+    font-size: 14px; font-weight: 700; color: #0F4514;
+    line-height: 1.25; margin-bottom: 4px;
+  }
+  .step__desc {
+    font-size: 12px; color: #444; line-height: 1.4;
+  }
+  /* Footer */
+  .footer {
+    border-top: 2px solid #D4EDDA;
+    padding-top: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: #666;
+  }
+  .footer strong { color: #0F4514; }
+  /* Print fix */
+  @media print {
+    body { background: #fff; }
+    .page { width: auto; height: auto; padding: 0.5in 0.75in; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header__logo"><img src="icon-512.png" alt="Logo Parques Alegres"></div>
+    <div>
+      <div class="header__title">Árboles PA</div>
+      <div class="header__sub">Parques Alegres · Reforestación 11K · 2026</div>
+    </div>
+    <span class="header__chip">Comités vecinales</span>
+  </div>
+
+  <div class="cta">
+    <div class="cta__hi">Registra cada árbol que plantes</div>
+    <div class="cta__title">Escanea el código y abre la app</div>
+    <p class="cta__lead">
+      Esta aplicación captura GPS, fotos y datos i-Tree de cada árbol
+      directamente desde tu celular. Funciona sin internet después de la primera carga.
+    </p>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-canvas" id="qr"></div>
+    <div class="qr-card__hint">Apunta la cámara del celular al código</div>
+    <div class="qr-card__url">raulopezazueta-bit.github.io/registro_arboles_pa</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step__num">1</div>
+      <div class="step__title">Escanea el QR</div>
+      <div class="step__desc">Abre la cámara y enfoca. Toca el enlace que aparece.</div>
+    </div>
+    <div class="step">
+      <div class="step__num">2</div>
+      <div class="step__title">Permite GPS y cámara</div>
+      <div class="step__desc">Concede los permisos cuando Chrome o Safari los solicite.</div>
+    </div>
+    <div class="step">
+      <div class="step__num">3</div>
+      <div class="step__title">Instala como app</div>
+      <div class="step__desc">Menú (⋮) → "Agregar a pantalla de inicio". Listo para campo.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div><strong>Ecosistémica</strong> · Consultoría Ambiental Integral</div>
+    <div>Soporte: <strong>Ing. Raúl López Zazueta</strong></div>
+    <div>v4 · Abril 2026</div>
+  </div>
+
+</div>
+
+<!-- QR generator: embedded fallback for offline / CDN for online -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" onerror="loadFallback()"></script>
+<script>
+const URL_APP = 'https://raulopezazueta-bit.github.io/registro_arboles_pa/';
+function renderQR() {
+  if (typeof qrcode === 'undefined') return;
+  /* type 0 = auto, error correction H = high (~30% redundancy, soporta logo y daño) */
+  const qr = qrcode(0, 'H');
+  qr.addData(URL_APP);
+  qr.make();
+  /* render como imagen base64 con módulos verde corporativo */
+  const cellSize = 12;
+  const margin = 2;
+  const tile = qr.getModuleCount() * cellSize + margin*2*cellSize;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${tile} ${tile}" shape-rendering="crispEdges">`;
+  svg += `<rect width="${tile}" height="${tile}" fill="#FFFFFF"/>`;
+  for (let r=0; r<qr.getModuleCount(); r++) {
+    for (let c=0; c<qr.getModuleCount(); c++) {
+      if (qr.isDark(r,c)) {
+        svg += `<rect x="${(c+margin)*cellSize}" y="${(r+margin)*cellSize}" width="${cellSize}" height="${cellSize}" fill="#0F4514"/>`;
+      }
+    }
+  }
+  svg += '</svg>';
+  document.getElementById('qr').innerHTML = svg;
+}
+function loadFallback() {
+  document.getElementById('qr').innerHTML =
+    '<div style="padding:20px;text-align:center;color:#C62828;font-size:14px">' +
+    '⚠️ No se pudo cargar el generador QR.<br>Conecta a internet y recarga, o<br>' +
+    'abre <strong>' + URL_APP + '</strong> manualmente.</div>';
+}
+window.addEventListener('load', () => setTimeout(renderQR, 200));
+</script>
+</body>
+</html>
