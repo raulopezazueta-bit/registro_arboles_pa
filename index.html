@@ -216,6 +216,23 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 .mon-result__id{font-weight:700;color:var(--c-p-800);font-size:var(--fs-md)}
 .mon-result__meta{font-size:var(--fs-xs);color:var(--c-n-600)}
 .mon-result__dist{font-weight:700;color:var(--c-p-700);font-size:var(--fs-lg);white-space:nowrap;padding-left:10px}
+.mon-result__foto{width:64px;height:64px;flex-shrink:0;border-radius:var(--r-sm);object-fit:cover;margin-right:var(--s-3);background:var(--c-n-100);border:1.5px solid var(--c-p-100)}
+.mon-result__foto--vacia{display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--c-n-400)}
+.mon-lupa{position:absolute;right:6px;bottom:6px;background:rgba(15,69,20,.85);color:#fff;border-radius:var(--r-full);font-size:var(--fs-2xs);font-weight:700;padding:2px 8px}
+.mon-result__izq{display:flex;align-items:center;min-width:0;flex:1}
+.mon-foto-wrap{position:relative;flex-shrink:0}
+.mon-arbol-foto{width:100%;max-width:320px;border-radius:var(--r-md);display:block;margin:0 auto var(--s-2)}
+/* Visor de fotos de referencia */
+.visor{position:fixed;inset:0;z-index:500;background:rgba(15,20,25,.94);display:none;flex-direction:column;padding:var(--s-4);overflow-y:auto}
+.visor[data-open="true"]{display:flex}
+.visor__id{color:#fff;font-weight:800;font-size:var(--fs-lg);font-family:var(--ff-mono);text-align:center;margin-bottom:var(--s-2)}
+.visor__meta{color:#A8D5B0;font-size:var(--fs-sm);text-align:center;margin-bottom:var(--s-3)}
+.visor__fotos{display:flex;flex-direction:column;gap:var(--s-3);align-items:center;flex:1}
+.visor__fig{width:100%;max-width:520px}
+.visor__fig img{width:100%;border-radius:var(--r-md);display:block;background:#000}
+.visor__cap{color:#fff;font-size:var(--fs-sm);font-weight:600;margin-top:4px;text-align:center}
+.visor__acciones{display:flex;gap:var(--s-2);margin-top:var(--s-4);position:sticky;bottom:0;padding-top:var(--s-2)}
+.visor__acciones .btn-action{flex:1;justify-content:center;padding:14px;font-size:var(--fs-md);min-height:50px}
 .mon-card{background:var(--c-w);border-radius:var(--r-md);padding:var(--s-3);margin-bottom:10px;box-shadow:var(--sh-1);border-left:4px solid var(--c-p-600)}
 .mon-card--dead{border-left-color:var(--c-err)}
 .mon-card--hurt{border-left-color:var(--c-warn)}
@@ -558,7 +575,14 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
         📂 <span style="margin-left:6px">Cargar CSV de muestra</span>
         <input type="file" id="monCsvInput" onchange="cargarBaseMonitoreo(this)" style="display:none">
       </label>
+      <label class="btn-action btn-action--secondary" style="display:inline-flex;cursor:pointer;margin-left:6px">
+        📷 <span style="margin-left:6px">Cargar fotos de la muestra</span>
+        <input type="file" accept="image/*" multiple id="monFotosInput" onchange="cargarFotosMuestra(this)" style="display:none">
+      </label>
+      <p class="field__hint" style="margin-top:10px">Las fotos son las que se tomaron al plantar (<code>ID_finalizado.jpg</code> y <code>ID_cenital.jpg</code>). La app las empareja sola por el nombre del archivo y las muestra al buscar, para reconocer el árbol sin necesidad de identificar la especie.</p>
       <div id="monBaseStatus" style="margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
+      <div id="monFotosStatus" style="margin-top:6px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
+      <button class="btn-action btn-action--danger" id="btnBorrarFotos" onclick="borrarFotosMuestra()" style="margin-top:10px;display:none">🗑 Borrar fotos de la muestra</button>
     </div>
   </div>
 
@@ -617,6 +641,15 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 <div class="save-bar" id="saveBar">
   <div class="save-bar__info"><span class="save-bar__count" id="saveBarCount">0 / 19</span><span class="save-bar__hint" id="saveBarHint">Comienza por bloquear el GPS</span></div>
   <button class="btn-save" id="btnSave" disabled onclick="guardarRegistro()">💾 <span>Guardar y siguiente árbol</span></button>
+</div>
+<div class="visor" id="visorFotos" data-open="false" role="dialog" aria-modal="true" aria-label="Fotos del árbol">
+  <div class="visor__id" id="visorId">—</div>
+  <div class="visor__meta" id="visorMeta"></div>
+  <div class="visor__fotos" id="visorFotos_cont"></div>
+  <div class="visor__acciones">
+    <button class="btn-action btn-action--secondary" onclick="cerrarVisor()">← Volver</button>
+    <button class="btn-action" id="visorConfirmar">✓ Es este árbol</button>
+  </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -743,6 +776,7 @@ window.addEventListener('load', () => {
   const lmr=localStorage.getItem('lmr'); if(lmr) $('monRevisor').value=lmr;
   renderRegistros();
   actualizarBaseMonitoreoStatus();
+  refrescarFotosMuestra();
   renderMonitoreoHoy();
   pintarProtocolo();
   actualizarValidacion();
@@ -1379,6 +1413,117 @@ function detectarSeparador(linea){
   if (tabs > comas && tabs > puntoYComa) return '\t';
   return puntoYComa > comas ? ';' : ',';
 }
+/* ---------- Fotos de referencia de la muestra (IndexedDB) ----------
+   Las fotos de plantación no caben en localStorage (~5 MB), así que van en IndexedDB.
+   Clave: ID del árbol. Valor: { frente, cenital } en dataURL reducido. */
+const FOTOS_DB='arbolespa_fotos', FOTOS_STORE='muestra';
+let fotosMuestraIds = new Set();
+function idbAbrir(){
+  return new Promise((res,rej)=>{
+    if (!window.indexedDB) return rej(new Error('IndexedDB no disponible'));
+    const req=indexedDB.open(FOTOS_DB,1);
+    req.onupgradeneeded=()=>{ const db=req.result; if(!db.objectStoreNames.contains(FOTOS_STORE)) db.createObjectStore(FOTOS_STORE); };
+    req.onsuccess=()=>res(req.result);
+    req.onerror=()=>rej(req.error);
+  });
+}
+function idbOp(modo, fn){
+  return idbAbrir().then(db => new Promise((res,rej)=>{
+    const tx=db.transaction(FOTOS_STORE,modo), st=tx.objectStore(FOTOS_STORE);
+    let out; try{ out=fn(st); }catch(e){ rej(e); return; }
+    tx.oncomplete=()=>res(out instanceof IDBRequest ? out.result : out);
+    tx.onerror=()=>rej(tx.error);
+  }));
+}
+const fotosGet   = id => idbOp('readonly',  st => st.get(id));
+const fotosPut   = (id,v) => idbOp('readwrite', st => st.put(v,id));
+const fotosClear = () => idbOp('readwrite', st => st.clear());
+const fotosKeys  = () => idbOp('readonly',  st => st.getAllKeys());
+
+async function refrescarFotosMuestra(){
+  try{
+    const keys = await fotosKeys();
+    fotosMuestraIds = new Set(keys || []);
+  }catch(_){ fotosMuestraIds = new Set(); }
+  const n = fotosMuestraIds.size;
+  const st = $('monFotosStatus');
+  if (st){
+    const enBase = baseMonitoreo.filter(t => fotosMuestraIds.has(t.id)).length;
+    st.textContent = n
+      ? '📷 Fotos guardadas: '+n+' árboles'+(baseMonitoreo.length ? ' · '+enBase+' de '+baseMonitoreo.length+' de la muestra tienen foto' : '')
+      : 'Sin fotos cargadas. Sin ellas solo verás el ID, la especie y la distancia.';
+  }
+  const btn=$('btnBorrarFotos'); if (btn) btn.style.display = n ? 'inline-flex' : 'none';
+}
+/* Reduce la foto para que quepan cientos en el celular */
+function comprimirRef(dataUrl){
+  return new Promise(resolve => {
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=640, scale=Math.min(1,MAX/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      resolve(c.toDataURL('image/jpeg',0.62));
+    };
+    img.onerror=()=>resolve(dataUrl);
+    img.src=dataUrl;
+  });
+}
+/* Del nombre del archivo saca el ID y el tipo: 14664-A3F9-00001_cenital.jpg */
+function idDesdeNombre(nombre){
+  const base = nombre.replace(/\.[^.]+$/,'');
+  const m = base.match(/^(.*?)[_-]?(finalizado|frente|cenital|arriba)?$/i);
+  const tipo = (m && m[2] || '').toLowerCase();
+  let id = (m && m[1] || base).replace(/[_-]+$/,'');
+  return { id, tipo: (tipo==='cenital'||tipo==='arriba') ? 'cenital' : 'frente' };
+}
+async function cargarFotosMuestra(input){
+  const files=[...input.files]; input.value='';
+  if (!files.length) return;
+  if (!window.indexedDB){ toast('Este navegador no puede guardar las fotos','err'); return; }
+  toast('⏳ Procesando '+files.length+' fotos…');
+  let ok=0, sinPareja=0;
+  for (const f of files){
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png)$/i.test(f.name)) continue;
+    const { id, tipo } = idDesdeNombre(f.name);
+    if (!id){ sinPareja++; continue; }
+    try{
+      const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
+      const comp = await comprimirRef(dataUrl);
+      const prev = (await fotosGet(id)) || {};
+      prev[tipo] = comp;
+      await fotosPut(id, prev);
+      ok++;
+    }catch(e){ sinPareja++; }
+  }
+  await refrescarFotosMuestra();
+  const enBase = baseMonitoreo.length ? baseMonitoreo.filter(t => fotosMuestraIds.has(t.id)).length : 0;
+  toast('📷 '+ok+' fotos guardadas'+(baseMonitoreo.length ? ' · '+enBase+' árboles de la muestra con foto' : '')+(sinPareja?' · '+sinPareja+' no se pudieron leer':''),'ok');
+}
+async function borrarFotosMuestra(){
+  if (!fotosMuestraIds.size) return;
+  if (!confirm('¿Borrar las fotos de referencia guardadas en este celular? Las revisitas ya registradas no se tocan.')) return;
+  try{ await fotosClear(); }catch(_){}
+  await refrescarFotosMuestra();
+  toast('Fotos de la muestra eliminadas','ok');
+}
+/* Visor a pantalla completa con las fotos del árbol */
+async function verFotosArbol(idArbol){
+  const t = baseMonitoreo.find(x => x.id === idArbol) || { id: idArbol };
+  const fotos = (await fotosGet(idArbol)) || {};
+  $('visorId').textContent = t.id;
+  $('visorMeta').textContent = [t.especie, t.parque, t.colonia].filter(Boolean).join(' · ');
+  const cont = $('visorFotos_cont');
+  const fig = (src,cap) => src ? '<figure class="visor__fig"><img src="'+src+'" alt="'+cap+'"><figcaption class="visor__cap">'+cap+'</figcaption></figure>' : '';
+  cont.innerHTML = (fig(fotos.frente,'Foto de frente el día de la plantación') + fig(fotos.cenital,'Foto desde arriba'))
+    || '<p class="visor__cap">Este árbol no tiene fotos cargadas en el celular.</p>';
+  $('visorConfirmar').onclick = () => { cerrarVisor(); seleccionarArbol(idArbol); };
+  $('visorFotos').dataset.open='true';
+}
+function cerrarVisor(){ $('visorFotos').dataset.open='false'; }
+document.addEventListener('keydown', e => { if (e.key==='Escape') cerrarVisor(); });
+
 function cargarBaseMonitoreo(input){
   const file=input.files[0]; if(!file) return;
   if (/\.(xlsx|xls)$/i.test(file.name)){
@@ -1426,7 +1571,9 @@ function cargarBaseMonitoreo(input){
       baseMonitoreo=rows;
       try{ localStorage.setItem('baseMonitoreo', JSON.stringify(rows)); }catch(_){}
       actualizarBaseMonitoreoStatus();
-      toast('📂 '+rows.length+' árboles cargados para monitoreo','ok');
+      refrescarFotosMuestra();
+      const conFoto = rows.filter(t => fotosMuestraIds.has(t.id)).length;
+      toast('📂 '+rows.length+' árboles cargados'+(fotosMuestraIds.size ? ' · '+conFoto+' con foto' : ''),'ok');
     } catch(err){
       toast('No se pudo leer el archivo: '+(err.message||'formato no reconocido'),'err');
     }
@@ -1478,21 +1625,44 @@ function buscarArbolCercano(){
 function renderResultadosCercanos(lista){
   const cont=$('monResultados');
   if (!lista.length){ cont.innerHTML=''; return; }
-  cont.innerHTML = lista.map(t => `
-    <button type="button" class="mon-result" onclick='seleccionarArbol(${JSON.stringify(t.id)})'>
-      <span class="mon-result__info">
-        <span class="mon-result__id">${t.id}</span>
-        <span class="mon-result__meta">${(t.especie||'—')} · ${(t.parque||'—')}</span>
+  /* Con foto: la tarjeta abre el visor para comparar con el árbol que se tiene enfrente.
+     Sin foto: se comporta como antes y selecciona directo. */
+  cont.innerHTML = lista.map(t => {
+    const conFoto = fotosMuestraIds.has(t.id);
+    const accion = conFoto ? 'verFotosArbol' : 'seleccionarArbol';
+    const mini = conFoto
+      ? '<span class="mon-foto-wrap"><img class="mon-result__foto" id="minia-'+t.id+'" alt="Foto de plantación"><span class="mon-lupa">ver</span></span>'
+      : '<span class="mon-result__foto mon-result__foto--vacia" aria-hidden="true">🌳</span>';
+    return `
+    <button type="button" class="mon-result" onclick='${accion}(${JSON.stringify(t.id)})'>
+      <span class="mon-result__izq">
+        ${mini}
+        <span class="mon-result__info">
+          <span class="mon-result__id">${t.id}</span>
+          <span class="mon-result__meta">${(t.especie||'—')} · ${(t.parque||'—')}</span>
+        </span>
       </span>
       <span class="mon-result__dist">${t.dist<1000?Math.round(t.dist)+' m':(t.dist/1000).toFixed(1)+' km'}</span>
-    </button>`).join('');
+    </button>`; }).join('');
+  /* Las miniaturas se cargan después, para no trabar la lista */
+  lista.filter(t => fotosMuestraIds.has(t.id)).forEach(async t => {
+    try{
+      const f = await fotosGet(t.id);
+      const el = document.getElementById('minia-'+t.id);
+      if (el && f && (f.frente || f.cenital)) el.src = f.frente || f.cenital;
+    }catch(_){}
+  });
 }
 
 function seleccionarArbol(idArbol){
   const t = baseMonitoreo.find(x => x.id === idArbol);
   if (!t) return;
   arbolSeleccionado = t;
-  $('monArbolInfo').innerHTML = '<strong>'+t.id+'</strong><br>'+(t.especie||'—')+' · '+(t.parque||'—')+(t.colonia?' — '+t.colonia:'');
+  $('monArbolInfo').innerHTML = '<strong>'+t.id+'</strong><br>'+(t.especie||'—')+' · '+(t.parque||'—')+(t.colonia?' — '+t.colonia:'')
+    + (fotosMuestraIds.has(t.id) ? '<div style="margin-top:8px"><img class="mon-arbol-foto" id="fichaFoto" alt="Foto de la plantación"><button type="button" class="btn-action btn-action--secondary" style="width:100%;justify-content:center" onclick="verFotosArbol(\''+t.id+'\')">🔍 Ver fotos de la plantación</button></div>' : '');
+  if (fotosMuestraIds.has(t.id)){
+    fotosGet(t.id).then(f => { const el=$('fichaFoto'); if (el && f) el.src = f.frente || f.cenital || ''; }).catch(()=>{});
+  }
   $('secRevisita').style.display='block';
   $('monEstado').value=''; $('monDap').value=''; $('monObs').value='';
   if (!$('monMes').value){ const lmm=localStorage.getItem('lmm'); $('monMes').value = esMes(lmm) ? lmm : mesActual(); }
