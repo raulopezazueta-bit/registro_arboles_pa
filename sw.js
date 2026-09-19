@@ -11,8 +11,9 @@
    v11 (19-sep-2026): descarga de las fotos de verificación en Monitoreo.
    v12 (19-sep-2026): la carga del CSV de monitoreo ya no filtra por extensión y acepta
    separador ; o tabulador, encabezados con distinta escritura y archivos de Excel en Windows-1252.
-   v13 (19-sep-2026): fotos de referencia de la muestra (IndexedDB) para identificar el árbol en campo. */
-const CACHE_VERSION = 'apa-2026-09-19-v13';
+   v13 (19-sep-2026): fotos de referencia de la muestra (IndexedDB) para identificar el árbol en campo.
+   v14 (19-sep-2026): emparejado tolerante de las fotos con los IDs de la muestra y aviso cuando no coinciden. */
+const CACHE_VERSION = 'apa-2026-09-19-v14';
 const CORE = [
   './',
   './index.html',
