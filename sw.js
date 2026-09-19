@@ -3,7 +3,13 @@
    Estrategia: cache-first para shell estático, network-first para
    datos. Permite operación offline tras la primera carga.
    ════════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'apa-2026-04-29-v1';
+/* Cambia CACHE_VERSION en cada publicación para que los celulares descarguen la versión nueva.
+   v7 (16-sep-2026): 14 especies, protocolo de 4 pasos, foto cenital, botón Aa, secciones en cadena.
+   v8 (16-sep-2026): el periodo se registra por Mes (ya no Sprint) en registro y monitoreo.
+   v9 (17-sep-2026): corrección de especies: Palo Verde = Parkinsonia aculeata (PAAC3), Bacapora = Parkinsonia praecox (PAPR).
+   v10 (17-sep-2026): criterio de Condición general (Buena/Regular/Mala/Crítica) y se quita la nota de auditoría.
+   v11 (19-sep-2026): descarga de las fotos de verificación en Monitoreo. */
+const CACHE_VERSION = 'apa-2026-09-19-v11';
 const CORE = [
   './',
   './index.html',
@@ -17,7 +23,10 @@ const CORE = [
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_VERSION).then(cache => cache.addAll(CORE))
+    /* cache:'reload' evita que el caché HTTP de GitHub Pages entregue el index anterior */
+    caches.open(CACHE_VERSION).then(cache =>
+      cache.addAll(CORE.map(url => new Request(url, { cache: 'reload' })))
+    )
   );
 });
 
@@ -38,8 +47,9 @@ self.addEventListener('fetch', event => {
       if (cached) {
         /* Cache-first: refresca en segundo plano */
         fetch(req).then(fresh => {
-          if (fresh && fresh.status === 200) {
-            caches.open(CACHE_VERSION).then(c => c.put(req, fresh.clone()));
+          if (fresh && fresh.status === 200 && req.url.startsWith(self.location.origin)) {
+            const copy = fresh.clone();
+            caches.open(CACHE_VERSION).then(c => c.put(req, copy));
           }
         }).catch(() => {});
         return cached;
