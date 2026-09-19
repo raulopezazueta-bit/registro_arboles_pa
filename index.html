@@ -553,10 +553,10 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
   <div class="section">
     <div class="section__head"><div class="section__head__title"><span aria-hidden="true">📂</span> Base de árboles a revisitar</div><span class="section__head__status" id="monBaseCount">0 cargados</span></div>
     <div class="section__body">
-      <p class="field__hint" style="margin-bottom:10px">Carga el CSV de la muestra a monitorear (columnas: ID_Arbol, Latitud, Longitud, Parque, Nombre_Comun, Colonia). Queda guardado en este celular hasta que cargues uno nuevo.</p>
+      <p class="field__hint" style="margin-bottom:10px">Carga el CSV de la muestra a monitorear (columnas: ID_Arbol, Latitud, Longitud, Parque, Nombre_Comun, Colonia). Queda guardado en este celular hasta que cargues uno nuevo. Acepta CSV separado por comas o por punto y coma, y archivos .txt con el mismo contenido.</p>
       <label class="btn-action" style="display:inline-flex;cursor:pointer">
         📂 <span style="margin-left:6px">Cargar CSV de muestra</span>
-        <input type="file" accept=".csv" id="monCsvInput" onchange="cargarBaseMonitoreo(this)" style="display:none">
+        <input type="file" id="monCsvInput" onchange="cargarBaseMonitoreo(this)" style="display:none">
       </label>
       <div id="monBaseStatus" style="margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
     </div>
@@ -1341,7 +1341,8 @@ function limpiarRegistros(){
 }
 /* ======================= MODO MONITOREO ======================= */
 
-function parseCSVLine(line){
+function parseCSVLine(line, sep){
+  sep = sep || ',';
   const out=[]; let cur=''; let inQ=false;
   for (let i=0;i<line.length;i++){
     const ch=line[i];
@@ -1351,7 +1352,7 @@ function parseCSVLine(line){
       else cur+=ch;
     } else {
       if (ch==='"') inQ=true;
-      else if (ch===','){ out.push(cur); cur=''; }
+      else if (ch===sep){ out.push(cur); cur=''; }
       else cur+=ch;
     }
   }
@@ -1359,28 +1360,58 @@ function parseCSVLine(line){
   return out;
 }
 
+/* Normaliza un encabezado: sin acentos, sin espacios ni guiones, en minúsculas.
+   Así "ID_Arbol", "id arbol" y "ID Árbol" se reconocen igual. */
+function normHeader(h){
+  return (h||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^A-Za-z0-9]/g,'').toLowerCase();
+}
+function buscarCol(headers, alias){
+  const norm = headers.map(normHeader);
+  for (const a of alias){ const i = norm.indexOf(normHeader(a)); if (i>=0) return i; }
+  return -1;
+}
+/* Excel en español suele exportar con punto y coma; se detecta por la línea de encabezados. */
+function detectarSeparador(linea){
+  const comas = (linea.match(/,/g)||[]).length;
+  const puntoYComa = (linea.match(/;/g)||[]).length;
+  const tabs = (linea.match(/\t/g)||[]).length;
+  if (tabs > comas && tabs > puntoYComa) return '\t';
+  return puntoYComa > comas ? ';' : ',';
+}
 function cargarBaseMonitoreo(input){
   const file=input.files[0]; if(!file) return;
+  if (/\.(xlsx|xls)$/i.test(file.name)){
+    toast('Es un Excel: guárdalo como CSV y vuelve a cargarlo','err');
+    input.value=''; return;
+  }
   const reader=new FileReader();
   reader.onload=e=>{
     try{
-      const text=e.target.result.replace(/^\uFEFF/,'');
+      /* UTF-8 y, si aparecen caracteres rotos, se reintenta en Windows-1252 (Excel) */
+      const buf=e.target.result;
+      let text=new TextDecoder('utf-8').decode(buf);
+      if (text.indexOf('\uFFFD')>=0){
+        try{ text=new TextDecoder('windows-1252').decode(buf); }catch(_){}
+      }
+      text=text.replace(/^\uFEFF/,'');
       const lines=text.split(/\r?\n/).filter(l=>l.trim().length);
-      if (lines.length<2){ toast('CSV vacío o inválido','err'); return; }
-      const headers=parseCSVLine(lines[0]).map(h=>h.trim());
-      const idxId=headers.indexOf('ID_Arbol');
-      const idxLat=headers.indexOf('Latitud');
-      const idxLon=headers.indexOf('Longitud');
-      const idxParque=headers.indexOf('Parque');
-      const idxEsp=headers.indexOf('Nombre_Comun');
-      const idxCol=headers.indexOf('Colonia');
+      if (lines.length<2){ toast('El archivo está vacío o no tiene filas','err'); return; }
+      const SEP=detectarSeparador(lines[0]);
+      const headers=parseCSVLine(lines[0],SEP).map(h=>h.trim());
+      const idxId=buscarCol(headers,['ID_Arbol','IDArbol','ID del arbol','Arbol']);
+      const idxLat=buscarCol(headers,['Latitud','Lat','Latitude']);
+      const idxLon=buscarCol(headers,['Longitud','Lon','Lng','Longitude']);
+      const idxParque=buscarCol(headers,['Parque','Parque o area']);
+      const idxEsp=buscarCol(headers,['Nombre_Comun','Especie','Nombre comun']);
+      const idxCol=buscarCol(headers,['Colonia']);
       if (idxId<0||idxLat<0||idxLon<0){
-        toast('El CSV debe tener columnas ID_Arbol, Latitud y Longitud','err');
+        toast('Faltan columnas: se necesitan ID_Arbol, Latitud y Longitud','err');
         return;
       }
       const rows=[];
       for (let i=1;i<lines.length;i++){
-        const cols=parseCSVLine(lines[i]);
+        const cols=parseCSVLine(lines[i],SEP);
         const lat=parseFloat(cols[idxLat]), lon=parseFloat(cols[idxLon]);
         if (!cols[idxId] || isNaN(lat) || isNaN(lon)) continue;
         rows.push({
@@ -1391,16 +1422,18 @@ function cargarBaseMonitoreo(input){
           colonia: idxCol>=0?cols[idxCol]:'',
         });
       }
-      if (!rows.length){ toast('No se encontraron árboles válidos en el CSV','err'); return; }
+      if (!rows.length){ toast('No se encontraron árboles con coordenadas válidas','err'); return; }
       baseMonitoreo=rows;
       try{ localStorage.setItem('baseMonitoreo', JSON.stringify(rows)); }catch(_){}
       actualizarBaseMonitoreoStatus();
       toast('📂 '+rows.length+' árboles cargados para monitoreo','ok');
     } catch(err){
-      toast('No se pudo leer el CSV','err');
+      toast('No se pudo leer el archivo: '+(err.message||'formato no reconocido'),'err');
     }
+    input.value='';   // permite volver a cargar el mismo archivo
   };
-  reader.readAsText(file, 'utf-8');
+  reader.onerror=()=>{ toast('No se pudo abrir el archivo','err'); input.value=''; };
+  reader.readAsArrayBuffer(file);
 }
 
 function actualizarBaseMonitoreoStatus(){

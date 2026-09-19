@@ -8,8 +8,10 @@
    v8 (16-sep-2026): el periodo se registra por Mes (ya no Sprint) en registro y monitoreo.
    v9 (17-sep-2026): corrección de especies: Palo Verde = Parkinsonia aculeata (PAAC3), Bacapora = Parkinsonia praecox (PAPR).
    v10 (17-sep-2026): criterio de Condición general (Buena/Regular/Mala/Crítica) y se quita la nota de auditoría.
-   v11 (19-sep-2026): descarga de las fotos de verificación en Monitoreo. */
-const CACHE_VERSION = 'apa-2026-09-19-v11';
+   v11 (19-sep-2026): descarga de las fotos de verificación en Monitoreo.
+   v12 (19-sep-2026): la carga del CSV de monitoreo ya no filtra por extensión y acepta
+   separador ; o tabulador, encabezados con distinta escritura y archivos de Excel en Windows-1252. */
+const CACHE_VERSION = 'apa-2026-09-19-v12';
 const CORE = [
   './',
   './index.html',
