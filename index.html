@@ -541,6 +541,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
         <div class="foto-slot" id="slot2"><img class="foto-slot__img" id="prev2" alt="Árbol finalizado desde arriba"><span class="foto-slot__icon">⬇️</span><span class="foto-slot__label">2 · Desde arriba<br>Cepa, tutor y riego vistos en vertical</span><span class="foto-slot__check">✓</span><input type="file" accept="image/*" capture="environment" id="fi2" onchange="capturarFoto(2,this)"></div>
       </div>
       <p class="foto-nota">📌 Foto 1: de frente, árbol completo. Foto 2: con el celular sobre el árbol, apuntando hacia abajo.</p>
+      <p class="foto-nota">📤 Para enviarlas al coordinador usa <strong>Registros → Compartir</strong>. Si las adjuntas desde la galería pierden el ID en el nombre.</p>
       <div class="field" style="margin-top:var(--s-3)"><label class="field__label" for="obs">Observaciones <span class="opt">opcional</span></label>
         <textarea id="obs" placeholder="Estado del árbol, condiciones del terreno, incidencias…"></textarea>
       </div>
@@ -565,6 +566,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
     <div class="reg-actions">
       <button class="btn-action" onclick="exportCSV()">⬇️ CSV i-Tree</button>
       <button class="btn-action btn-action--secondary" onclick="exportFotos()">📷 Fotos</button>
+      <button class="btn-action btn-action--secondary" onclick="compartirJornada()">📤 Compartir</button>
       <button class="btn-action btn-action--danger" onclick="limpiarRegistros()">🗑 Limpiar</button>
     </div>
   </div>
@@ -584,7 +586,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
         📷 <span style="margin-left:6px">Cargar fotos de la muestra</span>
         <input type="file" accept="image/*" multiple id="monFotosInput" onchange="cargarFotosMuestra(this)" style="display:none">
       </label>
-      <p class="field__hint" style="margin-top:10px">Las fotos son las que se tomaron al plantar (<code>ID_finalizado.jpg</code> y <code>ID_cenital.jpg</code>). La app las empareja sola por el nombre del archivo y las muestra al buscar, para reconocer el árbol sin necesidad de identificar la especie.</p>
+      <p class="field__hint" style="margin-top:10px">Usa las fotos que descarga la app con el botón 📷 Fotos (se llaman <code>ID_finalizado.jpg</code> y <code>ID_cenital.jpg</code>): así se emparejan solas por el nombre. Si el archivo llega sin el ID, la app intenta emparejarlo por la ubicación y la hora guardadas dentro de la foto. Lo que no logre resolver queda abajo para asignarlo a mano.</p>
       <div id="monBaseStatus" style="margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
       <div id="monFotosStatus" style="margin-top:6px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
       <div id="monFotosPend" style="margin-top:12px"></div>
@@ -637,6 +639,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
       <div class="reg-actions" style="margin-bottom:12px">
         <button class="btn-action" onclick="exportCSVMonitoreo()">⬇️ CSV Monitoreo</button>
         <button class="btn-action btn-action--secondary" onclick="exportFotosMonitoreo()">📷 Fotos</button>
+        <button class="btn-action btn-action--secondary" onclick="compartirMonitoreo()">📤 Compartir</button>
         <button class="btn-action btn-action--danger" onclick="limpiarMonitoreo()">🗑 Limpiar</button>
       </div>
       <div id="monListaHoy"></div>
@@ -1331,8 +1334,7 @@ function protoResumen(r){
   return { completo: pasos.length>0 && hechos===pasos.length, texto: hechos+'/'+pasos.length };
 }
 function siNoNA(v){ return v===undefined ? 'N/A' : (v?'Sí':'No'); }
-function exportCSV(){
-  if (!registros.length){ toast('Sin registros','err'); return; }
+function csvPlantacion(){
   const cols=['ID_Arbol','Num','ID_Parque','Asesor','Mes','Ejecutor','Parque','Colonia','Nombre_Comun','Nombre_Cientifico','Codigo_iTree','iTree_En_BD','iTree_Alternativa','Registrado_Por','Latitud','Longitud','Precision_Efectiva_m','Precision_Raw_m','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General','Proto_Hoyo','Proto_Riego_Asentamiento','Estado','Fecha_Hora','Observaciones','Foto','Proto_Cama_Tierra_Fertilizada','Proto_Tutor_Crecimiento','Foto_Cenital'];
   const rows=registros.map(r=>[
     r.id,r.num,r.idParque||'',r.asesor||'',r.mes||'',r.ejecutor,
@@ -1348,8 +1350,11 @@ function exportCSV(){
     siNoNA(r.protoCama), siNoNA(r.protoTutor),
     r.foto2?r.id+'_cenital.jpg':''
   ].join(','));
-  const csv=[cols.join(','),...rows].join('\n');
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  return [cols.join(','),...rows].join('\n');
+}
+function exportCSV(){
+  if (!registros.length){ toast('Sin registros','err'); return; }
+  const blob=new Blob(['﻿'+csvPlantacion()],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.download='CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv';
@@ -1373,6 +1378,52 @@ function exportFotos(){
   }
   next();
 }
+/* ---------- Compartir por correo, WhatsApp o Drive con los nombres correctos ----------
+   Al adjuntar desde la galería los archivos pierden el nombre con el ID. Compartir desde la
+   app entrega los archivos tal cual, con su ID, para que el emparejado sea automático. */
+function dataUrlAFile(dataUrl, nombre){
+  const [cab, b64] = dataUrl.split(',');
+  const tipo = (cab.match(/:(.*?);/) || [,'image/jpeg'])[1];
+  const bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  return new File([arr], nombre, { type: tipo });
+}
+function csvAFile(texto, nombre){
+  return new File(['\ufeff'+texto], nombre, { type:'text/csv' });
+}
+async function compartirArchivos(archivos, titulo){
+  if (!navigator.canShare || !navigator.canShare({ files: archivos })){
+    toast('Este celular no puede compartir desde la app: usa los botones de descarga y adjunta desde la carpeta Descargas','err');
+    return false;
+  }
+  try{
+    await navigator.share({ files: archivos, title: titulo, text: titulo });
+    return true;
+  }catch(e){
+    if (e && e.name === 'AbortError') return false;          // el usuario canceló
+    toast('No se pudo compartir: usa los botones de descarga','err');
+    return false;
+  }
+}
+async function compartirJornada(){
+  if (!registros.length){ toast('Sin registros','err'); return; }
+  const archivos = [ csvAFile(csvPlantacion(), 'CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv') ];
+  registros.forEach(r => {
+    if (r.foto1) archivos.push(dataUrlAFile(r.foto1, r.id+'_finalizado.jpg'));
+    if (r.foto2) archivos.push(dataUrlAFile(r.foto2, r.id+'_cenital.jpg'));
+  });
+  toast('📤 Preparando '+archivos.length+' archivos…');
+  await compartirArchivos(archivos, 'Árboles PA · '+registros.length+' árboles');
+}
+async function compartirMonitoreo(){
+  if (!monitoreoRegistros.length){ toast('Sin revisitas','err'); return; }
+  const nombres = nombresFotosMonitoreo();
+  const archivos = [ csvAFile(csvMonitoreo(), 'Monitoreo_'+new Date().toISOString().slice(0,10)+'.csv') ];
+  monitoreoRegistros.forEach(r => { if (r.foto) archivos.push(dataUrlAFile(r.foto, nombres[r.idMonitoreo])); });
+  toast('📤 Preparando '+archivos.length+' archivos…');
+  await compartirArchivos(archivos, 'Árboles PA · Monitoreo ('+monitoreoRegistros.length+' revisitas)');
+}
+
 function limpiarRegistros(){
   if (!registros.length) return;
   if (!confirm('¿Borrar '+registros.length+' registros? Exporta el CSV primero.')) return;
@@ -1509,20 +1560,37 @@ async function cargarFotosMuestra(input){
   if (!baseMonitoreo.length){ toast('Carga primero el CSV de la muestra','err'); return; }
   toast('⏳ Procesando '+files.length+' fotos…');
   const idsBase = new Set(baseMonitoreo.map(t => t.id));
-  let ok=0, sinPareja=0, sinCoincidir=0;
+  let ok=0, sinPareja=0, sinCoincidir=0, porExif=0;
   const ejemplos=[];
   for (const f of files){
     if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic)$/i.test(f.name)) continue;
     const { id, tipo } = idDesdeNombre(f.name, idsBase);
     if (!id){ sinPareja++; continue; }
-    if (!idsBase.has(id)){        // el nombre no contiene ningún ID de la muestra
+    if (!idsBase.has(id)){        // el nombre no contiene ningún ID: se intenta por EXIF
+      let comp=null;
+      try{
+        const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
+        comp = await comprimirRef(dataUrl);
+      }catch(_){ sinPareja++; continue; }
+      const exif = await leerExif(f);
+      /* Con ubicación en la foto decide la ubicación. La hora sola solo sugiere. */
+      const porUbicacion = exif && exif.lat!==null ? candidatoPorUbicacion(exif.lat, exif.lon) : null;
+      const cand = porUbicacion || (exif && exif.lat===null ? candidatoPorFecha(exif.fecha) : null);
+      if (porUbicacion && porUbicacion.seguro){
+        const prev = (await fotosGet(porUbicacion.id)) || {};
+        const hueco = !prev.frente ? 'frente' : (!prev.cenital ? 'cenital' : null);
+        if (hueco){                                          // nunca se pisa una foto ya guardada
+          prev[hueco] = comp;
+          await fotosPut(porUbicacion.id, prev);
+          porExif++; ok++;
+          continue;
+        }
+      }
       sinCoincidir++;
       if (ejemplos.length<2) ejemplos.push(f.name);
       if (fotosPendientes.length < 80){
-        try{
-          const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
-          fotosPendientes.push({ nombre:f.name, tipo, data: await comprimirRef(dataUrl) });
-        }catch(_){}
+        fotosPendientes.push({ nombre:f.name, tipo, data: comp,
+          sugerido: cand ? cand.id : '', motivo: cand ? cand.motivo : '' });
       }
       continue;
     }
@@ -1541,10 +1609,94 @@ async function cargarFotosMuestra(input){
   if (!ok && sinCoincidir){
     toast('Ninguna foto coincidió con los IDs de la muestra','err');
   } else {
-    toast('📷 '+ok+' fotos guardadas · '+enBase+' árboles de la muestra con foto'
+    toast('📷 '+ok+' fotos guardadas · '+enBase+' árboles con foto'
+      +(porExif?' · '+porExif+' por ubicación u hora':'')
       +(sinCoincidir?' · '+sinCoincidir+' sin coincidencia':'')+(sinPareja?' · '+sinPareja+' ilegibles':''),'ok');
   }
 }
+/* ---------- Lectura de los datos internos de la foto (EXIF) ----------
+   Sirve de respaldo cuando el archivo llega sin el ID en el nombre (fotos de la galería).
+   Se leen la fecha en que se tomó y, si el celular la guardó, la ubicación. */
+async function leerExif(file){
+  try{
+    const buf = await file.slice(0, 256*1024).arrayBuffer();
+    const dv = new DataView(buf);
+    if (dv.getUint16(0) !== 0xFFD8) return null;            // no es JPEG
+    let off = 2, app1 = -1;
+    while (off + 4 < dv.byteLength){
+      if (dv.getUint16(off) !== 0xFFE1){                     // busca el bloque APP1
+        if ((dv.getUint16(off) & 0xFF00) !== 0xFF00) break;
+        off += 2 + dv.getUint16(off+2); continue;
+      }
+      app1 = off + 4; break;
+    }
+    if (app1 < 0) return null;
+    if (dv.getUint32(app1) !== 0x45786966) return null;      // "Exif"
+    const tiff = app1 + 6;
+    const le = dv.getUint16(tiff) === 0x4949;                // little o big endian
+    const u16 = o => dv.getUint16(o, le), u32 = o => dv.getUint32(o, le);
+    const leerIFD = (base) => {
+      const out = {}; const n = u16(base);
+      for (let i=0;i<n;i++){
+        const e = base + 2 + i*12;
+        out[u16(e)] = { tipo:u16(e+2), n:u32(e+4), val:e+8 };
+      }
+      return out;
+    };
+    const rational = o => u32(o) / (u32(o+4) || 1);
+    const texto = (ent) => {
+      const p = ent.n > 4 ? tiff + u32(ent.val) : ent.val;
+      let t=''; for (let i=0;i<ent.n-1;i++) t += String.fromCharCode(dv.getUint8(p+i));
+      return t;
+    };
+    const grados = (ent) => {                                 // 3 racionales: grados, minutos, segundos
+      const p = tiff + u32(ent.val);
+      return rational(p) + rational(p+8)/60 + rational(p+16)/3600;
+    };
+    const ifd0 = leerIFD(tiff + u32(tiff+4));
+    let fecha = null, lat = null, lon = null;
+    if (ifd0[0x8769]){
+      const exif = leerIFD(tiff + u32(ifd0[0x8769].val));
+      const f = exif[0x9003] || exif[0x9004];                 // DateTimeOriginal / DateTimeDigitized
+      if (f){
+        const t = texto(f);                                   // "2026:09:19 14:03:22"
+        const m = t.match(/(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+        if (m) fecha = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]).getTime();
+      }
+    }
+    if (ifd0[0x8825]){
+      const gps = leerIFD(tiff + u32(ifd0[0x8825].val));
+      if (gps[2] && gps[4]){
+        lat = grados(gps[2]); lon = grados(gps[4]);
+        if (gps[1] && String.fromCharCode(dv.getUint8(gps[1].val)).toUpperCase()==='S') lat = -lat;
+        if (gps[3] && String.fromCharCode(dv.getUint8(gps[3].val)).toUpperCase()==='W') lon = -lon;
+        if (!isFinite(lat) || !isFinite(lon)) { lat=null; lon=null; }
+      }
+    }
+    return (fecha || lat!==null) ? { fecha, lat, lon } : null;
+  }catch(_){ return null; }
+}
+/* Con la ubicación de la foto busca el árbol más cercano de la muestra.
+   Solo asigna sola si está a menos de 20 m y el segundo candidato queda claramente más lejos. */
+const EXIF_MAX_M = 20, EXIF_MAX_MIN = 12;
+function candidatoPorUbicacion(lat, lon){
+  if (lat===null || lon===null || !baseMonitoreo.length) return null;
+  const orden = baseMonitoreo.map(t => ({ t, d: haversine(lat, lon, t.lat, t.lon) })).sort((a,b)=>a.d-b.d);
+  const mejor = orden[0], segundo = orden[1];
+  if (!mejor || mejor.d > EXIF_MAX_M) return null;
+  const seguro = !segundo || segundo.d > mejor.d * 1.5 + 3;
+  return { id: mejor.t.id, dist: mejor.d, seguro, motivo: 'ubicación (±'+Math.round(mejor.d)+' m)' };
+}
+function candidatoPorFecha(fecha){
+  if (!fecha || !baseMonitoreo.length) return null;
+  const conFecha = baseMonitoreo.filter(t => t.ts);
+  if (!conFecha.length) return null;
+  const orden = conFecha.map(t => ({ t, d: Math.abs(t.ts - fecha) })).sort((a,b)=>a.d-b.d);
+  const mejor = orden[0];
+  if (!mejor || mejor.d > EXIF_MAX_MIN*60000) return null;
+  return { id: mejor.t.id, seguro: true, motivo: 'hora de captura (±'+Math.round(mejor.d/60000)+' min)' };
+}
+
 /* Fotos cuyo nombre no contiene ningún ID de la muestra: se asignan a mano */
 let fotosPendientes = [];
 function renderFotosPendientes(){
@@ -1558,10 +1710,10 @@ function renderFotosPendientes(){
       <div class="pend-item">
         <img src="${f.data}" alt="${f.nombre}">
         <div class="pend-item__col">
-          <div class="pend-item__nombre">${f.nombre} · ${f.tipo==='cenital'?'desde arriba':'de frente'}</div>
+          <div class="pend-item__nombre">${f.nombre}${f.motivo ? ' · sugerido por '+f.motivo : ''}</div>
           <select id="pend-sel-${i}" onchange="asignarFotoPendiente(${i}, this.value)">
             <option value="">— elegir árbol —</option>
-            ${opciones}
+            ${f.sugerido ? opciones.replace('value="'+f.sugerido+'"','value="'+f.sugerido+'" selected') : opciones}
           </select>
         </div>
       </div>`).join('')
@@ -1636,6 +1788,7 @@ function cargarBaseMonitoreo(input){
       const idxParque=buscarCol(headers,['Parque','Parque o area']);
       const idxEsp=buscarCol(headers,['Nombre_Comun','Especie','Nombre comun']);
       const idxCol=buscarCol(headers,['Colonia']);
+      const idxFecha=buscarCol(headers,['Fecha_Hora','Fecha','Fecha_Plantacion','Fecha de plantacion']);
       if (idxId<0||idxLat<0||idxLon<0){
         toast('Faltan columnas: se necesitan ID_Arbol, Latitud y Longitud','err');
         return;
@@ -1645,9 +1798,10 @@ function cargarBaseMonitoreo(input){
         const cols=parseCSVLine(lines[i],SEP);
         const lat=parseFloat(cols[idxLat]), lon=parseFloat(cols[idxLon]);
         if (!cols[idxId] || isNaN(lat) || isNaN(lon)) continue;
+        const ts = idxFecha>=0 ? Date.parse((cols[idxFecha]||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1')) : NaN;
         rows.push({
           id: cols[idxId].trim(),
-          lat, lon,
+          lat, lon, ts: isNaN(ts) ? null : ts,
           parque: idxParque>=0?cols[idxParque]:'',
           especie: idxEsp>=0?cols[idxEsp]:'',
           colonia: idxCol>=0?cols[idxCol]:'',
@@ -1872,16 +2026,18 @@ function exportFotosMonitoreo(){
     i++; setTimeout(next,700);
   })();
 }
-function exportCSVMonitoreo(){
-  if (!monitoreoRegistros.length){ toast('Sin revisitas para exportar','err'); return; }
+function csvMonitoreo(){
   const nombres = nombresFotosMonitoreo();
   const cols=['ID_Monitoreo','ID_Arbol','Fecha_Revision','Estado','DAP_Actual_cm','Foto_Verificacion','Revisado_Por','Observaciones','Mes_Revision'];
   const rows=monitoreoRegistros.map(r=>[
     r.idMonitoreo, r.idArbol, '"'+(r.fecha||'')+'"', r.estado, (r.dap||'').toString(),
     r.foto?nombres[r.idMonitoreo]:'', '"'+r.revisor+'"', '"'+(r.obs||'')+'"', r.mes||''
   ].join(','));
-  const csv=[cols.join(','),...rows].join('\n');
-  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  return [cols.join(','),...rows].join('\n');
+}
+function exportCSVMonitoreo(){
+  if (!monitoreoRegistros.length){ toast('Sin revisitas para exportar','err'); return; }
+  const blob=new Blob(['\ufeff'+csvMonitoreo()],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.download='Monitoreo_'+new Date().toISOString().slice(0,10)+'.csv';
