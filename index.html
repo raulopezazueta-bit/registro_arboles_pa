@@ -216,6 +216,11 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 .mon-result__id{font-weight:700;color:var(--c-p-800);font-size:var(--fs-md)}
 .mon-result__meta{font-size:var(--fs-xs);color:var(--c-n-600)}
 .mon-result__dist{font-weight:700;color:var(--c-p-700);font-size:var(--fs-lg);white-space:nowrap;padding-left:10px}
+.pend-item{display:flex;align-items:center;gap:var(--s-2);padding:var(--s-2);border:1.5px solid var(--c-n-200);border-radius:var(--r-md);margin-bottom:8px;background:var(--c-n-50)}
+.pend-item img{width:56px;height:56px;object-fit:cover;border-radius:var(--r-sm);flex-shrink:0}
+.pend-item__col{flex:1;min-width:0}
+.pend-item__nombre{font-size:var(--fs-xs);color:var(--c-n-600);word-break:break-all;margin-bottom:4px}
+.pend-item select{width:100%;padding:8px 10px;border:2px solid var(--c-n-200);border-radius:var(--r-sm);font-size:var(--fs-sm);background:var(--c-w);min-height:40px}
 .mon-result__foto{width:64px;height:64px;flex-shrink:0;border-radius:var(--r-sm);object-fit:cover;margin-right:var(--s-3);background:var(--c-n-100);border:1.5px solid var(--c-p-100)}
 .mon-result__foto--vacia{display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--c-n-400)}
 .mon-lupa{position:absolute;right:6px;bottom:6px;background:rgba(15,69,20,.85);color:#fff;border-radius:var(--r-full);font-size:var(--fs-2xs);font-weight:700;padding:2px 8px}
@@ -495,7 +500,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 
   <div class="section" id="sec-proto" data-group="proto" data-nombre="Protocolo de plantación">
     <button type="button" class="section__lock" tabindex="-1" onclick="irAPendiente()"><span class="section__lock-msg">🔒 Completa la sección anterior</span></button>
-    <div class="section__head section__head--proto"><div class="section__head__title"><span aria-hidden="true">✅</span> Protocolo de plantación</div><span class="section__head__status" id="stProto">0/4</span></div>
+    <div class="section__head section__head--proto"><div class="section__head__title"><span aria-hidden="true">✅</span> Protocolo de plantación <span style="font-weight:600;opacity:.85">· opcional</span></div><span class="section__head__status" id="stProto">0/4</span></div>
     <div class="section__body">
       <div class="proto-list">
         <label class="proto-item" id="protoHoyo-label">
@@ -522,7 +527,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
           <div class="proto-item__txt"><div class="proto-item__title">Realizar el riego de asentamiento</div><div class="proto-item__sub">Aplicado inmediatamente después de la plantación</div></div>
           <span class="proto-item__check" aria-hidden="true"></span>
         </label>
-        <p class="field__hint">Marca los pasos en orden: cada paso se habilita al completar el anterior.</p>
+        <p class="field__hint">Marca <strong>solo los pasos que realmente se hicieron</strong>, en cualquier orden. Si alguno no se hizo, déjalo sin marcar: ese dato explica después por qué un árbol pudo no sobrevivir. No es obligatorio para guardar.</p>
       </div>
     </div>
   </div>
@@ -582,6 +587,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
       <p class="field__hint" style="margin-top:10px">Las fotos son las que se tomaron al plantar (<code>ID_finalizado.jpg</code> y <code>ID_cenital.jpg</code>). La app las empareja sola por el nombre del archivo y las muestra al buscar, para reconocer el árbol sin necesidad de identificar la especie.</p>
       <div id="monBaseStatus" style="margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
       <div id="monFotosStatus" style="margin-top:6px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
+      <div id="monFotosPend" style="margin-top:12px"></div>
       <button class="btn-action btn-action--danger" id="btnBorrarFotos" onclick="borrarFotosMuestra()" style="margin-top:10px;display:none">🗑 Borrar fotos de la muestra</button>
     </div>
   </div>
@@ -639,7 +645,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 </section>
 
 <div class="save-bar" id="saveBar">
-  <div class="save-bar__info"><span class="save-bar__count" id="saveBarCount">0 / 19</span><span class="save-bar__hint" id="saveBarHint">Comienza por bloquear el GPS</span></div>
+  <div class="save-bar__info"><span class="save-bar__count" id="saveBarCount">0 / 15</span><span class="save-bar__hint" id="saveBarHint">Comienza por bloquear el GPS</span></div>
   <button class="btn-save" id="btnSave" disabled onclick="guardarRegistro()">💾 <span>Guardar y siguiente árbol</span></button>
 </div>
 <div class="visor" id="visorFotos" data-open="false" role="dialog" aria-modal="true" aria-label="Fotos del árbol">
@@ -686,16 +692,12 @@ const FIELDS = [
   { id:'suelo', label:'Suelo circundante', group:'itree' },
   { id:'copa', label:'% Copa viva', group:'itree' },
   { id:'condicion', label:'Condición general', group:'itree' },
-  { id:'protoHoyo', label:'Protocolo 1: Hoyo 60×60×60 cm', group:'proto' },
-  { id:'protoCama', label:'Protocolo 2: Cama de tierra fertilizada', group:'proto' },
-  { id:'protoTutor', label:'Protocolo 3: Tutor de crecimiento', group:'proto' },
-  { id:'protoRiego', label:'Protocolo 4: Riego de asentamiento', group:'proto' },
   { id:'foto1', label:'Foto de frente', group:'fotos' },
   { id:'foto2', label:'Foto desde arriba', group:'fotos' },
 ];
 const PROTO_PASOS = ['Hoyo','Cama','Tutor','Riego'];
 // Orden de las secciones en pantalla: cada una se habilita al completar la anterior (GPS no bloquea).
-const SECCIONES_CADENA = ['datos','especie','id','itree','proto','fotos'];
+const SECCIONES_CADENA = ['datos','especie','id','itree','fotos'];
 const FS_NOMBRES = ['Normal','Grande','Extra grande'];
 const TOTAL_FIELDS = FIELDS.length;
 const GROUP_COUNTS = FIELDS.reduce((acc,f)=>{ acc[f.group]=(acc[f.group]||0)+1; return acc; },{});
@@ -977,26 +979,26 @@ function setGPSMsg(txt,cls){
 }
 function setGPSBadge(txt,cls){ const b=$('gpsBadge'); b.textContent=txt; b.className='gps__badge gps__badge--'+cls; }
 
+/* El protocolo es informativo: cada paso se marca por separado y ninguno es obligatorio
+   para guardar. Lo que no se marcó queda registrado como no ejecutado. */
 function onProto(name){
-  const idx=PROTO_PASOS.indexOf(name), cb=$('proto'+name);
-  if (cb.checked && idx>0 && !$('proto'+PROTO_PASOS[idx-1]).checked){
-    cb.checked=false;
-    toast('Primero completa el paso '+idx,'err');
-    vibrate([40,40,40]);
-  } else if (!cb.checked){
-    // Si se desmarca un paso, los siguientes también se desmarcan para respetar el orden
-    PROTO_PASOS.slice(idx+1).forEach(p => { $('proto'+p).checked=false; });
-  } else vibrate(20);
+  if ($('proto'+name).checked) vibrate(20);
   pintarProtocolo();
 }
+function protoMarcados(){ return PROTO_PASOS.filter(p => $('proto'+p).checked).length; }
 function pintarProtocolo(){
-  PROTO_PASOS.forEach((p,i) => {
+  PROTO_PASOS.forEach(p => {
     const cb=$('proto'+p), lab=$('proto'+p+'-label');
-    const habilitado = i===0 || $('proto'+PROTO_PASOS[i-1]).checked;
-    cb.disabled = !habilitado;
+    cb.disabled=false;
     lab.classList.toggle('proto-item--done', cb.checked);
-    lab.classList.toggle('proto-item--wait', !habilitado);
+    lab.classList.remove('proto-item--wait');
   });
+  const st=$('stProto');
+  if (st){
+    const n=protoMarcados();
+    st.textContent = n+'/4';
+    st.classList.toggle('section__head__status--ok', n===4);
+  }
 }
 
 function comprimirFoto(dataUrl){
@@ -1076,7 +1078,7 @@ function actualizarValidacion(){
   setStatus('stEspecie',groupOk.especie,GROUP_COUNTS.especie);
   setStatus('stID',groupOk.id,GROUP_COUNTS.id);
   setStatus('stItree',groupOk.itree,GROUP_COUNTS.itree);
-  setStatus('stProto',groupOk.proto,GROUP_COUNTS.proto);
+  pintarProtocolo();
   setStatus('stFotos',groupOk.fotos,GROUP_COUNTS.fotos);
   const pct=Math.round(okCount/TOTAL_FIELDS*100);
   $('progressFill').style.width=pct+'%';
@@ -1315,7 +1317,7 @@ function renderRegistros(){
           <span class="reg-chip">Alt. ${(r.altura||1.5).toFixed(1)} m</span>
           <span class="reg-chip">${r.suelo||'—'}</span>
           <span class="reg-chip">${r.condicion||'—'}</span>
-          <span class="reg-chip ${protoOk(r)?'reg-chip--ok':'reg-chip--warn'}">${protoOk(r)?'✅ Protocolo':'⚠️ Protocolo incompleto'}</span>
+          <span class="reg-chip ${protoResumen(r).completo?'reg-chip--ok':'reg-chip--warn'}">${protoResumen(r).completo?'✅ Protocolo completo':'⚠️ Protocolo '+protoResumen(r).texto}</span>
         </div>
         ${(r.foto1||r.foto2)?'<div class="reg-fotos">'+(r.foto1?'<img src="'+r.foto1+'" alt="De frente">':'')+(r.foto2?'<img src="'+r.foto2+'" alt="Desde arriba">':'')+'</div>':''}
       </div>
@@ -1323,7 +1325,11 @@ function renderRegistros(){
 }
 
 // Registros previos a esta versión no tienen protoCama/protoTutor: no se marcan como incompletos
-function protoOk(r){ return !!(r.protoHoyo && r.protoRiego && r.protoCama!==false && r.protoTutor!==false); }
+function protoResumen(r){
+  const pasos=['protoHoyo','protoCama','protoTutor','protoRiego'].filter(k => r[k]!==undefined);
+  const hechos=pasos.filter(k => r[k]).length;
+  return { completo: pasos.length>0 && hechos===pasos.length, texto: hechos+'/'+pasos.length };
+}
 function siNoNA(v){ return v===undefined ? 'N/A' : (v?'Sí':'No'); }
 function exportCSV(){
   if (!registros.length){ toast('Sin registros','err'); return; }
@@ -1440,7 +1446,7 @@ const fotosPut   = (id,v) => idbOp('readwrite', st => st.put(v,id));
 const fotosClear = () => idbOp('readwrite', st => st.clear());
 const fotosKeys  = () => idbOp('readonly',  st => st.getAllKeys());
 
-async function refrescarFotosMuestra(){
+async function refrescarFotosMuestra(ejemplos, sinCoincidir){
   try{
     const keys = await fotosKeys();
     fotosMuestraIds = new Set(keys || []);
@@ -1449,9 +1455,17 @@ async function refrescarFotosMuestra(){
   const st = $('monFotosStatus');
   if (st){
     const enBase = baseMonitoreo.filter(t => fotosMuestraIds.has(t.id)).length;
-    st.textContent = n
+    let txt = n
       ? '📷 Fotos guardadas: '+n+' árboles'+(baseMonitoreo.length ? ' · '+enBase+' de '+baseMonitoreo.length+' de la muestra tienen foto' : '')
       : 'Sin fotos cargadas. Sin ellas solo verás el ID, la especie y la distancia.';
+    if (sinCoincidir){
+      txt += '\n⚠️ '+sinCoincidir+' foto(s) sin emparejar.';
+      if (ejemplos && ejemplos.length) txt += '\n   Nombre del archivo: '+ejemplos[0];
+      if (baseMonitoreo.length) txt += '\n   ID en la muestra:   '+baseMonitoreo[0].id;
+      txt += '\n   Puedes asignarlas a mano aquí abajo.';
+    }
+    st.style.whiteSpace='pre-line';
+    st.textContent = txt;
   }
   const btn=$('btnBorrarFotos'); if (btn) btn.style.display = n ? 'inline-flex' : 'none';
 }
@@ -1470,24 +1484,48 @@ function comprimirRef(dataUrl){
     img.src=dataUrl;
   });
 }
-/* Del nombre del archivo saca el ID y el tipo: 14664-A3F9-00001_cenital.jpg */
-function idDesdeNombre(nombre){
-  const base = nombre.replace(/\.[^.]+$/,'');
-  const m = base.match(/^(.*?)[_-]?(finalizado|frente|cenital|arriba)?$/i);
-  const tipo = (m && m[2] || '').toLowerCase();
-  let id = (m && m[1] || base).replace(/[_-]+$/,'');
-  return { id, tipo: (tipo==='cenital'||tipo==='arriba') ? 'cenital' : 'frente' };
+/* Del nombre del archivo saca el ID y el tipo: 14664-A3F9-00001_cenital.jpg
+   Tolera copias "(1)", espacios, prefijos que agregan WhatsApp o Drive, y si aun así no
+   coincide, busca cualquier ID de la muestra dentro del nombre. */
+const soloAlfaNum = t => (t||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+function idDesdeNombre(nombre, idsBase){
+  let base = nombre.replace(/\.[^.]+$/,'');          // quita la extensión
+  base = base.replace(/\s*\(\d+\)\s*$/,'');         // quita "(1)", "(2)" de las copias
+  const tipo = /(cenital|arriba|top)/i.test(base) ? 'cenital' : 'frente';
+  let id = base.replace(/[_\-\s]*(finalizado|frente|cenital|arriba|top)\s*$/i,'')
+               .replace(/[_\-\s]+$/,'').trim();
+  if (idsBase && idsBase.size && !idsBase.has(id)){
+    const plano = soloAlfaNum(base);
+    for (const cand of idsBase){
+      if (plano.includes(soloAlfaNum(cand))){ id = cand; break; }
+    }
+  }
+  return { id, tipo };
 }
 async function cargarFotosMuestra(input){
   const files=[...input.files]; input.value='';
   if (!files.length) return;
   if (!window.indexedDB){ toast('Este navegador no puede guardar las fotos','err'); return; }
+  if (!baseMonitoreo.length){ toast('Carga primero el CSV de la muestra','err'); return; }
   toast('⏳ Procesando '+files.length+' fotos…');
-  let ok=0, sinPareja=0;
+  const idsBase = new Set(baseMonitoreo.map(t => t.id));
+  let ok=0, sinPareja=0, sinCoincidir=0;
+  const ejemplos=[];
   for (const f of files){
-    if (!/^image\//.test(f.type) && !/\.(jpe?g|png)$/i.test(f.name)) continue;
-    const { id, tipo } = idDesdeNombre(f.name);
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic)$/i.test(f.name)) continue;
+    const { id, tipo } = idDesdeNombre(f.name, idsBase);
     if (!id){ sinPareja++; continue; }
+    if (!idsBase.has(id)){        // el nombre no contiene ningún ID de la muestra
+      sinCoincidir++;
+      if (ejemplos.length<2) ejemplos.push(f.name);
+      if (fotosPendientes.length < 80){
+        try{
+          const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
+          fotosPendientes.push({ nombre:f.name, tipo, data: await comprimirRef(dataUrl) });
+        }catch(_){}
+      }
+      continue;
+    }
     try{
       const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
       const comp = await comprimirRef(dataUrl);
@@ -1497,14 +1535,62 @@ async function cargarFotosMuestra(input){
       ok++;
     }catch(e){ sinPareja++; }
   }
-  await refrescarFotosMuestra();
-  const enBase = baseMonitoreo.length ? baseMonitoreo.filter(t => fotosMuestraIds.has(t.id)).length : 0;
-  toast('📷 '+ok+' fotos guardadas'+(baseMonitoreo.length ? ' · '+enBase+' árboles de la muestra con foto' : '')+(sinPareja?' · '+sinPareja+' no se pudieron leer':''),'ok');
+  await refrescarFotosMuestra(ejemplos, sinCoincidir);
+  renderFotosPendientes();
+  const enBase = baseMonitoreo.filter(t => fotosMuestraIds.has(t.id)).length;
+  if (!ok && sinCoincidir){
+    toast('Ninguna foto coincidió con los IDs de la muestra','err');
+  } else {
+    toast('📷 '+ok+' fotos guardadas · '+enBase+' árboles de la muestra con foto'
+      +(sinCoincidir?' · '+sinCoincidir+' sin coincidencia':'')+(sinPareja?' · '+sinPareja+' ilegibles':''),'ok');
+  }
+}
+/* Fotos cuyo nombre no contiene ningún ID de la muestra: se asignan a mano */
+let fotosPendientes = [];
+function renderFotosPendientes(){
+  const cont=$('monFotosPend'); if (!cont) return;
+  if (!fotosPendientes.length){ cont.innerHTML=''; return; }
+  const opciones = baseMonitoreo.map(t =>
+    '<option value="'+t.id+'">'+t.id+(t.especie?' · '+t.especie:'')+(t.parque?' · '+t.parque:'')+'</option>').join('');
+  cont.innerHTML = '<p class="field__hint" style="margin-bottom:8px"><strong>'+fotosPendientes.length+' foto(s) sin emparejar.</strong> '
+    + 'El nombre del archivo no contiene ningún ID de la muestra. Elige a qué árbol corresponde cada una:</p>'
+    + fotosPendientes.map((f,i) => `
+      <div class="pend-item">
+        <img src="${f.data}" alt="${f.nombre}">
+        <div class="pend-item__col">
+          <div class="pend-item__nombre">${f.nombre} · ${f.tipo==='cenital'?'desde arriba':'de frente'}</div>
+          <select id="pend-sel-${i}" onchange="asignarFotoPendiente(${i}, this.value)">
+            <option value="">— elegir árbol —</option>
+            ${opciones}
+          </select>
+        </div>
+      </div>`).join('')
+    + '<button class="btn-action btn-action--secondary" onclick="descartarFotosPendientes()" style="margin-top:4px">Descartar las no emparejadas</button>';
+}
+async function asignarFotoPendiente(i, idArbol){
+  const f = fotosPendientes[i];
+  if (!f || !idArbol) return;
+  try{
+    const prev = (await fotosGet(idArbol)) || {};
+    prev[f.tipo] = f.data;
+    await fotosPut(idArbol, prev);
+    fotosPendientes.splice(i,1);
+    await refrescarFotosMuestra();
+    renderFotosPendientes();
+    toast('📷 Foto asignada a '+idArbol,'ok');
+  }catch(e){ toast('No se pudo guardar la foto','err'); }
+}
+function descartarFotosPendientes(){
+  fotosPendientes = [];
+  renderFotosPendientes();
+  refrescarFotosMuestra();
 }
 async function borrarFotosMuestra(){
   if (!fotosMuestraIds.size) return;
   if (!confirm('¿Borrar las fotos de referencia guardadas en este celular? Las revisitas ya registradas no se tocan.')) return;
   try{ await fotosClear(); }catch(_){}
+  fotosPendientes = [];
+  renderFotosPendientes();
   await refrescarFotosMuestra();
   toast('Fotos de la muestra eliminadas','ok');
 }

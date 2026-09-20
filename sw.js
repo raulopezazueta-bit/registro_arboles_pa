@@ -12,8 +12,10 @@
    v12 (19-sep-2026): la carga del CSV de monitoreo ya no filtra por extensión y acepta
    separador ; o tabulador, encabezados con distinta escritura y archivos de Excel en Windows-1252.
    v13 (19-sep-2026): fotos de referencia de la muestra (IndexedDB) para identificar el árbol en campo.
-   v14 (19-sep-2026): emparejado tolerante de las fotos con los IDs de la muestra y aviso cuando no coinciden. */
-const CACHE_VERSION = 'apa-2026-09-19-v14';
+   v14 (19-sep-2026): emparejado tolerante de las fotos con los IDs de la muestra y aviso cuando no coinciden.
+   v15 (20-sep-2026): el protocolo de plantación deja de ser obligatorio (queda como registro de lo que sí se hizo)
+   y las fotos sin emparejar se pueden asignar a mano al árbol que corresponde. */
+const CACHE_VERSION = 'apa-2026-09-20-v15';
 const CORE = [
   './',
   './index.html',
