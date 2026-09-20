@@ -16,8 +16,10 @@
    v15 (20-sep-2026): el protocolo de plantación deja de ser obligatorio (queda como registro de lo que sí se hizo)
    y las fotos sin emparejar se pueden asignar a mano al árbol que corresponde.
    v16 (20-sep-2026): botón Compartir (envía CSV y fotos con su nombre, sin pasar por la galería)
-   y emparejado de respaldo por la ubicación y la hora guardadas dentro de la foto. */
-const CACHE_VERSION = 'apa-2026-09-20-v16';
+   y emparejado de respaldo por la ubicación y la hora guardadas dentro de la foto.
+   v17 (20-sep-2026): la app escribe el ID dentro del archivo de cada foto (sello propio) y lo graba
+   visible al pie de la imagen, para que las fotos se emparejen solas aunque el correo las renombre. */
+const CACHE_VERSION = 'apa-2026-09-20-v17';
 const CORE = [
   './',
   './index.html',

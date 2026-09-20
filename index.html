@@ -586,7 +586,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
         📷 <span style="margin-left:6px">Cargar fotos de la muestra</span>
         <input type="file" accept="image/*" multiple id="monFotosInput" onchange="cargarFotosMuestra(this)" style="display:none">
       </label>
-      <p class="field__hint" style="margin-top:10px">Usa las fotos que descarga la app con el botón 📷 Fotos (se llaman <code>ID_finalizado.jpg</code> y <code>ID_cenital.jpg</code>): así se emparejan solas por el nombre. Si el archivo llega sin el ID, la app intenta emparejarlo por la ubicación y la hora guardadas dentro de la foto. Lo que no logre resolver queda abajo para asignarlo a mano.</p>
+      <p class="field__hint" style="margin-top:10px">Usa las fotos que la app exporta o comparte: desde la v17 llevan el ID escrito <strong>dentro del archivo</strong>, así que se emparejan solas aunque el correo o el celular las renombren. Si una foto llega sin ese sello, la app la intenta por el nombre y luego por la ubicación. Lo que no logre resolver queda abajo para asignarlo a mano.</p>
       <div id="monBaseStatus" style="margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
       <div id="monFotosStatus" style="margin-top:6px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
       <div id="monFotosPend" style="margin-top:12px"></div>
@@ -1228,6 +1228,7 @@ function guardarRegistro(){
       try{localStorage.setItem('lp',reg.idParque);}catch(_){}
     }
     renderRegistros();
+    sellarFotosRegistro(reg);          // graba el ID en la foto, sin detener la captura
     resetForm(reg.id);
     vibrate([30,40,30]);
   },250);
@@ -1364,16 +1365,15 @@ function exportCSV(){
 function exportFotos(){
   const items=[];
   registros.forEach(r => {
-    if (r.foto1) items.push({data:r.foto1,nombre:r.id+'_finalizado.jpg'});
-    if (r.foto2) items.push({data:r.foto2,nombre:r.id+'_cenital.jpg'});
+    if (r.foto1) items.push({data:r.foto1,nombre:r.id+'_finalizado.jpg',info:selloDeRegistro(r,'frente')});
+    if (r.foto2) items.push({data:r.foto2,nombre:r.id+'_cenital.jpg',info:selloDeRegistro(r,'cenital')});
   });
   if (!items.length){ toast('Sin fotos guardadas','err'); return; }
   toast('📷 Descargando '+items.length+' fotos…');
   let i=0;
   function next(){
     if (i>=items.length) return;
-    const a=document.createElement('a');
-    a.href=items[i].data; a.download=items[i].nombre; a.click();
+    descargarFotoSellada(items[i].data, items[i].nombre, items[i].info);
     i++; setTimeout(next,700);
   }
   next();
@@ -1381,12 +1381,148 @@ function exportFotos(){
 /* ---------- Compartir por correo, WhatsApp o Drive con los nombres correctos ----------
    Al adjuntar desde la galería los archivos pierden el nombre con el ID. Compartir desde la
    app entrega los archivos tal cual, con su ID, para que el emparejado sea automático. */
-function dataUrlAFile(dataUrl, nombre){
+/* ---------- Sello de identidad dentro del archivo de la foto ----------
+   Hasta la v16 lo único que identificaba una foto era el nombre del archivo, y ese nombre
+   se pierde en el camino: al adjuntar por correo y volver a descargar, el celular las
+   renombra (1000018666.jpg). El respaldo por ubicación y hora tampoco alcanzaba, porque al
+   comprimir la foto el navegador la vuelve a dibujar y borra los datos internos originales.
+
+   Desde la v17 la app escribe su propio sello DENTRO del archivo JPEG: un bloque de
+   comentario con el ID del árbol, el tipo de foto, las coordenadas y la fecha. Ese bloque
+   viaja con los bytes del archivo, así que sobrevive al correo, a Drive y al renombrado, y
+   las fotos se emparejan solas aunque lleguen con cualquier nombre.
+
+   Ojo: WhatsApp vuelve a comprimir las imágenes y borra el sello. Por eso el ID también se
+   graba visible en una franja al pie de la foto. */
+const SELLO_MARCA = 'APAv1';
+
+function selloTexto(info){
+  return [SELLO_MARCA, info.id || '', info.tipo || '',
+          (info.lat !== undefined && info.lat !== null) ? (+info.lat).toFixed(6) : '',
+          (info.lon !== undefined && info.lon !== null) ? (+info.lon).toFixed(6) : '',
+          (info.fecha || '').replace(/\|/g, ' '),
+          (info.especie || '').replace(/\|/g, ' ')].join('|');
+}
+/* Mete el sello como bloque de comentario (marcador COM) justo después del inicio del JPEG */
+function inyectarSello(bytes, texto){
+  try{
+    if (bytes.length < 4 || bytes[0] !== 0xFF || bytes[1] !== 0xD8) return bytes;
+    const datos = new TextEncoder().encode(texto);
+    const largo = datos.length + 2;
+    if (largo > 65533) return bytes;
+    const out = new Uint8Array(bytes.length + 4 + datos.length);
+    out.set(bytes.subarray(0, 2), 0);
+    out[2] = 0xFF; out[3] = 0xFE;
+    out[4] = (largo >> 8) & 0xFF; out[5] = largo & 0xFF;
+    out.set(datos, 6);
+    out.set(bytes.subarray(2), 6 + datos.length);
+    return out;
+  }catch(_){ return bytes; }
+}
+function dataUrlABytes(dataUrl){
+  const b64 = dataUrl.split(',')[1] || '';
+  const bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  return arr;
+}
+/* Lee el sello de un archivo que llega de la galería o del correo */
+async function leerSello(file){
+  try{
+    const b = new Uint8Array(await file.slice(0, 192*1024).arrayBuffer());
+    if (b[0] !== 0xFF || b[1] !== 0xD8) return null;
+    let off = 2;
+    while (off + 4 <= b.length){
+      if (b[off] !== 0xFF) break;
+      const marcador = b[off+1];
+      if (marcador === 0xD8 || marcador === 0x01 || (marcador >= 0xD0 && marcador <= 0xD7)){ off += 2; continue; }
+      if (marcador === 0xDA) break;                       // aquí empieza la imagen comprimida
+      const largo = (b[off+2] << 8) | b[off+3];
+      if (largo < 2) break;
+      if (marcador === 0xFE){                             // bloque de comentario
+        const txt = new TextDecoder().decode(b.subarray(off+4, off+2+largo));
+        if (txt.indexOf(SELLO_MARCA + '|') === 0){
+          const p = txt.split('|');
+          return { id: p[1] || '', tipo: p[2] || '',
+                   lat: p[3] ? parseFloat(p[3]) : null, lon: p[4] ? parseFloat(p[4]) : null,
+                   fecha: p[5] || '', especie: p[6] || '' };
+        }
+      }
+      off += 2 + largo;
+    }
+    return null;
+  }catch(_){ return null; }
+}
+/* Graba el ID y la fecha en una franja al pie de la foto. Se hace una sola vez, al guardar
+   el árbol, para que exportar y compartir sigan siendo instantáneos. */
+function estamparVisible(dataUrl, info){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      try{
+        const c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        const x = c.getContext('2d');
+        x.drawImage(img, 0, 0);
+        const alto = Math.max(16, Math.round(c.height * 0.05));
+        x.fillStyle = 'rgba(15,69,20,0.80)';
+        x.fillRect(0, c.height - alto, c.width, alto);
+        x.fillStyle = '#FFFFFF';
+        x.font = '600 ' + Math.round(alto * 0.55) + 'px -apple-system, Segoe UI, Arial, sans-serif';
+        x.textBaseline = 'middle';
+        x.textAlign = 'left';
+        x.fillText(info.id || '', Math.round(alto * 0.35), c.height - alto/2);
+        const derecha = (info.fecha || '').split(',')[0].trim();
+        if (derecha){
+          x.textAlign = 'right';
+          x.fillText(derecha, c.width - Math.round(alto * 0.35), c.height - alto/2);
+        }
+        resolve(c.toDataURL('image/jpeg', 0.72));
+      }catch(_){ resolve(dataUrl); }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+/* Datos de identidad de un árbol registrado, para sellar sus fotos */
+function selloDeRegistro(reg, tipo){
+  return { id: reg.id, tipo: tipo, lat: reg.lat, lon: reg.lon, fecha: reg.fecha,
+           especie: (reg.especie || '').split('(')[0].trim() };
+}
+async function sellarFotosRegistro(reg){
+  try{
+    if (reg.foto1) reg.foto1 = await estamparVisible(reg.foto1, selloDeRegistro(reg, 'frente'));
+    if (reg.foto2) reg.foto2 = await estamparVisible(reg.foto2, selloDeRegistro(reg, 'cenital'));
+    reg.sellada = true;
+    try{ localStorage.setItem('r11k_v2', JSON.stringify(registros)); }catch(_){}
+    renderRegistros();
+  }catch(_){}
+}
+async function sellarFotoMonitoreo(reg){
+  try{
+    if (!reg.foto) return;
+    reg.foto = await estamparVisible(reg.foto, { id: reg.idArbol, tipo: 'revision',
+                                                 lat: reg.lat, lon: reg.lon, fecha: reg.fecha });
+    reg.sellada = true;
+    try{ localStorage.setItem('monitoreo_v1', JSON.stringify(monitoreoRegistros)); }catch(_){}
+    renderMonitoreoHoy();
+  }catch(_){}
+}
+/* Descarga una foto ya sellada (los navegadores no dejan renombrar un dataURL con el sello) */
+function descargarFotoSellada(dataUrl, nombre, info){
+  const bytes = inyectarSello(dataUrlABytes(dataUrl), selloTexto(info));
+  const url = URL.createObjectURL(new Blob([bytes], { type:'image/jpeg' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+function dataUrlAFile(dataUrl, nombre, info){
   const [cab, b64] = dataUrl.split(',');
   const tipo = (cab.match(/:(.*?);/) || [,'image/jpeg'])[1];
   const bin = atob(b64), arr = new Uint8Array(bin.length);
   for (let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
-  return new File([arr], nombre, { type: tipo });
+  const bytes = info ? inyectarSello(arr, selloTexto(info)) : arr;
+  return new File([bytes], nombre, { type: tipo });
 }
 function csvAFile(texto, nombre){
   return new File(['\ufeff'+texto], nombre, { type:'text/csv' });
@@ -1409,8 +1545,8 @@ async function compartirJornada(){
   if (!registros.length){ toast('Sin registros','err'); return; }
   const archivos = [ csvAFile(csvPlantacion(), 'CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv') ];
   registros.forEach(r => {
-    if (r.foto1) archivos.push(dataUrlAFile(r.foto1, r.id+'_finalizado.jpg'));
-    if (r.foto2) archivos.push(dataUrlAFile(r.foto2, r.id+'_cenital.jpg'));
+    if (r.foto1) archivos.push(dataUrlAFile(r.foto1, r.id+'_finalizado.jpg', selloDeRegistro(r,'frente')));
+    if (r.foto2) archivos.push(dataUrlAFile(r.foto2, r.id+'_cenital.jpg', selloDeRegistro(r,'cenital')));
   });
   toast('📤 Preparando '+archivos.length+' archivos…');
   await compartirArchivos(archivos, 'Árboles PA · '+registros.length+' árboles');
@@ -1419,7 +1555,8 @@ async function compartirMonitoreo(){
   if (!monitoreoRegistros.length){ toast('Sin revisitas','err'); return; }
   const nombres = nombresFotosMonitoreo();
   const archivos = [ csvAFile(csvMonitoreo(), 'Monitoreo_'+new Date().toISOString().slice(0,10)+'.csv') ];
-  monitoreoRegistros.forEach(r => { if (r.foto) archivos.push(dataUrlAFile(r.foto, nombres[r.idMonitoreo])); });
+  monitoreoRegistros.forEach(r => { if (r.foto) archivos.push(dataUrlAFile(r.foto, nombres[r.idMonitoreo],
+    { id:r.idArbol, tipo:'revision', lat:r.lat, lon:r.lon, fecha:r.fecha })); });
   toast('📤 Preparando '+archivos.length+' archivos…');
   await compartirArchivos(archivos, 'Árboles PA · Monitoreo ('+monitoreoRegistros.length+' revisitas)');
 }
@@ -1510,10 +1647,10 @@ async function refrescarFotosMuestra(ejemplos, sinCoincidir){
       ? '📷 Fotos guardadas: '+n+' árboles'+(baseMonitoreo.length ? ' · '+enBase+' de '+baseMonitoreo.length+' de la muestra tienen foto' : '')
       : 'Sin fotos cargadas. Sin ellas solo verás el ID, la especie y la distancia.';
     if (sinCoincidir){
-      txt += '\n⚠️ '+sinCoincidir+' foto(s) sin emparejar.';
-      if (ejemplos && ejemplos.length) txt += '\n   Nombre del archivo: '+ejemplos[0];
-      if (baseMonitoreo.length) txt += '\n   ID en la muestra:   '+baseMonitoreo[0].id;
-      txt += '\n   Puedes asignarlas a mano aquí abajo.';
+      txt += '\n⚠️ '+sinCoincidir+' foto(s) sin emparejar: llegaron sin el sello de la app y sin el ID en el nombre.';
+      if (ejemplos && ejemplos.length) txt += '\n   Ejemplo: '+ejemplos[0];
+      txt += '\n   Suele pasar con fotos anteriores a la v17 o con fotos que pasaron por WhatsApp.';
+      txt += '\n   Vuelve a compartirlas desde la app con el botón 📤, o asígnalas a mano aquí abajo.';
     }
     st.style.whiteSpace='pre-line';
     st.textContent = txt;
@@ -1560,10 +1697,28 @@ async function cargarFotosMuestra(input){
   if (!baseMonitoreo.length){ toast('Carga primero el CSV de la muestra','err'); return; }
   toast('⏳ Procesando '+files.length+' fotos…');
   const idsBase = new Set(baseMonitoreo.map(t => t.id));
-  let ok=0, sinPareja=0, sinCoincidir=0, porExif=0;
+  /* Los IDs se comparan sin guiones ni mayúsculas, porque el CSV y la app no siempre
+     los escriben igual. */
+  const mapaIds = new Map(baseMonitoreo.map(t => [soloAlfaNum(t.id), t.id]));
+  let ok=0, sinPareja=0, sinCoincidir=0, porExif=0, porSello=0;
   const ejemplos=[];
   for (const f of files){
     if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic)$/i.test(f.name)) continue;
+    /* 1ª opción: el sello que la app escribió dentro del archivo. No depende del nombre,
+       así que funciona aunque la foto haya pasado por correo y llegue renombrada. */
+    const sello = await leerSello(f);
+    const idSellado = sello && sello.id ? mapaIds.get(soloAlfaNum(sello.id)) : null;
+    if (idSellado){
+      try{
+        const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
+        const comp = await comprimirRef(dataUrl);
+        const prev = (await fotosGet(idSellado)) || {};
+        prev[sello.tipo === 'cenital' ? 'cenital' : 'frente'] = comp;
+        await fotosPut(idSellado, prev);
+        ok++; porSello++;
+      }catch(_){ sinPareja++; }
+      continue;
+    }
     const { id, tipo } = idDesdeNombre(f.name, idsBase);
     if (!id){ sinPareja++; continue; }
     if (!idsBase.has(id)){        // el nombre no contiene ningún ID: se intenta por EXIF
@@ -1573,9 +1728,12 @@ async function cargarFotosMuestra(input){
         comp = await comprimirRef(dataUrl);
       }catch(_){ sinPareja++; continue; }
       const exif = await leerExif(f);
-      /* Con ubicación en la foto decide la ubicación. La hora sola solo sugiere. */
-      const porUbicacion = exif && exif.lat!==null ? candidatoPorUbicacion(exif.lat, exif.lon) : null;
-      const cand = porUbicacion || (exif && exif.lat===null ? candidatoPorFecha(exif.fecha) : null);
+      /* Con ubicación en la foto decide la ubicación. La hora sola solo sugiere.
+         Si el sello traía coordenadas pero su ID ya no está en la muestra, sirven igual. */
+      const lat = (sello && sello.lat !== null && isFinite(sello.lat)) ? sello.lat : (exif ? exif.lat : null);
+      const lon = (sello && sello.lon !== null && isFinite(sello.lon)) ? sello.lon : (exif ? exif.lon : null);
+      const porUbicacion = lat !== null && lat !== undefined ? candidatoPorUbicacion(lat, lon) : null;
+      const cand = porUbicacion || (exif && exif.fecha ? candidatoPorFecha(exif.fecha) : null);
       if (porUbicacion && porUbicacion.seguro){
         const prev = (await fotosGet(porUbicacion.id)) || {};
         const hueco = !prev.frente ? 'frente' : (!prev.cenital ? 'cenital' : null);
@@ -1610,6 +1768,7 @@ async function cargarFotosMuestra(input){
     toast('Ninguna foto coincidió con los IDs de la muestra','err');
   } else {
     toast('📷 '+ok+' fotos guardadas · '+enBase+' árboles con foto'
+      +(porSello?' · '+porSello+' por el sello de la app':'')
       +(porExif?' · '+porExif+' por ubicación u hora':'')
       +(sinCoincidir?' · '+sinCoincidir+' sin coincidencia':'')+(sinPareja?' · '+sinPareja+' ilegibles':''),'ok');
   }
@@ -1950,6 +2109,7 @@ function guardarMonitoreo(){
     idArbol: arbolSeleccionado.id,
     parque: arbolSeleccionado.parque,
     especie: arbolSeleccionado.especie,
+    lat: arbolSeleccionado.lat, lon: arbolSeleccionado.lon,   // van dentro del sello de la foto
     mes,
     estado,
     dap: parseFloat($('monDap').value)||'',
@@ -1981,6 +2141,7 @@ function guardarMonitoreo(){
   $('monGpsMsg').textContent='';
   renderMonitoreoHoy();
   vibrate([30,40,30]);
+  sellarFotoMonitoreo(reg);          // graba el ID en la foto de verificación
   toast('✅ Revisita guardada: '+reg.idArbol,'ok');
 }
 
@@ -2015,14 +2176,14 @@ function nombresFotosMonitoreo(){
 function exportFotosMonitoreo(){
   const nombres = nombresFotosMonitoreo();
   const items = monitoreoRegistros.filter(r => r.foto)
-    .map(r => ({ data:r.foto, nombre:nombres[r.idMonitoreo] }));
+    .map(r => ({ data:r.foto, nombre:nombres[r.idMonitoreo],
+                 info:{ id:r.idArbol, tipo:'revision', lat:r.lat, lon:r.lon, fecha:r.fecha } }));
   if (!items.length){ toast('Sin fotos de verificación guardadas','err'); return; }
   toast('📷 Descargando '+items.length+' fotos…');
   let i=0;
   (function next(){
     if (i>=items.length) return;
-    const a=document.createElement('a');
-    a.href=items[i].data; a.download=items[i].nombre; a.click();
+    descargarFotoSellada(items[i].data, items[i].nombre, items[i].info);
     i++; setTimeout(next,700);
   })();
 }
