@@ -21,8 +21,10 @@
    visible al pie de la imagen, para que las fotos se emparejen solas aunque el correo las renombre.
    v18 (22-sep-2026): corrección botánica. Lluvia de oro es Cassia fistula (CAFI), no Laburnum anagyroides,
    y Amapa es Tabebuia rosea (TARO), no Handroanthus impetiginosus. Se cambia la foto de la Lluvia de oro
-   y los registros ya capturados se corrigen solos al abrir la app. */
-const CACHE_VERSION = 'apa-2026-09-22-v18';
+   y los registros ya capturados se corrigen solos al abrir la app.
+   v19 (22-sep-2026): base de parques actualizada desde la hoja "Septiembre" del Sheets de
+   Parques Alegres: 791 parques (entran 8, salen 12, cambian 282, casi todos acentos de colonia). */
+const CACHE_VERSION = 'apa-2026-09-22-v19';
 const CORE = [
   './',
   './index.html',
