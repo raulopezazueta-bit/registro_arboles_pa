@@ -18,8 +18,11 @@
    v16 (20-sep-2026): botón Compartir (envía CSV y fotos con su nombre, sin pasar por la galería)
    y emparejado de respaldo por la ubicación y la hora guardadas dentro de la foto.
    v17 (20-sep-2026): la app escribe el ID dentro del archivo de cada foto (sello propio) y lo graba
-   visible al pie de la imagen, para que las fotos se emparejen solas aunque el correo las renombre. */
-const CACHE_VERSION = 'apa-2026-09-20-v17';
+   visible al pie de la imagen, para que las fotos se emparejen solas aunque el correo las renombre.
+   v18 (22-sep-2026): corrección botánica. Lluvia de oro es Cassia fistula (CAFI), no Laburnum anagyroides,
+   y Amapa es Tabebuia rosea (TARO), no Handroanthus impetiginosus. Se cambia la foto de la Lluvia de oro
+   y los registros ya capturados se corrigen solos al abrir la app. */
+const CACHE_VERSION = 'apa-2026-09-22-v18';
 const CORE = [
   './',
   './index.html',
