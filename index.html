@@ -380,6 +380,11 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 .save-bar{height:auto;min-height:var(--savebar-h);padding-top:var(--s-2);padding-bottom:var(--s-2)}
 .papelera{margin-left:var(--s-4);margin-right:var(--s-4)}
 @media(min-width:640px){.papelera{max-width:600px;margin-left:auto;margin-right:auto}}
+/* ── v28 · catálogo: la foto ocupa toda la tarjeta y el nombre va sobre ella ── */
+.especie-card img{height:96px}
+html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:112px}
+.especie-card__name{position:absolute;left:0;right:0;bottom:0;min-height:0;padding:16px 6px 5px;color:var(--c-w);text-shadow:0 1px 2px rgba(0,0,0,.6);background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,.72) 45%,rgba(0,0,0,.82));line-height:1.15}
+.especie-card.is-active .especie-card__name{color:var(--c-w);background:linear-gradient(to bottom,rgba(20,80,58,0),rgba(20,80,58,.85) 45%,rgba(20,80,58,.95))}
 </style>
 </head>
 <body>

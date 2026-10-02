@@ -47,8 +47,10 @@
    primero, y texto mínimo de 13 px con contraste AA.
    v27 (02-oct-2026): Sprint 3 «Revisión y envío». Registros en tarjetas de una línea con el
    estado de las fotos y del envío, «Este mes» cuenta el mes en curso, Compartir es el botón
-   principal y Limpiar avisa si hay árboles sin enviar. Monitoreo en tres pasos cortos. */
-const CACHE_VERSION = 'apa-2026-10-02-v27';
+   principal y Limpiar avisa si hay árboles sin enviar. Monitoreo en tres pasos cortos.
+   v28 (02-oct-2026): en el catálogo de especies la foto ocupa toda la tarjeta y el nombre
+   va sobre ella, en una franja oscura; antes el panel del nombre le quitaba media altura. */
+const CACHE_VERSION = 'apa-2026-10-02-v28';
 const CORE = [
   './',
   './index.html',
