@@ -23,8 +23,23 @@
    y Amapa es Tabebuia rosea (TARO), no Handroanthus impetiginosus. Se cambia la foto de la Lluvia de oro
    y los registros ya capturados se corrigen solos al abrir la app.
    v19 (22-sep-2026): base de parques actualizada desde la hoja "Septiembre" del Sheets de
-   Parques Alegres: 791 parques (entran 8, salen 12, cambian 282, casi todos acentos de colonia). */
-const CACHE_VERSION = 'apa-2026-09-22-v19';
+   Parques Alegres: 791 parques (entran 8, salen 12, cambian 282, casi todos acentos de colonia).
+   v20 (23-sep-2026): borrador automático del árbol en captura, papelera de 7 días con Deshacer y
+   Recapturar, y aviso de ID repetido. Correcciones: la restauración ya no puede tirar otro registro
+   cuando falta espacio, el borrado avisa si no se pudo guardar, "Limpiar" libera las fotos de la
+   papelera y el CSV escapa las comillas dentro de los textos.
+   v21 (23-sep-2026): el número consecutivo del árbol solo admite enteros del 1 en adelante.
+   Ya no pasan 0, 01, .1 ni 1.5: el campo se normaliza en cada tecla y el guardado lo exige.
+   v22 (23-sep-2026): la tarjeta de la Amapa muestra el follaje en lugar de la floración, que es como
+   llega el plantón a campo.
+   v23 (01-oct-2026): la precisión del GPS se presenta como «estimada» (antes «efectiva»), en
+   pantalla y en la columna Precision_Estimada_m del CSV. El cálculo no cambia.
+   v24 (02-oct-2026): Sprint 1 «Datos seguros». Las fotos pasan a IndexedDB (ya no se pierden al
+   llenarse la memoria) con migración automática y medidor de memoria en Registros; la precisión
+   del GPS es la del celular redondeada a medio metro (bloquea con ≤ 5 m); el Mes propone el mes en
+   curso; DAP, altura y copa empiezan vacíos con opciones rápidas (columna Mediciones_Por_Opcion);
+   sin regreso automático al bajar a una sección bloqueada. */
+const CACHE_VERSION = 'apa-2026-10-02-v24';
 const CORE = [
   './',
   './index.html',
