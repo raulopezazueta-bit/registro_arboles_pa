@@ -38,8 +38,14 @@
    llenarse la memoria) con migración automática y medidor de memoria en Registros; la precisión
    del GPS es la del celular redondeada a medio metro (bloquea con ≤ 5 m); el Mes propone el mes en
    curso; DAP, altura y copa empiezan vacíos con opciones rápidas (columna Mediciones_Por_Opcion);
-   sin regreso automático al bajar a una sección bloqueada. */
-const CACHE_VERSION = 'apa-2026-10-02-v24';
+   sin regreso automático al bajar a una sección bloqueada.
+   v25 (02-oct-2026): «Buscar árbol cercano» usa varias lecturas de satélite (antes una sola, que
+   podía venir de WiFi y estar a kilómetros), avisa si ningún árbol de la muestra está cerca y la
+   carga de la base corrige coma decimal, longitud sin signo y coordenadas invertidas.
+   v26 (02-oct-2026): Sprint 2 «Captura más rápida». Número consecutivo propuesto, GPS en una línea
+   al fijarlo (cambiarlo pide confirmación), catálogo de especies en una pantalla con las de hoy
+   primero, y texto mínimo de 13 px con contraste AA. */
+const CACHE_VERSION = 'apa-2026-10-02-v26';
 const CORE = [
   './',
   './index.html',

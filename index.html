@@ -14,24 +14,25 @@
 <script>try{var fsl=localStorage.getItem('fsLevel');if(fsl)document.documentElement.dataset.fs=fsl;}catch(e){}</script>
 <style>
 :root{
-  --c-p-900:#0F4514;--c-p-800:#145219;--c-p-700:#1A5C20;--c-p-600:#2E8B35;--c-p-500:#4CAF50;--c-p-100:#D4EDDA;--c-p-50:#F1F9F2;
-  --c-a-700:#1565C0;--c-a-100:#E3F2FD;--c-ok:#2E7D32;--c-warn:#E65100;--c-err:#C62828;
-  --c-n-900:#0F1419;--c-n-800:#1A1A1A;--c-n-700:#3A3A3A;--c-n-600:#666;--c-n-500:#888;--c-n-400:#AAA;
+  --c-p-900:#0F4514;--c-p-800:#145219;--c-p-700:#1A5C20;--c-p-600:#2E7D32;--c-p-500:#4CAF50;--c-p-100:#D4EDDA;--c-p-50:#F1F9F2;
+  --c-a-700:#1565C0;--c-a-100:#E3F2FD;--c-ok:#2E7D32;--c-warn:#BF360C;--c-err:#C62828;
+  --c-n-900:#0F1419;--c-n-800:#1A1A1A;--c-n-700:#3A3A3A;--c-n-600:#595959;--c-n-500:#5F6368;--c-n-400:#6B6B6B;
   --c-n-300:#C4C4C4;--c-n-200:#E5E7E9;--c-n-100:#F5F5F5;--c-n-50:#FAFAFA;--c-w:#FFF;
   --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:20px;--s-6:24px;--s-8:32px;--s-10:40px;
   --ff:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   --ff-mono:ui-monospace,'SF Mono',Monaco,Consolas,monospace;
-  --fs-xs:11px;--fs-sm:12px;--fs-md:14px;--fs-lg:15px;--fs-xl:17px;--fs-2xl:20px;--fs-3xl:24px;
+  --fs-xs:13px;--fs-sm:14px;--fs-md:14px;--fs-lg:15px;--fs-xl:17px;--fs-2xl:20px;--fs-3xl:24px;
   --r-sm:6px;--r-md:10px;--r-lg:14px;--r-full:999px;
   --sh-1:0 1px 2px rgba(15,69,20,.08);--sh-2:0 2px 8px rgba(15,69,20,.10);--sh-3:0 6px 18px rgba(15,69,20,.14);--sh-up:0 -2px 12px rgba(0,0,0,.10);
   --t-fast:120ms;--t-base:200ms;--t-slow:340ms;--easing:cubic-bezier(.2,.8,.2,1);
   --header-h:56px;--tabs-h:44px;--progress-h:36px;--savebar-h:74px;
-  --fs-2xs:10px;--fs-13:13px;
+  --fs-2xs:13px;--fs-13:14px;
 }
 /* ---- Tamaño de letra (botón Aa · 3 niveles) ---- */
-html[data-fs="1"]{--fs-2xs:12px;--fs-xs:13px;--fs-sm:14px;--fs-13:15px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;--fs-2xl:24px;--fs-3xl:28px;--header-h:66px;--tabs-h:50px;--progress-h:40px;--savebar-h:82px}
-html[data-fs="2"]{--fs-2xs:14px;--fs-xs:15px;--fs-sm:16px;--fs-13:17px;--fs-md:19px;--fs-lg:21px;--fs-xl:23px;--fs-2xl:27px;--fs-3xl:31px;--header-h:72px;--tabs-h:58px;--progress-h:44px;--savebar-h:92px}
+html[data-fs="1"]{--fs-2xs:14px;--fs-xs:15px;--fs-sm:15px;--fs-13:16px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;--fs-2xl:24px;--fs-3xl:28px;--header-h:66px;--tabs-h:50px;--progress-h:40px;--savebar-h:82px}
+html[data-fs="2"]{--fs-2xs:16px;--fs-xs:17px;--fs-sm:16px;--fs-13:17px;--fs-md:19px;--fs-lg:21px;--fs-xl:23px;--fs-2xl:27px;--fs-3xl:31px;--header-h:72px;--tabs-h:58px;--progress-h:44px;--savebar-h:92px}
 html[data-fs="2"] .field-row{grid-template-columns:1fr}
+html[data-fs="1"] .especie-grid,html[data-fs="2"] .especie-grid{grid-template-columns:repeat(2,1fr)}
 html[data-fs="1"] .tab-btn>span[aria-hidden],html[data-fs="2"] .tab-btn>span[aria-hidden]{display:none}
 html[data-fs="1"] .tab-btn,html[data-fs="2"] .tab-btn{padding:0 4px;gap:5px;min-width:0}
 html[data-fs="2"] .foto-grid{grid-template-columns:1fr}
@@ -48,6 +49,18 @@ html[data-fs="2"] .reg-stat__label{letter-spacing:0}
 .memoria__fill{height:100%;background:var(--c-ok);width:0}
 .memoria--alerta{color:var(--c-err);font-weight:600}
 .memoria--alerta .memoria__fill{background:var(--c-err)}
+/* v26 · placeholder legible, GPS fijado, catálogo compacto */
+::placeholder{color:var(--c-n-500);opacity:1}
+.gps__fijo{display:none;align-items:center;gap:var(--s-2);padding:var(--s-3) var(--s-4);background:var(--c-p-50);border-left:5px solid var(--c-ok)}
+.gps__fijo-txt{flex:1;min-width:0;font-size:var(--fs-sm);color:var(--c-p-900);line-height:1.35}
+.gps__fijo-txt b{display:block;font-size:var(--fs-md)}
+.gps__fijo-txt span{font-family:var(--ff-mono);font-size:var(--fs-xs);color:var(--c-n-700)}
+.gps__fijo button{flex:none;min-height:44px;padding:8px 14px;border-radius:var(--r-full);border:1.5px solid var(--c-p-700);background:var(--c-w);color:var(--c-p-800);font-weight:700;font-size:var(--fs-sm)}
+.gps--fijo .gps__head,.gps--fijo .gps__body{display:none}
+.gps--fijo .gps__fijo{display:flex}
+/* Pestañas: con el texto a 14 px no caben los íconos en celulares angostos */
+@media (max-width:430px){.tab-btn>span[aria-hidden]{display:none}.tab-btn{padding:0 4px;gap:5px;min-width:0}}
+.especie-hoy{position:absolute;top:5px;left:5px;background:var(--c-p-800);color:var(--c-w);font-size:var(--fs-2xs);font-weight:700;padding:1px 7px;border-radius:var(--r-full);line-height:1.5}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -120,7 +133,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .section__head--itree{background:linear-gradient(135deg,#1565C0,#1976D2)}
 .section__head--proto{background:linear-gradient(135deg,#4A148C,#6A1B9A)}
 .section__head__title{flex:1;display:flex;align-items:center;gap:var(--s-2)}
-.section__head__status{font-size:var(--fs-xs);font-weight:700;padding:3px 10px;border-radius:var(--r-full);background:rgba(255,255,255,.20);min-width:42px;text-align:center;transition:all var(--t-base) var(--easing)}
+.section__head__status{font-size:var(--fs-xs);font-weight:700;padding:3px 10px;border-radius:var(--r-full);background:rgba(0,0,0,.22);min-width:42px;text-align:center;transition:all var(--t-base) var(--easing)}
 .section__head__status--ok{background:var(--c-w);color:var(--c-ok)}
 .section__body{padding:var(--s-4)}
 .field{margin-bottom:var(--s-4)}
@@ -153,10 +166,10 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 #manualToggleIcon{display:none}
 .manual-toggle span{line-height:1.3}
 .manual-toggle.is-active{border-color:var(--c-p-600);background:var(--c-p-50);color:var(--c-p-800);font-weight:600}
-.especie-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-2)}
+.especie-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .especie-card{position:relative;border:2px solid var(--c-n-200);border-radius:var(--r-md);overflow:hidden;cursor:pointer;background:var(--c-n-50);transition:all var(--t-base) var(--easing);text-align:left}
-.especie-card img{width:100%;height:96px;object-fit:cover;display:block;background:var(--c-n-100)}
-.especie-card__name{display:block;padding:8px 10px;font-size:var(--fs-sm);font-weight:700;color:var(--c-n-700);line-height:1.25}
+.especie-card img{width:100%;height:62px;object-fit:cover;display:block;background:var(--c-n-100)}
+.especie-card__name{display:flex;align-items:center;min-height:2.5em;padding:4px 6px;font-size:var(--fs-xs);font-weight:700;color:var(--c-n-800);line-height:1.2}
 .especie-card.is-active{border-color:var(--c-p-600);background:var(--c-p-50);box-shadow:0 0 0 3px var(--c-p-100)}
 .especie-card.is-active .especie-card__name{color:var(--c-p-800)}
 .especie-card__check{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--c-p-700);color:#fff;display:none;align-items:center;justify-content:center;font-size:var(--fs-13);font-weight:900}
@@ -271,7 +284,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 .reg-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:var(--s-2)}
 .reg-chip{font-size:var(--fs-2xs);font-weight:600;padding:3px 8px;border-radius:var(--r-full);background:var(--c-a-100);color:var(--c-a-700)}
 .reg-chip--ok{background:#C8E6C9;color:#1B5E20}
-.reg-chip--warn{background:#FFCDD2;color:var(--c-err)}
+.reg-chip--warn{background:#FFE3E3;color:#B71C1C}
 .reg-fotos{display:flex;gap:var(--s-1);margin-top:var(--s-2)}
 .reg-fotos img{width:56px;height:56px;object-fit:cover;border-radius:var(--r-sm);border:2px solid var(--c-p-100)}
 .no-regs{padding:var(--s-10) var(--s-4);text-align:center;color:var(--c-n-400)}
@@ -350,11 +363,16 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
       </div>
     </div>
   </div>
-  <div class="gps">
+  <div class="gps" id="gpsCard">
     <div class="gps__head">
       <span class="gps__icon" aria-hidden="true">📍</span>
       <span class="gps__title">Georreferenciación</span>
       <span class="gps__badge gps__badge--wait" id="gpsBadge" aria-live="polite">Esperando…</span>
+    </div>
+    <div class="gps__fijo" id="gpsFijo" role="status">
+      <span aria-hidden="true">📍</span>
+      <div class="gps__fijo-txt"><b id="gpsFijoPrec">Ubicación fijada</b><span id="gpsFijoCoords"></span></div>
+      <button type="button" onclick="cambiarUbicacion()">Cambiar</button>
     </div>
     <div class="gps__body">
       <div class="gps__quality">
@@ -430,6 +448,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
     <div class="section__body">
       <div class="field" id="f-especie"><label class="field__label" for="especie">Nombre común <span class="req">*</span></label>
         <input type="hidden" id="especie">
+        <p class="field__hint" id="especieOrden" style="margin:0 0 6px;display:none">Primero las que más has plantado hoy.</p>
         <div class="especie-grid" id="especieGrid">
           <button type="button" class="especie-card" id="ecard-tabebuia_rosea" onclick="selectEspecie('Amapa (Tabebuia rosea)')" aria-label="Amapa (Tabebuia rosea)">
             <span class="especie-card__check">✓</span>
@@ -524,6 +543,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
         <input type="text" id="arbolNum" placeholder="Ej: 42" inputmode="numeric" pattern="[0-9]*"
                maxlength="5" autocomplete="off" oninput="normalizarNum(this)">
         <p class="field__hint">Solo números enteros, del 1 en adelante.</p>
+        <p class="field__hint" id="numHint" style="color:var(--c-p-800);font-weight:600"></p>
         <p class="dup-warn" id="dupWarn"></p>
       </div>
       <div class="id-display"><div class="id-display__value" id="arbolID">ARB-00000</div><div class="id-display__label">ID generado automáticamente</div></div>
@@ -906,6 +926,8 @@ window.addEventListener('load', () => {
   renderPapelera();
   prepararEvidencias();       // v24: mueve a IndexedDB las fotos que sigan en localStorage
   ofrecerBorrador();          // si quedó un árbol a medias, se ofrece recuperarlo
+  ordenarEspecies();
+  proponerNumero();
   borradorActivo=true;        // a partir de aquí cada cambio se va guardando solo
   ['input','change'].forEach(t => document.addEventListener(t, anotarBorrador));
   // El sistema puede cerrar la pestaña sin avisar: último guardado al ocultarse
@@ -1165,6 +1187,66 @@ function medidasPorOpcion(r){
   return l.length ? l.join('; ') : 'Ninguna';
 }
 
+/* ════════════════════════════════════════════════════════════
+   NÚMERO PROPUESTO (v26 · HU-06)
+   El siguiente número de ese parque en este celular. Se recuerda el mayor usado
+   por prefijo aunque se limpien los registros: así no se repiten números de
+   árboles que ya se enviaron.
+   ════════════════════════════════════════════════════════════ */
+let numPropuesto=false;
+function prefijoID(){ return ($('idParque').value.trim() || 'MANUAL') + '-' + deviceToken + '-'; }
+function leerUltimos(){ try{ return JSON.parse(localStorage.getItem('ultimoNum')||'{}'); }catch(_){ return {}; } }
+function recordarNumero(reg){
+  const pre=(reg.id||'').replace(/\d{5}$/, ''), n=+reg.num||0;
+  if (!pre || !n) return;
+  const u=leerUltimos();
+  if (!u[pre] || n>u[pre]){ u[pre]=n; try{ localStorage.setItem('ultimoNum', JSON.stringify(u)); }catch(_){} }
+}
+function siguienteNumero(){
+  const pre=prefijoID();
+  let max=leerUltimos()[pre]||0;
+  registros.concat(papelera).forEach(r => {
+    if ((r.id||'').startsWith(pre)){ const n=+r.num || parseInt(r.id.slice(pre.length),10) || 0; if (n>max) max=n; }
+  });
+  return max+1;
+}
+function proponerNumero(){
+  const el=$('arbolNum');
+  if (el.value && !numPropuesto) return;          // lo escribió la persona: se respeta
+  const n=siguienteNumero();
+  if (n>99999) return;
+  el.value=String(n); numPropuesto=true;
+  actualizarID();
+  $('numHint').textContent = n===1
+    ? 'Propuesto: 1, el primer árbol de este parque en este celular. Cámbialo si no corresponde.'
+    : 'Propuesto: '+n+', el siguiente después del '+(n-1)+'. Cámbialo si no corresponde.';
+}
+/* Si la persona escribe, el número deja de ser propuesto */
+document.addEventListener('input', e => {
+  if (e.target && e.target.id==='arbolNum' && e.isTrusted){ numPropuesto=false; $('numHint').textContent=''; }
+});
+
+/* ════════════════════════════════════════════════════════════
+   ESPECIES DE HOY PRIMERO (v26 · HU-08)
+   ════════════════════════════════════════════════════════════ */
+function ordenarEspecies(){
+  const grid=$('especieGrid'); if (!grid) return;
+  const hoy=new Date().toDateString(), cuenta={};
+  registros.forEach(r => { if (r.especie && r.ts && new Date(r.ts).toDateString()===hoy) cuenta[r.especie]=(cuenta[r.especie]||0)+1; });
+  const cards=[...grid.querySelectorAll('.especie-card')];
+  cards.forEach((c,i) => { if (c.dataset.orden===undefined) c.dataset.orden=i; });
+  const nombre = c => (c.getAttribute('aria-label')||'');
+  cards.sort((a,b) => (cuenta[nombre(b)]||0)-(cuenta[nombre(a)]||0) || a.dataset.orden-b.dataset.orden)
+       .forEach(c => {
+         grid.appendChild(c);
+         let t=c.querySelector('.especie-hoy');
+         const n=cuenta[nombre(c)]||0;
+         if (n){ if (!t){ t=document.createElement('span'); t.className='especie-hoy'; c.appendChild(t); } t.textContent='Hoy '+n; }
+         else if (t) t.remove();
+       });
+  $('especieOrden').style.display = Object.keys(cuenta).length ? 'block' : 'none';
+}
+
 function switchTab(tab) {
   ['registrar','registros','monitoreo'].forEach(t => {
     $('tab-'+t).dataset.active = t===tab ? 'true' : 'false';
@@ -1202,6 +1284,7 @@ function buscarParque() {
     statusEl.style.display = 'flex';
   }
   actualizarID();
+  proponerNumero();
   if (typeof updateProgress === 'function') updateProgress();
 }
 function activarModoManual() {
@@ -1341,7 +1424,10 @@ function lockGPS(){
   gpsLocked={lat:btn._bLat,lon:btn._bLon,acc:btn._bAcc,prec:btn._prec!==undefined&&btn._prec!==null?btn._prec:precisionDe(btn._bAcc)};
   btn.disabled=false; btn.className='btn-lock btn-lock--locked';
   btn.innerHTML='✅ Bloqueado ±'+fmtPrec(gpsLocked.prec)+' m';
-  btn.onclick=unlockGPS;
+  btn.onclick=cambiarUbicacion;
+  $('gpsFijoPrec').textContent='Ubicación fijada · ±'+fmtPrec(gpsLocked.prec)+' m';
+  $('gpsFijoCoords').textContent=gpsLocked.lat.toFixed(6)+', '+gpsLocked.lon.toFixed(6);
+  $('gpsCard').classList.add('gps--fijo');
   $('gpsLat').textContent=gpsLocked.lat.toFixed(7);
   $('gpsLon').textContent=gpsLocked.lon.toFixed(7);
   setGPSMsg('✅ Coordenadas bloqueadas — precisión estimada ±'+fmtPrec(gpsLocked.prec)+' m.','good');
@@ -1349,8 +1435,16 @@ function lockGPS(){
   vibrate(40);
   anotarBorrador();
 }
+/* Cambiar la ubicación descarta la fijada: se confirma, porque volver a fijarla
+   cuesta quedarse quieto otra vez sobre el árbol */
+function cambiarUbicacion(){
+  if (!gpsLocked) return;
+  if (!confirm('¿Cambiar la ubicación?\n\nSe borra la que fijaste y hay que esperar otra vez a que el GPS se estabilice sobre el árbol.')) return;
+  unlockGPS();
+}
 function unlockGPS(){
   gpsLocked=null;
+  $('gpsCard').classList.remove('gps--fijo');
   const btn=$('btnLock');
   btn.disabled=true; btn.className='btn-lock'; btn.innerHTML='🔒 Esperando señal…'; btn.onclick=lockGPS;
   setGPSMsg('GPS liberado. Espera nueva estabilización.','wait');
@@ -1624,6 +1718,7 @@ function guardarRegistro(){
       return;
     }
     if (guardado){
+      recordarNumero(reg);
       try{localStorage.setItem('lr',reg.registrante);}catch(_){}
       try{localStorage.setItem('ls',reg.mes);}catch(_){}
       try{localStorage.setItem('le',reg.ejecutor);}catch(_){}
@@ -1659,6 +1754,7 @@ function resetForm(idGuardado){
     resetFotoInput(n);
   });
   gpsLocked=null; readings=[];
+  $('gpsCard').classList.remove('gps--fijo');
   const btnL=$('btnLock');
   btnL.disabled=true; btnL.className='btn-lock'; btnL.innerHTML='🔒 Esperando señal…'; btnL.onclick=lockGPS;
   btnL._bLat=null; btnL._bLon=null; btnL._bAcc=null; btnL._prec=null;
@@ -1681,6 +1777,8 @@ function resetForm(idGuardado){
     setTimeout(()=>{ b.style.opacity='0'; setTimeout(()=>{b.style.display='none';},400); },2500);
   }
   limpiarBorrador();   // el árbol ya está guardado: el borrador deja de tener sentido
+  ordenarEspecies();
+  proponerNumero();
   $('dupWarn')?.classList.remove('dup-warn--show');
   switchTab('registrar');
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1703,7 +1801,7 @@ let borradorActivo=false, borradorTimer=null;
 
 /* ¿Hay algo capturado que valga la pena conservar? */
 function hayCaptura(){
-  return !!(gpsLocked || foto1 || foto2 || $('arbolNum').value || $('especie').value
+  return !!(gpsLocked || foto1 || foto2 || ($('arbolNum').value && !numPropuesto) || $('especie').value
     || ($('obs').value||'').trim() || PROTO_PASOS.some(p => $('proto'+p).checked));
 }
 
@@ -1781,6 +1879,7 @@ async function restaurarBorrador(){
     lockGPS();
   }
   $('borradorAviso').classList.remove('borrador--show');
+  numPropuesto=false; $('numHint').textContent='';
   normalizarNum($('arbolNum'));
   pintarCondicionSugerida(); actualizarValidacion();
   toast('🌱 Árbol recuperado. Revisa el GPS antes de guardar.','ok');
@@ -1936,6 +2035,7 @@ function recapturarRegistro(id){
     if (r[k]!==undefined && $(k)) $(k).value=r[k];
   });
   if ($('arbolNum')) $('arbolNum').value = r.num || '';
+  numPropuesto=false; $('numHint').textContent='';
   $('obs').value = r.obs || '';
   $('dap').value = r.dap ?? '';
   $('altura').value = r.altura ?? '';
@@ -2315,6 +2415,22 @@ function buscarCol(headers, alias){
   return -1;
 }
 /* Excel en español suele exportar con punto y coma; se detecta por la línea de encabezados. */
+/* v25: lee una coordenada aunque venga con coma decimal (Excel en español) */
+function numCoord(v){
+  v = String(v == null ? '' : v).trim().replace(/\s+/g, '');
+  if (/^-?\d+,\d+$/.test(v)) v = v.replace(',', '.');
+  return v === '' ? NaN : Number(v);
+}
+/* Corrige los errores comunes y dice si el punto cae en Culiacán */
+function revisarCoord(lat, lon){
+  if (isNaN(lat) || isNaN(lon)) return null;
+  const dentro = (a, b) => a>=BOUNDS.latMin && a<=BOUNDS.latMax && b>=BOUNDS.lonMin && b<=BOUNDS.lonMax;
+  if (dentro(lat, lon)) return { lat, lon, arreglo: '' };
+  if (dentro(lat, -Math.abs(lon))) return { lat, lon: -Math.abs(lon), arreglo: 'signo' };
+  if (dentro(lon, lat)) return { lat: lon, lon: lat, arreglo: 'invertidas' };
+  if (dentro(lon, -Math.abs(lat))) return { lat: lon, lon: -Math.abs(lat), arreglo: 'invertidas' };
+  return { lat, lon, arreglo: 'fuera' };
+}
 function detectarSeparador(linea){
   const comas = (linea.match(/,/g)||[]).length;
   const puntoYComa = (linea.match(/;/g)||[]).length;
@@ -2667,11 +2783,14 @@ function cargarBaseMonitoreo(input){
         toast('Faltan columnas: se necesitan ID_Arbol, Latitud y Longitud','err');
         return;
       }
-      const rows=[];
+      const rows=[], fuera=[]; let corregidas=0;
       for (let i=1;i<lines.length;i++){
         const cols=parseCSVLine(lines[i],SEP);
-        const lat=parseFloat(cols[idxLat]), lon=parseFloat(cols[idxLon]);
-        if (!cols[idxId] || isNaN(lat) || isNaN(lon)) continue;
+        const rc=revisarCoord(numCoord(cols[idxLat]), numCoord(cols[idxLon]));
+        if (!cols[idxId] || !rc) continue;
+        if (rc.arreglo==='fuera'){ fuera.push(cols[idxId].trim()); continue; }
+        if (rc.arreglo) corregidas++;
+        const lat=rc.lat, lon=rc.lon;
         const ts = idxFecha>=0 ? Date.parse((cols[idxFecha]||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1')) : NaN;
         rows.push({
           id: cols[idxId].trim(),
@@ -2681,9 +2800,14 @@ function cargarBaseMonitoreo(input){
           colonia: idxCol>=0?cols[idxCol]:'',
         });
       }
-      if (!rows.length){ toast('No se encontraron árboles con coordenadas válidas','err'); return; }
+      if (!rows.length){
+        toast(fuera.length ? 'Ninguna coordenada cae en Culiacán: revisa las columnas Latitud y Longitud' : 'No se encontraron árboles con coordenadas válidas','err');
+        input.value=''; return;
+      }
       baseMonitoreo=rows;
       try{ localStorage.setItem('baseMonitoreo', JSON.stringify(rows)); }catch(_){}
+      baseRevision={ corregidas, fuera };
+      try{ localStorage.setItem('baseRevision', JSON.stringify(baseRevision)); }catch(_){}
       actualizarBaseMonitoreoStatus();
       refrescarFotosMuestra();
       const conFoto = rows.filter(t => fotosMuestraIds.has(t.id)).length;
@@ -2697,13 +2821,33 @@ function cargarBaseMonitoreo(input){
   reader.readAsArrayBuffer(file);
 }
 
+let baseRevision = (()=>{ try{ return JSON.parse(localStorage.getItem('baseRevision')||'null') || {corregidas:0,fuera:[]}; }catch(_){ return {corregidas:0,fuera:[]}; } })();
 function actualizarBaseMonitoreoStatus(){
   $('monBaseCount').textContent = baseMonitoreo.length+' cargados';
   const st=$('monBaseStatus');
-  st.textContent = baseMonitoreo.length
+  let txt = baseMonitoreo.length
     ? '✅ Base lista: '+baseMonitoreo.length+' árboles disponibles para buscar en campo.'
     : 'Aún no has cargado ninguna base. Exporta la muestra desde el workbook de seguimiento y cárgala aquí.';
+  if (baseMonitoreo.length && baseRevision.corregidas)
+    txt += '\n🔧 '+baseRevision.corregidas+' coordenada(s) corregida(s): venían con la longitud sin signo menos o con latitud y longitud invertidas.';
+  if (baseMonitoreo.length && baseRevision.fuera && baseRevision.fuera.length)
+    txt += '\n⚠️ '+baseRevision.fuera.length+' árbol(es) apartado(s) porque sus coordenadas no caen en Culiacán: '+
+      baseRevision.fuera.slice(0,5).join(', ')+(baseRevision.fuera.length>5?'…':'')+'. Revísalos en el workbook.';
+  st.style.whiteSpace='pre-line';
+  st.textContent = txt;
 }
+/* Una base guardada por una versión anterior se revisa al abrir, sin reescribirla */
+(function revisarBaseGuardada(){
+  if (!baseMonitoreo.length || localStorage.getItem('baseRevision')) return;
+  const fuera=[]; let corregidas=0;
+  baseMonitoreo = baseMonitoreo.filter(t => {
+    const rc = revisarCoord(numCoord(t.lat), numCoord(t.lon));
+    if (!rc || rc.arreglo==='fuera'){ fuera.push(t.id); return false; }
+    if (rc.arreglo){ corregidas++; t.lat=rc.lat; t.lon=rc.lon; }
+    return true;
+  });
+  baseRevision={ corregidas, fuera };
+})();
 
 function haversine(lat1,lon1,lat2,lon2){
   const R=6371000, toRad=d=>d*Math.PI/180;
@@ -2712,29 +2856,76 @@ function haversine(lat1,lon1,lat2,lon2){
   return R*2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+/* v25: la búsqueda ya no usa una sola lectura. La primera que entrega el celular
+   suele salir de WiFi o antenas y puede estar a kilómetros. Se escucha el GPS hasta
+   25 s y se usan solo las lecturas buenas. */
+const BUSQ_MAX_S = 25, BUSQ_MIN_LECT = 5, BUSQ_ACC_BUENA = 20, BUSQ_ACC_LIMITE = 100, BUSQ_LEJOS_M = 300;
+let busqWatch = null, busqTimer = null;
+function terminarBusqueda(){
+  if (busqWatch !== null){ navigator.geolocation.clearWatch(busqWatch); busqWatch = null; }
+  clearTimeout(busqTimer); busqTimer = null;
+  const btn=$('btnBuscarCercano'); btn.disabled=false; btn.innerHTML='📍 Buscar árbol cercano';
+}
+function posicionDeLecturas(ls){
+  /* Las lecturas cuya exactitud no pasa del doble de la mejor, promediadas por peso */
+  const mejor = Math.min(...ls.map(r => r.acc));
+  const sel = ls.filter(r => r.acc <= Math.max(mejor * 2, 5));
+  let w=0, la=0, lo=0;
+  sel.forEach(r => { const k=1/(r.acc*r.acc); w+=k; la+=r.lat*k; lo+=r.lon*k; });
+  const accs = sel.map(r => r.acc).sort((a,b)=>a-b);
+  return { lat: la/w, lon: lo/w, acc: accs[accs.length>>1], n: sel.length };
+}
 function buscarArbolCercano(){
-  if (!baseMonitoreo.length){
-    toast('Primero carga una base de árboles','err');
-    return;
-  }
-  const btn=$('btnBuscarCercano');
-  const msg=$('monGpsMsg');
+  if (!baseMonitoreo.length){ toast('Primero carga una base de árboles','err'); return; }
+  if (busqWatch !== null) return;
+  const btn=$('btnBuscarCercano'), msg=$('monGpsMsg');
   btn.disabled=true; btn.innerHTML='🔎 Buscando señal…';
-  msg.textContent='Obteniendo tu ubicación… quédate quieto un momento.';
-  navigator.geolocation.getCurrentPosition(pos => {
-    const {latitude:lat, longitude:lon, accuracy:acc} = pos.coords;
-    const conDistancia = baseMonitoreo.map(t => ({...t, dist: haversine(lat,lon,t.lat,t.lon)}))
-      .sort((a,b) => a.dist-b.dist)
-      .slice(0,6);
+  msg.textContent='Obteniendo tu ubicación con satélites… quédate quieto, a cielo abierto si puedes.';
+  $('monResultados').innerHTML='';
+  const lecturas=[], t0=Date.now();
+  const listo = () => {
+    const buenas = lecturas.filter(r => r.acc <= BUSQ_ACC_BUENA);
+    /* al menos 6 s: las primeras lecturas suelen venir de WiFi aunque digan buena exactitud */
+    if (buenas.length >= BUSQ_MIN_LECT && Date.now()-t0 >= 6000) return buenas;
+    if ((Date.now()-t0)/1000 >= BUSQ_MAX_S) return lecturas.filter(r => r.acc <= BUSQ_ACC_LIMITE);
+    return null;
+  };
+  const cerrar = () => {
+    const sel = listo() || lecturas.filter(r => r.acc <= BUSQ_ACC_LIMITE);
+    terminarBusqueda();
+    if (!sel.length){
+      const mejor = lecturas.length ? Math.min(...lecturas.map(r => r.acc)) : null;
+      msg.textContent = '⚠️ Señal insuficiente' + (mejor ? ' (la mejor lectura fue ±'+Math.round(mejor)+' m)' : '') +
+        '. Sal a cielo abierto, lejos de techos, y vuelve a buscar.';
+      return;
+    }
+    const pos = posicionDeLecturas(sel);
+    const conDistancia = baseMonitoreo.map(t => ({...t, dist: haversine(pos.lat,pos.lon,t.lat,t.lon)}))
+      .sort((a,b) => a.dist-b.dist).slice(0,6);
     renderResultadosCercanos(conDistancia);
-    btn.disabled=false; btn.innerHTML='📍 Buscar árbol cercano';
-    msg.textContent='Precisión GPS: ±'+acc.toFixed(1)+' m · toca el árbol correcto de la lista.';
+    const cerca = conDistancia[0].dist <= BUSQ_LEJOS_M;
+    const coords = pos.lat.toFixed(6)+', '+pos.lon.toFixed(6);
+    msg.innerHTML = cerca
+      ? 'Precisión GPS: ±'+pos.acc.toFixed(1)+' m ('+pos.n+' lecturas) · toca el árbol correcto de la lista.'
+      : '⚠️ <b>Ningún árbol de la muestra está cerca:</b> el más cercano está a '+fmtDist(conDistancia[0].dist)+
+        '. Revisa que estés en el parque correcto. Si sí lo estás, el celular puede estar ubicándote mal: sal a cielo abierto y vuelve a buscar.'+
+        '<br>Tu posición: <span style="font-family:var(--ff-mono)">'+coords+'</span> (±'+pos.acc.toFixed(0)+' m) · '+
+        '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(coords)+'" target="_blank" rel="noopener">ver en mapa</a>';
+  };
+  busqWatch = navigator.geolocation.watchPosition(p => {
+    const c=p.coords;
+    lecturas.push({ lat:c.latitude, lon:c.longitude, acc:c.accuracy });
+    const buenas = lecturas.filter(r => r.acc <= BUSQ_ACC_BUENA).length;
+    btn.innerHTML = '🔎 Buscando señal… '+Math.min(buenas, BUSQ_MIN_LECT)+'/'+BUSQ_MIN_LECT;
+    if (listo()) cerrar();
   }, err => {
-    btn.disabled=false; btn.innerHTML='📍 Buscar árbol cercano';
+    terminarBusqueda();
     msg.textContent='⚠️ No se pudo obtener tu ubicación. Activa el GPS e inténtalo de nuevo.';
     toast('Error de GPS: '+err.message,'err');
-  }, { enableHighAccuracy:true, timeout:15000, maximumAge:0 });
+  }, { enableHighAccuracy:true, timeout:BUSQ_MAX_S*1000, maximumAge:0 });
+  busqTimer = setTimeout(cerrar, BUSQ_MAX_S*1000);
 }
+function fmtDist(d){ return d<1000 ? Math.round(d)+' m' : (d/1000).toFixed(1)+' km'; }
 
 function renderResultadosCercanos(lista){
   const cont=$('monResultados');
@@ -2756,7 +2947,7 @@ function renderResultadosCercanos(lista){
           <span class="mon-result__meta">${(t.especie||'—')} · ${(t.parque||'—')}</span>
         </span>
       </span>
-      <span class="mon-result__dist">${t.dist<1000?Math.round(t.dist)+' m':(t.dist/1000).toFixed(1)+' km'}</span>
+      <span class="mon-result__dist">${fmtDist(t.dist)}</span>
     </button>`; }).join('');
   /* Las miniaturas se cargan después, para no trabar la lista */
   lista.filter(t => fotosMuestraIds.has(t.id)).forEach(async t => {
