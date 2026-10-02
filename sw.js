@@ -44,8 +44,11 @@
    carga de la base corrige coma decimal, longitud sin signo y coordenadas invertidas.
    v26 (02-oct-2026): Sprint 2 «Captura más rápida». Número consecutivo propuesto, GPS en una línea
    al fijarlo (cambiarlo pide confirmación), catálogo de especies en una pantalla con las de hoy
-   primero, y texto mínimo de 13 px con contraste AA. */
-const CACHE_VERSION = 'apa-2026-10-02-v26';
+   primero, y texto mínimo de 13 px con contraste AA.
+   v27 (02-oct-2026): Sprint 3 «Revisión y envío». Registros en tarjetas de una línea con el
+   estado de las fotos y del envío, «Este mes» cuenta el mes en curso, Compartir es el botón
+   principal y Limpiar avisa si hay árboles sin enviar. Monitoreo en tres pasos cortos. */
+const CACHE_VERSION = 'apa-2026-10-02-v27';
 const CORE = [
   './',
   './index.html',

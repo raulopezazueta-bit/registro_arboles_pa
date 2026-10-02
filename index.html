@@ -327,6 +327,59 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 .undo{position:fixed;bottom:calc(var(--savebar-h) + 12px);left:50%;transform:translateX(-50%) translateY(20px);display:flex;align-items:center;gap:var(--s-3);background:var(--c-n-900);color:var(--c-w);padding:10px 12px 10px 20px;border-radius:var(--r-full);font-size:var(--fs-sm);font-weight:600;opacity:0;transition:all var(--t-base) var(--easing);pointer-events:none;z-index:1000;max-width:92vw;box-shadow:var(--sh-3)}
 .undo--show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 .undo button{border:0;background:var(--c-w);color:var(--c-n-900);border-radius:var(--r-full);padding:8px 16px;font-size:var(--fs-xs);font-weight:700;cursor:pointer;min-height:40px}
+/* ── v27 · Sprint 3 · Revisión y envío (HU-10) ─────────────────── */
+.reg-toolbar{position:static}
+.btn-compartir{width:100%;min-height:52px;border:0;border-radius:var(--r-md);background:var(--c-p-700);color:var(--c-w);font:inherit;font-size:var(--fs-lg);font-weight:750;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;cursor:pointer;box-shadow:var(--sh-2);padding:10px 14px}
+.btn-compartir small{font-size:var(--fs-xs);font-weight:500;opacity:.92}
+.btn-compartir:active{transform:scale(.98)}
+.btn-compartir:disabled{opacity:.8;cursor:wait}
+.envio-estado{font-size:var(--fs-sm);font-weight:650;margin:var(--s-2) 0;line-height:1.35}
+.envio-estado:empty{display:none}
+.envio-estado--pend{color:var(--c-warn)}
+.envio-estado--ok{color:var(--c-ok)}
+.reg-actions--sec{align-items:center}
+.reg-actions__lbl{font-size:var(--fs-sm);color:var(--c-n-600);font-weight:600}
+.reg-actions--sec .btn-action{min-height:44px}
+.reg-card--compacta{margin-top:6px;margin-bottom:6px}
+.reg-card__resumen{display:grid;grid-template-columns:1fr auto;grid-template-areas:"id estado" "linea estado";gap:2px var(--s-2);align-items:center;width:100%;border:0;background:var(--c-w);text-align:left;font:inherit;padding:var(--s-2) var(--s-3);min-height:56px;cursor:pointer;color:inherit}
+.reg-card--abierta .reg-card__resumen{background:var(--c-p-50)}
+.reg-card__resumen .reg-card__id{grid-area:id;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:var(--fs-md);letter-spacing:0}
+.reg-card__linea{grid-area:linea;display:flex;gap:var(--s-2);min-width:0;font-size:var(--fs-sm);color:var(--c-n-700)}
+.reg-card__esp{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reg-card__hora{color:var(--c-n-600);white-space:nowrap;flex:none}
+.reg-card__estado{grid-area:estado;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.reg-foto-st,.reg-env{font-size:var(--fs-2xs);font-weight:700;padding:2px 8px;border-radius:var(--r-full);background:var(--c-n-100);color:var(--c-n-700);white-space:nowrap}
+.reg-foto-st--ok{background:#C8E6C9;color:#1B5E20}
+.reg-foto-st--err{background:#FFE3E3;color:#B71C1C}
+.reg-env{background:#FFF3E0;color:#8A2A00}
+.reg-env--ok{background:#C8E6C9;color:#1B5E20}
+.reg-card__body[hidden]{display:none}
+.reg-card--compacta .reg-card__body{border-top:1px solid var(--c-n-200)}
+.reg-card--compacta .reg-card__del{display:block;width:100%;margin:var(--s-3) 0 var(--s-1);padding:10px;min-height:44px;border:1px solid var(--c-err);color:var(--c-err);background:var(--c-w);border-radius:var(--r-md);font:inherit;font-size:var(--fs-sm);font-weight:650;opacity:1}
+.reg-limpiar{margin:var(--s-6) var(--s-4) var(--s-2);padding-top:var(--s-4);border-top:1px dashed var(--c-n-300);text-align:center}
+.reg-limpiar__btn{border:1px solid var(--c-err);background:var(--c-w);color:var(--c-err);border-radius:var(--r-full);padding:10px 18px;min-height:44px;font:inherit;font-size:var(--fs-sm);font-weight:650;cursor:pointer}
+.reg-limpiar__txt{font-size:var(--fs-xs);color:var(--c-n-600);margin-top:6px}
+@media(min-width:640px){.reg-limpiar{max-width:600px;margin-left:auto;margin-right:auto}}
+.mon-pasos{margin:var(--s-3) var(--s-4) 0;padding:var(--s-3) var(--s-3) var(--s-3) 36px;background:var(--c-p-50);border-radius:var(--r-md);font-size:var(--fs-sm);color:var(--c-n-800);line-height:1.5}
+.mon-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--c-w);color:var(--c-p-700);font-weight:800;font-size:var(--fs-sm);flex:none}
+.mon-carga{cursor:pointer;margin-top:var(--s-2);min-height:44px}
+.mon-status{margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)}
+.mon-status:empty{display:none}
+#tab-monitoreo .field__hint{margin:0}
+@media(min-width:640px){.mon-pasos{max-width:600px;margin-left:auto;margin-right:auto}}
+/* ── v27 · HU-13 pulido visual ───────────────────────────────── */
+.btn-fs{min-height:44px}
+.section__head--itree,.section__head--proto{background:var(--c-p-600)}
+.head-opt{display:block;font-size:var(--fs-xs);font-weight:600;opacity:.92;line-height:1.3}
+.save-bar__info{min-width:0}
+.save-bar__hint{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.btn-save{flex:0 1 auto;min-width:0;padding:12px 16px;line-height:1.15;text-align:center}
+.save-bar__count{white-space:nowrap}
+.save-bar .btn-save{max-width:62%}
+.save-bar__info{flex:1 1 38%}
+.save-bar{height:auto;min-height:var(--savebar-h);padding-top:var(--s-2);padding-bottom:var(--s-2)}
+.papelera{margin-left:var(--s-4);margin-right:var(--s-4)}
+@media(min-width:640px){.papelera{max-width:600px;margin-left:auto;margin-right:auto}}
 </style>
 </head>
 <body>
@@ -608,7 +661,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 
   <div class="section" id="sec-proto" data-group="proto" data-nombre="Protocolo de plantación">
     <button type="button" class="section__lock" tabindex="-1" onclick="irAPendiente()"><span class="section__lock-msg">🔒 Completa la sección anterior</span></button>
-    <div class="section__head section__head--proto"><div class="section__head__title"><span aria-hidden="true">✅</span> Protocolo de plantación <span style="font-weight:600;opacity:.85">· opcional</span></div><span class="section__head__status" id="stProto">0/4</span></div>
+    <div class="section__head section__head--proto"><div class="section__head__title"><span aria-hidden="true">✅</span> <span>Protocolo de plantación <span class="head-opt">Opcional · marca solo lo que se hizo</span></span></div><span class="section__head__status" id="stProto">0/4</span></div>
     <div class="section__body">
       <div class="proto-list">
         <label class="proto-item" id="protoHoyo-label">
@@ -667,19 +720,24 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
   <div class="reg-toolbar">
     <div class="reg-stats">
       <div class="reg-stat"><div class="reg-stat__value" id="kpiTotal">0</div><div class="reg-stat__label">Total</div></div>
-      <div class="reg-stat"><div class="reg-stat__value" id="kpiMes">—</div><div class="reg-stat__label">Mes actual</div></div>
+      <div class="reg-stat"><div class="reg-stat__value" id="kpiMes">—</div><div class="reg-stat__label">Este mes</div></div>
       <div class="reg-stat"><div class="reg-stat__value" id="kpiHoy">0</div><div class="reg-stat__label">Hoy</div></div>
     </div>
     <div class="memoria" id="memoria" aria-live="polite"></div>
     <div class="reg-search"><input type="search" id="searchInput" placeholder="Buscar por ID, parque, especie, registrante…" oninput="renderRegistros()"></div>
-    <div class="reg-actions">
-      <button class="btn-action" onclick="exportCSV()">⬇️ CSV i-Tree</button>
+    <button type="button" class="btn-compartir" onclick="compartirJornada()">📤 Compartir jornada <small>CSV y fotos juntos</small></button>
+    <div class="envio-estado" id="envioEstado" aria-live="polite"></div>
+    <div class="reg-actions reg-actions--sec">
+      <span class="reg-actions__lbl">Descargar:</span>
+      <button class="btn-action btn-action--secondary" onclick="exportCSV()">⬇️ CSV i-Tree</button>
       <button class="btn-action btn-action--secondary" onclick="exportFotos()">📷 Fotos</button>
-      <button class="btn-action btn-action--secondary" onclick="compartirJornada()">📤 Compartir</button>
-      <button class="btn-action btn-action--danger" onclick="limpiarRegistros()">🗑 Limpiar</button>
     </div>
   </div>
   <div id="regList"></div>
+  <div class="reg-limpiar" id="regLimpiarBox">
+    <button type="button" class="reg-limpiar__btn" onclick="limpiarRegistros()">🗑 Limpiar registros de este celular</button>
+    <p class="reg-limpiar__txt">Úsalo solo cuando el coordinador confirme que recibió la jornada.</p>
+  </div>
   <div class="papelera" id="papeleraBox" style="display:none">
     <button type="button" class="papelera__head" id="papeleraHead" onclick="togglePapelera()"></button>
     <div class="papelera__body" id="papeleraBody">
@@ -690,31 +748,43 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 </section>
 
 <section id="tab-monitoreo" class="tab-content" role="tabpanel">
+  <ol class="mon-pasos" aria-label="Cómo revisitar un árbol">
+    <li><b>Carga la muestra</b> que te envió el coordinador.</li>
+    <li><b>Carga las fotos</b> de esos árboles.</li>
+    <li><b>Busca el árbol</b> estando junto a él.</li>
+  </ol>
   <div class="section">
-    <div class="section__head"><div class="section__head__title"><span aria-hidden="true">📂</span> Base de árboles a revisitar</div><span class="section__head__status" id="monBaseCount">0 cargados</span></div>
+    <div class="section__head"><div class="section__head__title"><span class="mon-num" aria-hidden="true">1</span> Carga la muestra</div><span class="section__head__status" id="monBaseCount">0 cargados</span></div>
     <div class="section__body">
-      <p class="field__hint" style="margin-bottom:10px">Carga el CSV de la muestra a monitorear (columnas: ID_Arbol, Latitud, Longitud, Parque, Nombre_Comun, Colonia). Queda guardado en este celular hasta que cargues uno nuevo. Acepta CSV separado por comas o por punto y coma, y archivos .txt con el mismo contenido.</p>
-      <label class="btn-action" style="display:inline-flex;cursor:pointer">
-        📂 <span style="margin-left:6px">Cargar CSV de muestra</span>
+      <p class="field__hint">Elige el archivo CSV de la muestra. Se queda en este celular hasta que cargues otro.</p>
+      <label class="btn-action mon-carga">
+        📂 <span>Cargar CSV de muestra</span>
         <input type="file" id="monCsvInput" onchange="cargarBaseMonitoreo(this)" style="display:none">
       </label>
-      <label class="btn-action btn-action--secondary" style="display:inline-flex;cursor:pointer;margin-left:6px">
-        📷 <span style="margin-left:6px">Cargar fotos de la muestra</span>
+      <div id="monBaseStatus" class="mon-status"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section__head"><div class="section__head__title"><span class="mon-num" aria-hidden="true">2</span> Carga las fotos</div></div>
+    <div class="section__body">
+      <p class="field__hint">Elige las fotos que compartió la brigada. Se acomodan solas con su árbol.</p>
+      <label class="btn-action mon-carga">
+        📷 <span>Cargar fotos de la muestra</span>
         <input type="file" accept="image/*" multiple id="monFotosInput" onchange="cargarFotosMuestra(this)" style="display:none">
       </label>
-      <p class="field__hint" style="margin-top:10px">Usa las fotos que la app exporta o comparte: desde la v17 llevan el ID escrito <strong>dentro del archivo</strong>, así que se emparejan solas aunque el correo o el celular las renombren. Si una foto llega sin ese sello, la app la intenta por el nombre y luego por la ubicación. Lo que no logre resolver queda abajo para asignarlo a mano.</p>
-      <div id="monBaseStatus" style="margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
-      <div id="monFotosStatus" style="margin-top:6px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
+      <div id="monFotosStatus" class="mon-status"></div>
       <div id="monFotosPend" style="margin-top:12px"></div>
       <button class="btn-action btn-action--danger" id="btnBorrarFotos" onclick="borrarFotosMuestra()" style="margin-top:10px;display:none">🗑 Borrar fotos de la muestra</button>
     </div>
   </div>
 
   <div class="section">
-    <div class="section__head"><div class="section__head__title"><span aria-hidden="true">📍</span> Buscar árbol en campo</div></div>
+    <div class="section__head"><div class="section__head__title"><span class="mon-num" aria-hidden="true">3</span> Busca el árbol</div></div>
     <div class="section__body">
-      <button class="btn-lock" id="btnBuscarCercano" onclick="buscarArbolCercano()">📍 Buscar árbol cercano</button>
-      <div id="monGpsMsg" style="margin-top:10px;font-size:var(--fs-13);color:var(--c-n-600)"></div>
+      <p class="field__hint">Párate junto al árbol y espera unos segundos a que el GPS se afine.</p>
+      <button class="btn-compartir" id="btnBuscarCercano" onclick="buscarArbolCercano()">📍 Buscar árbol cercano</button>
+      <div id="monGpsMsg" class="mon-status"></div>
       <div id="monResultados" style="margin-top:14px"></div>
     </div>
   </div>
@@ -1116,11 +1186,12 @@ function reactivarGuardar(){
 }
 /* Compartir necesita un toque reciente del usuario. Si preparar los archivos tardó,
    el navegador ya no lo reconoce: se ofrece un botón para compartir con un toque nuevo. */
-async function compartirListo(archivos, titulo, t0){
-  if (Date.now()-t0 < 3500){ await compartirArchivos(archivos, titulo); return; }
+async function compartirListo(archivos, titulo, t0, alCompartir){
+  const enviar = async () => { if (await compartirArchivos(archivos, titulo) && alCompartir) alCompartir(); };
+  if (Date.now()-t0 < 3500){ await enviar(); return; }
   const bar=$('listoBar');
   $('listoTxt').textContent=archivos.length+' archivos listos';
-  $('listoBtn').onclick = async () => { bar.classList.remove('undo--show'); await compartirArchivos(archivos, titulo); };
+  $('listoBtn').onclick = async () => { bar.classList.remove('undo--show'); await enviar(); };
   bar.classList.add('undo--show');
   setTimeout(() => bar.classList.remove('undo--show'), 20000);
 }
@@ -2062,16 +2133,91 @@ function recapturarRegistro(id){
   toast('📋 Datos del parque listos. Falta GPS, especie y las 2 fotos.','ok');
 }
 
+/* ════════════════════════════════════════════════════════════
+   REVISIÓN Y ENVÍO (v27 · Sprint 3 · HU-10)
+   Las tarjetas de Registros se muestran en una línea (ID, especie, hora, fotos y
+   si ya se envió); el detalle se abre al tocarlas. «Este mes» cuenta los árboles
+   guardados en el mes calendario (antes mostraba el mes con más registros).
+   Un árbol cuenta como enviado si salió por Compartir, o si se descargaron su CSV
+   y sus fotos. Limpiar avisa cuando hay árboles sin enviar.
+   ════════════════════════════════════════════════════════════ */
+function esc(v){
+  return String(v===undefined||v===null ? '' : v).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fechaDe(r){
+  if (r.ts){ const d=new Date(r.ts); if (!isNaN(d)) return d; }
+  const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\D+(\d{1,2}):(\d{2}))?/.exec(r.fecha||'');
+  return m ? new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0)) : null;
+}
+function esDeEsteMes(r){
+  const d=fechaDe(r), h=new Date();
+  return !!d && d.getMonth()===h.getMonth() && d.getFullYear()===h.getFullYear();
+}
+function horaDe(r){
+  const d=fechaDe(r); if (!d) return '';
+  const hm=d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  return d.toDateString()===new Date().toDateString() ? hm : d.getDate()+'/'+(d.getMonth()+1)+' '+hm;
+}
+function toggleRegistro(btn){
+  const body=btn.nextElementSibling, abrir=body.hidden;
+  body.hidden=!abrir; btn.setAttribute('aria-expanded', abrir?'true':'false');
+  btn.closest('.reg-card').classList.toggle('reg-card--abierta', abrir);
+  if (abrir) hidratarFotos(body);
+}
+/* Revisa en IndexedDB que cada árbol conserve sus 2 fotos (las de v23 o anteriores
+   aún sin migrar siguen dentro del registro). */
+async function pintarEstadoFotos(cont){
+  let claves;
+  try{ claves=new Set(await evClaves()); }catch(_){ claves=null; }
+  cont.querySelectorAll('[data-fst]').forEach(el => {
+    const r=registros.find(x => uidDe(x)===el.dataset.fst); if (!r) return;
+    const n=[1,2].filter(k => {
+      const v=r['foto'+k];
+      return typeof v==='string' ? !!v : (!!v && (!claves || claves.has(claveFoto(r,k))));
+    }).length;
+    el.textContent='📷 '+n+'/2';
+    el.classList.toggle('reg-foto-st--ok', n===2);
+    el.classList.toggle('reg-foto-st--err', n<2);
+    el.title = n===2 ? 'Conserva sus 2 fotos' : 'Le faltan fotos';
+  });
+}
+function leerEnvios(){
+  try{ const e=JSON.parse(localStorage.getItem('envios_v1')||'{}'); return { c:e.c||[], v:e.v||[], f:e.f||[] }; }
+  catch(_){ return { c:[], v:[], f:[] }; }
+}
+/* tipo: 'c' compartido · 'v' CSV descargado · 'f' fotos descargadas */
+function marcarEnviados(tipo){
+  const e=leerEnvios(), set=new Set(e[tipo]);
+  registros.forEach(r => set.add(uidDe(r)));
+  e[tipo]=[...set];
+  try{ localStorage.setItem('envios_v1', JSON.stringify(e)); }catch(_){}
+  renderRegistros();
+}
+function estaEnviado(r, e){
+  e = e || leerEnvios(); const u=uidDe(r);
+  const sinFotos = !r.foto1 && !r.foto2;
+  return e.c.includes(u) || (e.v.includes(u) && (sinFotos || e.f.includes(u)));
+}
+function sinEnviar(){ const e=leerEnvios(); return registros.filter(r => !estaEnviado(r,e)); }
+function pintarEnvio(){
+  const box=$('envioEstado'); if (!box) return;
+  const total=registros.length, pend=sinEnviar().length;
+  $('regLimpiarBox').style.display = total ? '' : 'none';
+  if (!total){ box.textContent=''; box.className='envio-estado'; return; }
+  box.className='envio-estado '+(pend ? 'envio-estado--pend' : 'envio-estado--ok');
+  box.textContent = pend
+    ? '⚠️ '+pend+' de '+total+' árbol'+(total===1?'':'es')+' sin enviar al coordinador'
+    : '✓ Los '+total+' árboles ya se enviaron';
+}
+
 function renderRegistros(){
   renderPapelera();
   actualizarMedidor();
   const list=$('regList'), total=registros.length;
   $('navBadge').textContent=total;
   $('kpiTotal').textContent=total;
-  const mesCount={};
-  registros.forEach(r => { if (r.mes) mesCount[r.mes]=(mesCount[r.mes]||0)+1; });
-  const top=Object.entries(mesCount).sort((a,b)=>b[1]-a[1])[0];
-  $('kpiMes').textContent = top ? top[0] : '—';
+  $('kpiMes').textContent = registros.filter(esDeEsteMes).length;
   const hoy=new Date().toLocaleDateString('es-MX');
   $('kpiHoy').textContent=registros.filter(r=>(r.fecha||'').startsWith(hoy)).length;
   const q=($('searchInput')?.value||'').toLowerCase().trim();
@@ -2085,31 +2231,39 @@ function renderRegistros(){
       (total===0?'Sin registros aún.<br>Planta el primer árbol.':'Sin resultados para tu búsqueda.')+'</div></div>';
     return;
   }
-  list.innerHTML = [...filtrados].reverse().map(r => `
-    <article class="reg-card">
-      <header class="reg-card__head"><span class="reg-card__id">${r.id}</span><span class="reg-card__badge">${r.mes||'—'} · ${r.ejecutor||'—'}</span><button type="button" class="reg-card__del" title="Eliminar este registro" aria-label="Eliminar ${r.id}" onclick="eliminarRegistro('${r.id}')">🗑</button></header>
-      <div class="reg-card__body">
-        <div class="reg-row"><span class="reg-row__k">Especie</span><span class="reg-row__v">${(r.especie||'').split('(')[0].trim()}</span></div>
-        <div class="reg-row"><span class="reg-row__k">Científico</span><span class="reg-row__v" style="font-style:italic">${r.nombreCientifico||'—'}</span></div>
-        <div class="reg-row"><span class="reg-row__k">Parque · Colonia</span><span class="reg-row__v">${r.parque} — ${r.colonia||'—'}</span></div>
-        <div class="reg-row"><span class="reg-row__k">ID Parque · Asesor</span><span class="reg-row__v">${r.idParque||'—'} · ${r.asesor||'—'}</span></div>
-        <div class="reg-row"><span class="reg-row__k">Registrado por</span><span class="reg-row__v">${r.registrante||'—'}</span></div>
+  list.innerHTML = [...filtrados].reverse().map(r => {
+    const u=uidDe(r), esp=(r.especie||'').split('(')[0].trim()||'—';
+    return `
+    <article class="reg-card reg-card--compacta" data-uid="${esc(u)}">
+      <button type="button" class="reg-card__resumen" aria-expanded="false" onclick="toggleRegistro(this)">
+        <span class="reg-card__id">${esc(r.id)}</span>
+        <span class="reg-card__linea"><span class="reg-card__esp">${esc(esp)}</span><span class="reg-card__hora">${esc(horaDe(r))}</span></span>
+        <span class="reg-card__estado"><span class="reg-foto-st" data-fst="${esc(u)}">📷 …</span>${estaEnviado(r)?'<span class="reg-env reg-env--ok">✓ Enviado</span>':'<span class="reg-env">Sin enviar</span>'}</span>
+      </button>
+      <div class="reg-card__body" hidden>
+        <div class="reg-row"><span class="reg-row__k">Científico</span><span class="reg-row__v" style="font-style:italic">${esc(r.nombreCientifico||'—')}</span></div>
+        <div class="reg-row"><span class="reg-row__k">Parque · Colonia</span><span class="reg-row__v">${esc(r.parque)} — ${esc(r.colonia||'—')}</span></div>
+        <div class="reg-row"><span class="reg-row__k">ID Parque · Asesor</span><span class="reg-row__v">${esc(r.idParque||'—')} · ${esc(r.asesor||'—')}</span></div>
+        <div class="reg-row"><span class="reg-row__k">Mes · Planta</span><span class="reg-row__v">${esc(r.mes||'—')} · ${esc(r.ejecutor||'—')}</span></div>
+        <div class="reg-row"><span class="reg-row__k">Registrado por</span><span class="reg-row__v">${esc(r.registrante||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">GPS</span><span class="reg-row__v reg-gps">±${fmtPrec(precDe(r))} m · ${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}</span></div>
-        <div class="reg-row"><span class="reg-row__k">Fecha</span><span class="reg-row__v">${r.fecha}</span></div>
-        ${r.obs?'<div class="reg-row"><span class="reg-row__k">Obs.</span><span class="reg-row__v">'+r.obs+'</span></div>':''}
+        <div class="reg-row"><span class="reg-row__k">Fecha</span><span class="reg-row__v">${esc(r.fecha)}</span></div>
+        ${r.obs?'<div class="reg-row"><span class="reg-row__k">Obs.</span><span class="reg-row__v">'+esc(r.obs)+'</span></div>':''}
         <div class="reg-chips">
-          ${r.itreeCode?'<span class="reg-chip">🔬 '+r.itreeCode+'</span>':''}
+          ${r.itreeCode?'<span class="reg-chip">🔬 '+esc(r.itreeCode)+'</span>':''}
           <span class="reg-chip">DAP ${isNaN(r.dap)||r.dap===''||r.dap==null?'—':(+r.dap).toFixed(1)} cm</span>
           <span class="reg-chip">Copa ${r.copa ?? '—'}%</span>
           <span class="reg-chip">Alt. ${isNaN(r.altura)||r.altura===''||r.altura==null?'—':(+r.altura).toFixed(1)} m</span>
-          <span class="reg-chip">${r.suelo||'—'}</span>
-          <span class="reg-chip">${r.condicion||'—'}</span>
+          <span class="reg-chip">${esc(r.suelo||'—')}</span>
+          <span class="reg-chip">${esc(r.condicion||'—')}</span>
           <span class="reg-chip ${protoResumen(r).completo?'reg-chip--ok':'reg-chip--warn'}">${protoResumen(r).completo?'✅ Protocolo completo':'⚠️ Protocolo '+protoResumen(r).texto}</span>
         </div>
         ${(r.foto1||r.foto2)?'<div class="reg-fotos">'+imgFoto(r,1,'De frente')+imgFoto(r,2,'Desde arriba')+'</div>':''}
+        <button type="button" class="reg-card__del" aria-label="Eliminar ${esc(r.id)}" onclick="eliminarRegistro('${esc(r.id)}')">🗑 Eliminar este registro</button>
       </div>
-    </article>`).join('');
-  hidratarFotos(list);
+    </article>`; }).join('');
+  pintarEstadoFotos(list);
+  pintarEnvio();
 }
 
 // Registros previos a esta versión no tienen protoCama/protoTutor: no se marcan como incompletos
@@ -2149,6 +2303,7 @@ function exportCSV(){
   a.href=url; a.download='CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click(); URL.revokeObjectURL(url);
   toast('📥 CSV exportado ('+registros.length+' registros)','ok');
+  marcarEnviados('v');
 }
 async function exportFotos(){
   const items=[];
@@ -2161,7 +2316,7 @@ async function exportFotos(){
   toast('📷 Descargando '+items.length+' fotos…');
   let i=0;
   function next(){
-    if (i>=items.length) return;
+    if (i>=items.length){ marcarEnviados('f'); return; }
     descargarFotoSellada(items[i].data, items[i].nombre, items[i].info);
     i++; setTimeout(next,700);
   }
@@ -2346,7 +2501,7 @@ async function compartirJornada(){
     if (f1) archivos.push(dataUrlAFile(f1, r.id+'_finalizado.jpg', selloDeRegistro(r,'frente')));
     if (f2) archivos.push(dataUrlAFile(f2, r.id+'_cenital.jpg', selloDeRegistro(r,'cenital')));
   }
-  await compartirListo(archivos, 'Árboles PA · '+registros.length+' árboles', t0);
+  await compartirListo(archivos, 'Árboles PA · '+registros.length+' árboles', t0, () => marcarEnviados('c'));
 }
 async function compartirMonitoreo(){
   if (!monitoreoRegistros.length){ toast('Sin revisitas','err'); return; }
@@ -2369,9 +2524,13 @@ function limpiarRegistros(){
   const avisoPap = papelera.length
     ? '\n\nQuedan '+papelera.length+' registro(s) en la papelera. No se borran, pero sueltan sus fotos para liberar memoria.'
     : '';
-  if (!confirm('¿Borrar '+registros.length+' registros? Exporta el CSV primero.'+avisoPap)) return;
+  const pend=sinEnviar().length;
+  const avisoEnvio = pend
+    ? '⚠️ '+pend+' de '+registros.length+' árbol(es) NO se han enviado al coordinador. Usa Compartir antes de limpiar.\n\n'
+    : '';
+  if (!confirm(avisoEnvio+'¿Borrar '+registros.length+' registros de este celular?'+avisoPap)) return;
   evBorrar(registros.flatMap(r => [claveFoto(r,1), claveFoto(r,2)]));
-  registros=[]; localStorage.removeItem('r11k_v2');
+  registros=[]; localStorage.removeItem('r11k_v2'); localStorage.removeItem('envios_v1');
   /* Limpiar es lo que hace el asesor para liberar memoria. Las fotos de la
      papelera son lo que pesa; los datos se conservan hasta cumplir los días. */
   if (papelera.length){
@@ -2478,10 +2637,8 @@ async function refrescarFotosMuestra(ejemplos, sinCoincidir){
       ? '📷 Fotos guardadas: '+n+' árboles'+(baseMonitoreo.length ? ' · '+enBase+' de '+baseMonitoreo.length+' de la muestra tienen foto' : '')
       : 'Sin fotos cargadas. Sin ellas solo verás el ID, la especie y la distancia.';
     if (sinCoincidir){
-      txt += '\n⚠️ '+sinCoincidir+' foto(s) sin emparejar: llegaron sin el sello de la app y sin el ID en el nombre.';
-      if (ejemplos && ejemplos.length) txt += '\n   Ejemplo: '+ejemplos[0];
-      txt += '\n   Suele pasar con fotos anteriores a la v17 o con fotos que pasaron por WhatsApp.';
-      txt += '\n   Vuelve a compartirlas desde la app con el botón 📤, o asígnalas a mano aquí abajo.';
+      txt += '\n⚠️ '+sinCoincidir+' foto(s) no se reconocieron'+(ejemplos && ejemplos.length ? ' (ej. '+ejemplos[0]+')' : '')+'.';
+      txt += '\nAsígnalas a mano aquí abajo, o pide que las compartan desde la app con 📤, no por WhatsApp.';
     }
     st.style.whiteSpace='pre-line';
     st.textContent = txt;
@@ -2827,12 +2984,12 @@ function actualizarBaseMonitoreoStatus(){
   const st=$('monBaseStatus');
   let txt = baseMonitoreo.length
     ? '✅ Base lista: '+baseMonitoreo.length+' árboles disponibles para buscar en campo.'
-    : 'Aún no has cargado ninguna base. Exporta la muestra desde el workbook de seguimiento y cárgala aquí.';
+    : 'Aún no hay muestra cargada.';
   if (baseMonitoreo.length && baseRevision.corregidas)
-    txt += '\n🔧 '+baseRevision.corregidas+' coordenada(s) corregida(s): venían con la longitud sin signo menos o con latitud y longitud invertidas.';
+    txt += '\n🔧 '+baseRevision.corregidas+' coordenada(s) con errores de captura se corrigieron solas.';
   if (baseMonitoreo.length && baseRevision.fuera && baseRevision.fuera.length)
     txt += '\n⚠️ '+baseRevision.fuera.length+' árbol(es) apartado(s) porque sus coordenadas no caen en Culiacán: '+
-      baseRevision.fuera.slice(0,5).join(', ')+(baseRevision.fuera.length>5?'…':'')+'. Revísalos en el workbook.';
+      baseRevision.fuera.slice(0,5).join(', ')+(baseRevision.fuera.length>5?'…':'')+'. Avisa al coordinador.';
   st.style.whiteSpace='pre-line';
   st.textContent = txt;
 }
