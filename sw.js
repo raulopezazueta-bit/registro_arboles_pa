@@ -52,8 +52,10 @@
    va sobre ella, en una franja oscura; antes el panel del nombre le quitaba media altura.
    v29 (06-oct-2026): el GPS vuelve a mostrar la precisión estimada del promedio
    (exactitud ÷ √lecturas) y se bloquea al llegar a ±1 m. El CSV conserva la del celular
-   (Precision_Raw_m) y agrega al final Precision_Metodo (estimada o celular). */
-const CACHE_VERSION = 'apa-2026-10-06-v29';
+   (Precision_Raw_m) y agrega al final Precision_Metodo (estimada o celular).
+   v30 (06-oct-2026): Compartir envía en paquetes de 10 archivos. Chrome en Android rechaza
+   más de 10 por envío, así que la jornada fallaba desde el 5.º árbol (CSV + 10 fotos). */
+const CACHE_VERSION = 'apa-2026-10-06-v30';
 const CORE = [
   './',
   './index.html',

@@ -1197,14 +1197,52 @@ function reactivarGuardar(){
 }
 /* Compartir necesita un toque reciente del usuario. Si preparar los archivos tardó,
    el navegador ya no lo reconoce: se ofrece un botón para compartir con un toque nuevo. */
-async function compartirListo(archivos, titulo, t0, alCompartir){
-  const enviar = async () => { if (await compartirArchivos(archivos, titulo) && alCompartir) alCompartir(); };
-  if (Date.now()-t0 < 3500){ await enviar(); return; }
+/* Compartir en paquetes (v30). Chrome en Android acepta como máximo 10 archivos y 50 MB
+   por envío: con 5 árboles (CSV + 10 fotos) el celular rechazaba la jornada completa.
+   Ahora se parte en paquetes de 10 archivos; el primero lleva el CSV con todos los
+   árboles. Cada paquete necesita un toque nuevo del usuario (lo exige el navegador),
+   así que tras enviar uno aparece la barra «Paquete 2 de N · Compartir».
+   items: [{ crear: async () => File, clave }] · alEnviar(claves) tras cada paquete. */
+const MAX_ARCHIVOS_ENVIO = 10, MAX_BYTES_ENVIO = 45*1024*1024;
+let listoTimer=null;
+function mostrarListo(txt, accion){
   const bar=$('listoBar');
-  $('listoTxt').textContent=archivos.length+' archivos listos';
-  $('listoBtn').onclick = async () => { bar.classList.remove('undo--show'); await enviar(); };
+  $('listoTxt').textContent=txt;
+  $('listoBtn').onclick = async () => { bar.classList.remove('undo--show'); clearTimeout(listoTimer); await accion(); };
   bar.classList.add('undo--show');
-  setTimeout(() => bar.classList.remove('undo--show'), 20000);
+  clearTimeout(listoTimer);
+  listoTimer=setTimeout(() => bar.classList.remove('undo--show'), 120000);
+}
+async function compartirEnLotes(items, titulo, t0, alEnviar){
+  const lotes=[]; for (let i=0;i<items.length;i+=MAX_ARCHIVOS_ENVIO) lotes.push(items.slice(i,i+MAX_ARCHIVOS_ENVIO));
+  const total=lotes.length;
+  const preparar = async k => {
+    const files=[];
+    for (const it of lotes[k]){ const f=await it.crear(); if (f) files.push(f); }
+    /* Si un paquete pasa del límite de peso, se parte en dos */
+    let bytes=files.reduce((t,f)=>t+f.size,0);
+    if (bytes>MAX_BYTES_ENVIO && lotes[k].length>1){
+      const mitad=Math.ceil(lotes[k].length/2);
+      lotes.splice(k,1,lotes[k].slice(0,mitad),lotes[k].slice(mitad));
+      return preparar(k);
+    }
+    return files;
+  };
+  let k=0, files=await preparar(0);
+  if (lotes.length>1) toast('📦 Se enviará en '+lotes.length+' paquetes: el celular solo permite 10 archivos por envío');
+  const enviar = async () => {
+    const n=lotes.length;
+    const ok=await compartirArchivos(files, titulo+(n>1?' · paquete '+(k+1)+' de '+n:''));
+    if (!ok){ if (n>1) mostrarListo('Paquete '+(k+1)+' de '+n+' sin enviar', enviar); return; }
+    if (alEnviar) alEnviar(lotes[k].map(it => it.clave));
+    k++;
+    if (k<lotes.length){
+      files=await preparar(k);
+      mostrarListo('Paquete '+(k+1)+' de '+lotes.length+' listo', enviar);
+    } else if (lotes.length>1) toast('✅ Se enviaron los '+lotes.length+' paquetes','ok');
+  };
+  if (Date.now()-t0 < 3500) await enviar();
+  else mostrarListo((lotes.length>1?'Paquete 1 de '+lotes.length+' · ':'')+files.length+' archivos listos', enviar);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -2199,9 +2237,9 @@ function leerEnvios(){
   catch(_){ return { c:[], v:[], f:[] }; }
 }
 /* tipo: 'c' compartido · 'v' CSV descargado · 'f' fotos descargadas */
-function marcarEnviados(tipo){
+function marcarEnviados(tipo, uids){
   const e=leerEnvios(), set=new Set(e[tipo]);
-  registros.forEach(r => set.add(uidDe(r)));
+  (uids || registros.map(uidDe)).forEach(u => set.add(u));
   e[tipo]=[...set];
   try{ localStorage.setItem('envios_v1', JSON.stringify(e)); }catch(_){}
   renderRegistros();
@@ -2508,26 +2546,37 @@ async function compartirJornada(){
   if (!registros.length){ toast('Sin registros','err'); return; }
   const t0 = Date.now();
   toast('📤 Preparando archivos…');
-  const archivos = [ csvAFile(csvPlantacion(), 'CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv') ];
-  for (const r of registros){
-    const [f1,f2] = await fotosDe(r);
-    if (f1) archivos.push(dataUrlAFile(f1, r.id+'_finalizado.jpg', selloDeRegistro(r,'frente')));
-    if (f2) archivos.push(dataUrlAFile(f2, r.id+'_cenital.jpg', selloDeRegistro(r,'cenital')));
+  const regs=[...registros];
+  const items=[{ clave:'csv', crear: async () => csvAFile(csvPlantacion(), 'CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv') }];
+  /* Solo se agregan las fotos que existen, para no dejar huecos en los paquetes */
+  const pend={};
+  for (const r of regs){
+    const u=uidDe(r); pend[u]=new Set();
+    [1,2].forEach(n => { if (r['foto'+n]){ pend[u].add(n); items.push({ clave:u+'|'+n, crear: async () => {
+      const d=(await fotosDe(r))[n-1];
+      return d ? dataUrlAFile(d, r.id+(n===1?'_finalizado.jpg':'_cenital.jpg'), selloDeRegistro(r, n===1?'frente':'cenital')) : null;
+    }}); } });
   }
-  await compartirListo(archivos, 'Árboles PA · '+registros.length+' árboles', t0, () => marcarEnviados('c'));
+  let csvOk=false;
+  await compartirEnLotes(items, 'Árboles PA · '+regs.length+' árboles', t0, claves => {
+    claves.forEach(c => { if (c==='csv') csvOk=true; else { const [u,n]=c.split('|'); pend[u] && pend[u].delete(+n); } });
+    if (csvOk) marcarEnviados('c', regs.filter(r => !pend[uidDe(r)].size).map(uidDe));
+  });
 }
 async function compartirMonitoreo(){
   if (!monitoreoRegistros.length){ toast('Sin revisitas','err'); return; }
   const nombres = nombresFotosMonitoreo();
-  const archivos = [ csvAFile(csvMonitoreo(), 'Monitoreo_'+new Date().toISOString().slice(0,10)+'.csv') ];
   const t0 = Date.now();
   toast('📤 Preparando archivos…');
+  const items=[{ clave:'csv', crear: async () => csvAFile(csvMonitoreo(), 'Monitoreo_'+new Date().toISOString().slice(0,10)+'.csv') }];
   for (const r of monitoreoRegistros){
-    const dato = await fotoMonDe(r);
-    if (dato) archivos.push(dataUrlAFile(dato, nombres[r.idMonitoreo],
-      { id:r.idArbol, tipo:'revision', lat:r.lat, lon:r.lon, fecha:r.fecha }));
+    if (!r.foto) continue;
+    items.push({ clave:r.idMonitoreo, crear: async () => {
+      const dato = await fotoMonDe(r);
+      return dato ? dataUrlAFile(dato, nombres[r.idMonitoreo], { id:r.idArbol, tipo:'revision', lat:r.lat, lon:r.lon, fecha:r.fecha }) : null;
+    }});
   }
-  await compartirListo(archivos, 'Árboles PA · Monitoreo ('+monitoreoRegistros.length+' revisitas)', t0);
+  await compartirEnLotes(items, 'Árboles PA · Monitoreo ('+monitoreoRegistros.length+' revisitas)', t0);
 }
 
 function limpiarRegistros(){
