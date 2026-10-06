@@ -49,8 +49,11 @@
    estado de las fotos y del envío, «Este mes» cuenta el mes en curso, Compartir es el botón
    principal y Limpiar avisa si hay árboles sin enviar. Monitoreo en tres pasos cortos.
    v28 (02-oct-2026): en el catálogo de especies la foto ocupa toda la tarjeta y el nombre
-   va sobre ella, en una franja oscura; antes el panel del nombre le quitaba media altura. */
-const CACHE_VERSION = 'apa-2026-10-02-v28';
+   va sobre ella, en una franja oscura; antes el panel del nombre le quitaba media altura.
+   v29 (06-oct-2026): el GPS vuelve a mostrar la precisión estimada del promedio
+   (exactitud ÷ √lecturas) y se bloquea al llegar a ±1 m. El CSV conserva la del celular
+   (Precision_Raw_m) y agrega al final Precision_Metodo (estimada o celular). */
+const CACHE_VERSION = 'apa-2026-10-06-v29';
 const CORE = [
   './',
   './index.html',
