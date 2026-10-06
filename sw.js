@@ -67,8 +67,10 @@
    barra fija de envío, menú de pantalla con modo sol, guía de primer uso, ejemplos de fotos,
    «Hoy: N» en el encabezado, versión visible y «Actualizar ahora».
    v35 (06-oct-2026): la app busca versión nueva al abrir, al volver a primer plano y cada
-   30 min (antes solo al cargar la página desde cero). */
-const CACHE_VERSION = 'apa-2026-10-06-v35';
+   30 min (antes solo al cargar la página desde cero).
+   v36 (06-oct-2026): al abrir la app con señal se carga la versión del servidor (espera
+   máxima 3 s); la copia guardada se usa sin señal. Antes siempre abría la copia guardada. */
+const CACHE_VERSION = 'apa-2026-10-06-v36';
 const CORE = [
   './',
   './index.html',
@@ -100,6 +102,27 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
+
+  /* v36 · Abrir la app (navegación): primero la red, con 3 s de espera máxima.
+     Antes se servía siempre la copia guardada y la nueva solo se bajaba en segundo
+     plano, así que el celular quedaba una versión atrás y a veces no se actualizaba.
+     Sin señal, o si la red tarda, se usa la copia guardada: sigue funcionando sin internet. */
+  if (req.mode === 'navigate') {
+    const red = fetch(req, { cache: 'no-store' }).then(resp => {
+      if (resp && resp.status === 200) {
+        const copia = resp.clone();
+        caches.open(CACHE_VERSION).then(c => c.put('./index.html', copia));
+      }
+      return resp;
+    });
+    const espera = new Promise(res => setTimeout(res, 3000));
+    event.respondWith(
+      Promise.race([red, espera.then(() => null)]).then(r => r ||
+        caches.match('./index.html').then(c => c || red)
+      ).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(req).then(cached => {
