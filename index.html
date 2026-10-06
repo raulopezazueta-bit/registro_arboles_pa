@@ -2662,12 +2662,12 @@ function renderPapelera(){
   $('papeleraHead').innerHTML='<span>🗑 Papelera ('+papelera.length+')</span><span>Se vacía sola a los '+PAPELERA_DIAS+' días</span>';
   $('papeleraList').innerHTML = [...papelera].reverse().map(r => {
     const dias=Math.max(0, PAPELERA_DIAS-Math.floor((Date.now()-(r.borradoTs||0))/86400000));
-    return '<div class="pap-item"><div><b>'+r.id+'</b>'+
-      (r.especie||'—').split('(')[0].trim()+' · '+(r.parque||'—')+
+    return '<div class="pap-item"><div><b>'+esc(r.id)+'</b>'+
+      esc((r.especie||'—').split('(')[0].trim())+' · '+esc(r.parque||'—')+
       ' · quedan '+dias+' día(s)</div>'+
       '<div class="pap-btns">'+
-      '<button type="button" class="pap-rec" onclick="recapturarRegistro(\''+r.id+'\')">Recapturar</button>'+
-      '<button type="button" onclick="restaurarRegistro(\''+r.id+'\')">Restaurar</button></div></div>';
+      '<button type="button" class="pap-rec" data-id="'+esc(r.id)+'" onclick="recapturarRegistro(this.dataset.id)">Recapturar</button>'+
+      '<button type="button" data-id="'+esc(r.id)+'" onclick="restaurarRegistro(this.dataset.id)">Restaurar</button></div></div>';
   }).join('');
 }
 
@@ -2889,7 +2889,7 @@ function renderRegistros(){
           <span class="reg-chip ${protoResumen(r).completo?'reg-chip--ok':'reg-chip--warn'}">${protoResumen(r).completo?'✅ Protocolo completo':'⚠️ Protocolo '+protoResumen(r).texto}</span>
         </div>
         ${(r.foto1||r.foto2)?'<div class="reg-fotos">'+imgFoto(r,1,'De frente')+imgFoto(r,2,'Desde arriba')+'</div>':''}
-        <button type="button" class="reg-card__del" aria-label="Eliminar ${esc(r.id)}" onclick="eliminarRegistro('${esc(r.id)}')">🗑 Eliminar este registro</button>
+        <button type="button" class="reg-card__del" aria-label="Eliminar ${esc(r.id)}" data-id="${esc(r.id)}" onclick="eliminarRegistro(this.dataset.id)">🗑 Eliminar este registro</button>
       </div>
     </article>`;
     }).join('');
@@ -3134,6 +3134,8 @@ async function compartirArchivos(archivos, titulo){
    de Ecosistémica; la persona adjunta el .zip. Como la app no puede saber si el
    correo salió, la jornada queda «Enviado» solo cuando tocan «Ya lo envié».
    ════════════════════════════════════════════════════════════ */
+/* v38: todo texto que viene de la muestra importada o de lo capturado pasa por esc() antes de
+   entrar a innerHTML, y los IDs llegan a los botones por data-id (nunca dentro de código). */
 const CORREO_DESTINO='ecosistemicaconsultoria@gmail.com';
 const CRC_TABLA=(()=>{ const t=new Uint32Array(256); for (let n=0;n<256;n++){ let c=n; for (let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
 function crc32(b){ let c=0xFFFFFFFF; for (let i=0;i<b.length;i++) c=CRC_TABLA[(c^b[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
@@ -3589,17 +3591,17 @@ function renderFotosPendientes(){
   const cont=$('monFotosPend'); if (!cont) return;
   if (!fotosPendientes.length){ cont.innerHTML=''; return; }
   const opciones = baseMonitoreo.map(t =>
-    '<option value="'+t.id+'">'+t.id+(t.especie?' · '+t.especie:'')+(t.parque?' · '+t.parque:'')+'</option>').join('');
+    '<option value="'+esc(t.id)+'">'+esc(t.id)+(t.especie?' · '+esc(t.especie):'')+(t.parque?' · '+esc(t.parque):'')+'</option>').join('');
   cont.innerHTML = '<p class="field__hint" style="margin-bottom:8px"><strong>'+fotosPendientes.length+' foto(s) sin emparejar.</strong> '
     + 'El nombre del archivo no contiene ningún ID de la muestra. Elige a qué árbol corresponde cada una:</p>'
     + fotosPendientes.map((f,i) => `
       <div class="pend-item">
-        <img src="${f.data}" alt="${f.nombre}">
+        <img src="${esc(f.data)}" alt="${esc(f.nombre)}">
         <div class="pend-item__col">
-          <div class="pend-item__nombre">${f.nombre}${f.motivo ? ' · sugerido por '+f.motivo : ''}</div>
+          <div class="pend-item__nombre">${esc(f.nombre)}${f.motivo ? ' · sugerido por '+esc(f.motivo) : ''}</div>
           <select id="pend-sel-${i}" onchange="asignarFotoPendiente(${i}, this.value)">
             <option value="">— elegir árbol —</option>
-            ${f.sugerido ? opciones.replace('value="'+f.sugerido+'"','value="'+f.sugerido+'" selected') : opciones}
+            ${f.sugerido ? opciones.replace('value="'+esc(f.sugerido)+'"','value="'+esc(f.sugerido)+'" selected') : opciones}
           </select>
         </div>
       </div>`).join('')
@@ -3832,15 +3834,15 @@ function renderResultadosCercanos(lista){
     const conFoto = fotosMuestraIds.has(t.id);
     const accion = conFoto ? 'verFotosArbol' : 'seleccionarArbol';
     const mini = conFoto
-      ? '<span class="mon-foto-wrap"><img class="mon-result__foto" id="minia-'+t.id+'" alt="Foto de plantación"><span class="mon-lupa">ver</span></span>'
+      ? '<span class="mon-foto-wrap"><img class="mon-result__foto" id="minia-'+esc(t.id)+'" alt="Foto de plantación"><span class="mon-lupa">ver</span></span>'
       : '<span class="mon-result__foto mon-result__foto--vacia" aria-hidden="true">🌳</span>';
     return `
-    <button type="button" class="mon-result" onclick='${accion}(${JSON.stringify(t.id)})'>
+    <button type="button" class="mon-result" data-id="${esc(t.id)}" onclick="${accion}(this.dataset.id)">
       <span class="mon-result__izq">
         ${mini}
         <span class="mon-result__info">
-          <span class="mon-result__id">${t.id}</span>
-          <span class="mon-result__meta">${(t.especie||'—')} · ${(t.parque||'—')}</span>
+          <span class="mon-result__id">${esc(t.id)}</span>
+          <span class="mon-result__meta">${esc(t.especie||'—')} · ${esc(t.parque||'—')}</span>
         </span>
       </span>
       <span class="mon-result__dist">${fmtDist(t.dist)}</span>
@@ -3859,8 +3861,8 @@ function seleccionarArbol(idArbol){
   const t = baseMonitoreo.find(x => x.id === idArbol);
   if (!t) return;
   arbolSeleccionado = t;
-  $('monArbolInfo').innerHTML = '<strong>'+t.id+'</strong><br>'+(t.especie||'—')+' · '+(t.parque||'—')+(t.colonia?' — '+t.colonia:'')
-    + (fotosMuestraIds.has(t.id) ? '<div style="margin-top:8px"><img class="mon-arbol-foto" id="fichaFoto" alt="Foto de la plantación"><button type="button" class="btn-action btn-action--secondary" style="width:100%;justify-content:center" onclick="verFotosArbol(\''+t.id+'\')">🔍 Ver fotos de la plantación</button></div>' : '');
+  $('monArbolInfo').innerHTML = '<strong>'+esc(t.id)+'</strong><br>'+esc(t.especie||'—')+' · '+esc(t.parque||'—')+(t.colonia?' — '+esc(t.colonia):'')
+    + (fotosMuestraIds.has(t.id) ? '<div style="margin-top:8px"><img class="mon-arbol-foto" id="fichaFoto" alt="Foto de la plantación"><button type="button" class="btn-action btn-action--secondary" style="width:100%;justify-content:center" data-id="'+esc(t.id)+'" onclick="verFotosArbol(this.dataset.id)">🔍 Ver fotos de la plantación</button></div>' : '');
   if (fotosMuestraIds.has(t.id)){
     fotosGet(t.id).then(f => { const el=$('fichaFoto'); if (el && f) el.src = f.frente || f.cenital || ''; }).catch(()=>{});
   }
@@ -3961,9 +3963,9 @@ function renderMonitoreoHoy(){
   const claseEstado = e => e==='Muerto' ? 'mon-card--dead' : (e==='Dañado' ? 'mon-card--hurt' : '');
   cont.innerHTML = [...monitoreoRegistros].reverse().map(r => `
     <div class="mon-card ${claseEstado(r.estado)}">
-      <strong>${r.idArbol}</strong> · ${r.mes||'—'} · ${r.estado}${r.dap?' · DAP '+r.dap+' cm':''}<br>
-      <span style="font-size:var(--fs-sm);color:var(--c-n-600)">${r.parque||'—'} · Revisó: ${r.revisor} · ${r.fecha}</span>
-      ${r.obs?'<div style="font-size:var(--fs-sm);margin-top:4px">'+r.obs+'</div>':''}
+      <strong>${esc(r.idArbol)}</strong> · ${esc(r.mes||'—')} · ${esc(r.estado)}${r.dap?' · DAP '+esc(r.dap)+' cm':''}<br>
+      <span style="font-size:var(--fs-sm);color:var(--c-n-600)">${esc(r.parque||'—')} · Revisó: ${esc(r.revisor)} · ${esc(r.fecha)}</span>
+      ${r.obs?'<div style="font-size:var(--fs-sm);margin-top:4px">'+esc(r.obs)+'</div>':''}
     </div>`).join('');
 }
 
