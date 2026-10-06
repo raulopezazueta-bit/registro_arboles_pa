@@ -62,8 +62,11 @@
    en una tarjeta, barra de guardar con lo que falta, confirmación al guardar, vibración y sonido.
    v33 (06-oct-2026): «señal estable» = el promedio ya se asentó (se mueve ≤ 0.5 m con las
    últimas 5 lecturas). La regla anterior casi nunca se cumplía y la app se quedaba en
-   «Quédate quieto» aunque ya marcara ±0.9 m. */
-const CACHE_VERSION = 'apa-2026-10-06-v33';
+   «Quédate quieto» aunque ya marcara ±0.9 m.
+   v34 (06-oct-2026): Sprint 5. Íconos SVG en lugar de emojis, Registros agrupados por día con
+   barra fija de envío, menú de pantalla con modo sol, guía de primer uso, ejemplos de fotos,
+   «Hoy: N» en el encabezado, versión visible y «Actualizar ahora». */
+const CACHE_VERSION = 'apa-2026-10-06-v34';
 const CORE = [
   './',
   './index.html',
