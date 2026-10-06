@@ -59,8 +59,11 @@
    (iNaturalist, CC BY / CC0), con sus créditos bajo el catálogo.
    v32 (06-oct-2026): Sprint 4 «Menos pasos y menos dudas por árbol». Pasos con íconos,
    GPS con anillo de progreso hacia ±1 m, pantalla de permiso negado, datos de la jornada
-   en una tarjeta, barra de guardar con lo que falta, confirmación al guardar, vibración y sonido. */
-const CACHE_VERSION = 'apa-2026-10-06-v32';
+   en una tarjeta, barra de guardar con lo que falta, confirmación al guardar, vibración y sonido.
+   v33 (06-oct-2026): «señal estable» = el promedio ya se asentó (se mueve ≤ 0.5 m con las
+   últimas 5 lecturas). La regla anterior casi nunca se cumplía y la app se quedaba en
+   «Quédate quieto» aunque ya marcara ±0.9 m. */
+const CACHE_VERSION = 'apa-2026-10-06-v33';
 const CORE = [
   './',
   './index.html',

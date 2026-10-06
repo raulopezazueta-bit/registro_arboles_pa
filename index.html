@@ -1073,7 +1073,7 @@ const SECCIONES_CADENA = ['datos','especie','id','itree','fotos'];
 const FS_NOMBRES = ['Normal','Grande','Extra grande'];
 const TOTAL_FIELDS = FIELDS.length;
 const GROUP_COUNTS = FIELDS.reduce((acc,f)=>{ acc[f.group]=(acc[f.group]||0)+1; return acc; },{});
-let watchId=null, readings=[], gpsLocked=null, foto1=null, foto2=null;
+let watchId=null, readings=[], gpsLocked=null, foto1=null, foto2=null, gpsAsentado=false;
 let registros = JSON.parse(localStorage.getItem('r11k_v2') || '[]');
 /* Papelera: los registros borrados se guardan 7 días por si el borrado fue un error.
    No aparecen en la lista, ni en los contadores, ni en el CSV, ni en las fotos. */
@@ -1658,9 +1658,20 @@ function onGPS(pos) {
   const accs=readings.map(r=>r.acc).sort((a,b)=>a-b), m=accs.length>>1;
   const bAcc = accs.length%2 ? accs[m] : (accs[m-1]+accs[m])/2;
   const prec = precisionEstimada(bAcc, readings.length);
-  const dispLat=readings.reduce((s,r)=>s+Math.abs(r.lat-bLat),0)/readings.length;
-  const dispLon=readings.reduce((s,r)=>s+Math.abs(r.lon-bLon),0)/readings.length;
-  const estable=(dispLat+dispLon)<0.000008 && readings.length>=MIN_READS;
+  /* v33 · «Señal estable» = el promedio ya se asentó. Antes se pedía que las lecturas
+     casi no variaran entre sí (dispersión < ~0.9 m), algo que un celular quieto rara vez
+     cumple: con la meta de ±1 m la app llegaba a ±0.9 m y se quedaba en «Quédate quieto».
+     Ahora: el promedio no se mueve más de 0.5 m al sumar las últimas 5 lecturas, y la
+     dispersión media es ≤ 6 m (si la persona camina, el promedio se desplaza y no bloquea). */
+  const aM = (p,q) => Math.hypot((p.lat-q.lat)*111320, (p.lon-q.lon)*111320*Math.cos(q.lat*Math.PI/180));
+  const mediaDe = rs => { let w=0,a=0,b=0; rs.forEach(r=>{ const k=1/(r.acc*r.acc); w+=k; a+=r.lat*k; b+=r.lon*k; }); return {lat:a/w, lon:b/w}; };
+  const centro={lat:bLat, lon:bLon};
+  const deriva = readings.length>5 ? aM(centro, mediaDe(readings.slice(0,-5))) : Infinity;
+  const dispersion = readings.reduce((s,r)=>s+aM(r,centro),0)/readings.length;
+  /* Con margen: una vez asentada, solo se pierde si el promedio se mueve más de 1.5 m,
+     para que el botón no se habilite y deshabilite de una lectura a otra. */
+  const estable = readings.length>=MIN_READS && dispersion<=6 && deriva <= (gpsAsentado ? 1.5 : 0.5);
+  gpsAsentado = estable;
   const enCuliacan=bLat>=BOUNDS.latMin&&bLat<=BOUNDS.latMax&&bLon>=BOUNDS.lonMin&&bLon<=BOUNDS.lonMax;
   /* 100 % con 2 m o menos, 0 % con 10 m o más */
   const calidad=Math.max(0,Math.min(100,Math.round((10-bAcc)/8*100)));
@@ -1697,7 +1708,7 @@ function onGPS(pos) {
     btn.innerHTML = puede ? '🔒 Bloquear GPS (±'+p+' m)' :
       readings.length<MIN_READS ? '⏳ Acumulando ('+readings.length+'/'+MIN_READS+')…' :
       bAcc>MAX_RAW ? '⏳ Señal débil (celular ±'+bAcc.toFixed(1)+' m)' :
-      !estable ? '⏳ Estabilizando…' : '⏳ Afinando ±'+p+' m (meta ±'+PREC_BLOQUEO+' m)';
+      !estable ? (prec<=PREC_BLOQUEO ? '⏳ Asentando la ubicación…' : '⏳ Estabilizando…') : '⏳ Afinando ±'+p+' m (meta ±'+PREC_BLOQUEO+' m)';
   }
   btn._bLat=bLat; btn._bLon=bLon; btn._bAcc=bAcc; btn._prec=prec;
   if (!gpsLocked) pintarAnillo({prec, bAcc, n:readings.length, puede, estable, enCuliacan});
@@ -2068,7 +2079,8 @@ function pintarAnillo(o){
   if (!o.enCuliacan){ tit='Estás fuera de Culiacán'; sub='Revisa que el GPS del celular esté activo.'; }
   else if (o.bAcc>MAX_RAW){ tit='Busca cielo abierto'; sub='Señal débil (celular ±'+o.bAcc.toFixed(1)+' m): aléjate de techos y árboles grandes.'; }
   else if (o.n<MIN_READS){ tit='Quédate quieto sobre el árbol'; sub='Leyendo satélites… '+o.n+' de '+MIN_READS; }
-  else if (!o.estable){ tit='Quédate completamente quieto'; sub='La señal todavía se está moviendo.'; }
+  else if (!o.estable && o.prec<=PREC_BLOQUEO){ tit='Ya casi: quédate quieto'; sub='Ya llegaste a ±'+fmtPrec(o.prec)+' m; falta que la ubicación se asiente unos segundos.'; }
+  else if (!o.estable){ tit='Quédate quieto sobre el árbol'; sub='La ubicación todavía se está moviendo.'; }
   else if (!o.puede){
     const necesarias=Math.ceil(Math.pow(o.bAcc/PREC_BLOQUEO,2));
     const faltan=Math.max(1, necesarias-o.n);
@@ -2081,6 +2093,7 @@ function pintarAnillo(o){
   $('gpsSubTxt').textContent=sub;
 }
 function reiniciarAnillo(){
+  gpsAsentado=false;
   $('gpsRing').style.strokeDashoffset=String(RING_C); $('gpsRing').style.opacity='0';
   $('gpsRing').style.stroke='var(--c-p-600)';
   $('gpsRingNum').textContent='--';
