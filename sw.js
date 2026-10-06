@@ -78,7 +78,8 @@
    y la cifra del anillo del GPS ya no se sale del círculo. */
 /* v38-1: el .zip sale directo desde Compartir donde el celular lo permite; fotos anteriores de Ceiba y
    Pata de vaca; catálogo con el nombre bajo la foto y la seña de la hoja. */
-const CACHE_VERSION = 'apa-2026-10-06-v38-1';
+/* v38-2: los íconos fijos ya vienen en SVG desde el HTML (no se ven emojis al abrir) y el clip del envío también es SVG. */
+const CACHE_VERSION = 'apa-2026-10-06-v38-2';
 const CORE = [
   './',
   './index.html',
