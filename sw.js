@@ -76,7 +76,9 @@
    instalar la app otra vez cuando guardó un registro viejo de una instalación borrada. */
 /* v38 (07-oct-2026): la jornada se envía en un solo .zip (CSV + fotos) a ecosistemicaconsultoria@gmail.com
    y la cifra del anillo del GPS ya no se sale del círculo. */
-const CACHE_VERSION = 'apa-2026-10-07-v38';
+/* v38-1: el .zip sale directo desde Compartir donde el celular lo permite; fotos anteriores de Ceiba y
+   Pata de vaca; catálogo con el nombre bajo la foto y la seña de la hoja. */
+const CACHE_VERSION = 'apa-2026-10-07-v38-1';
 const CORE = [
   './',
   './index.html',
