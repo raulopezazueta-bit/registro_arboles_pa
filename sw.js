@@ -56,8 +56,11 @@
    v30 (06-oct-2026): Compartir envía en paquetes de 10 archivos. Chrome en Android rechaza
    más de 10 por envío, así que la jornada fallaba desde el 5.º árbol (CSV + 10 fotos).
    v31 (06-oct-2026): HU-12. Fotos nuevas de follaje para Bacapora, Ceiba y Pata de vaca
-   (iNaturalist, CC BY / CC0), con sus créditos bajo el catálogo. */
-const CACHE_VERSION = 'apa-2026-10-06-v31';
+   (iNaturalist, CC BY / CC0), con sus créditos bajo el catálogo.
+   v32 (06-oct-2026): Sprint 4 «Menos pasos y menos dudas por árbol». Pasos con íconos,
+   GPS con anillo de progreso hacia ±1 m, pantalla de permiso negado, datos de la jornada
+   en una tarjeta, barra de guardar con lo que falta, confirmación al guardar, vibración y sonido. */
+const CACHE_VERSION = 'apa-2026-10-06-v32';
 const CORE = [
   './',
   './index.html',

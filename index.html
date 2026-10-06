@@ -390,6 +390,93 @@ html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:1
 .creditos-fotos summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
 .creditos-fotos ul{margin:4px 0 0 18px;line-height:1.5}
 .creditos-fotos p{margin:0}
+/* ══ v32 · Sprint 4 «Menos pasos y menos dudas por árbol» ══════════════ */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:root{--progress-h:64px}
+html[data-fs="1"]{--progress-h:68px}
+html[data-fs="2"]{--progress-h:72px}
+/* HU-19 · pasos con íconos */
+.pasos{padding:6px var(--s-2);height:var(--progress-h)}
+.pasos__nav{display:grid;grid-template-columns:repeat(6,1fr);width:100%;gap:2px}
+.paso:active .paso__ico{opacity:.7}
+.paso{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;padding:2px 0;cursor:pointer;color:var(--c-n-600);font:inherit;min-width:0}
+.paso__ico{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--c-n-100);border:1.5px solid var(--c-n-300);transition:background var(--t-base),border-color var(--t-base)}
+.paso__txt{font-size:13px;font-weight:650;letter-spacing:-.2px;white-space:nowrap;line-height:1.1}
+.paso--ok .paso__ico{background:var(--c-p-600);border-color:var(--c-p-600);color:var(--c-w);font-size:16px;font-weight:900}
+.paso--ok .paso__txt{color:var(--c-p-800)}
+.paso--actual .paso__ico{background:var(--c-w);border:2.5px solid var(--c-p-600);box-shadow:0 0 0 3px var(--c-p-100)}
+.paso--actual .paso__txt{color:var(--c-n-900);font-weight:800}
+html[data-fs="2"] .paso__ico{width:36px;height:36px;font-size:17px}
+/* HU-16 · GPS con anillo */
+.gps__anillo{position:relative;width:168px;height:168px;margin:0 auto var(--s-2)}
+.gps__ring{width:100%;height:100%;display:block}
+#gpsRing{transition:stroke-dashoffset .4s ease-out,stroke .3s}
+.gps__ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gps__ring-num{font-size:40px;font-weight:800;color:var(--c-p-800);font-variant-numeric:tabular-nums;line-height:1}
+.gps__ring-lbl{font-size:var(--fs-xs);color:var(--c-n-600);margin-top:4px}
+.gps__head-txt{text-align:center;font-size:var(--fs-lg);font-weight:800;color:var(--c-n-900);margin:0}
+.gps__sub-txt{text-align:center;font-size:var(--fs-sm);color:var(--c-n-600);margin:2px 0 var(--s-3);min-height:1.3em}
+.gps__det{margin-bottom:var(--s-3)}
+.gps__det>summary{cursor:pointer;text-align:center;color:var(--c-p-700);font-weight:700;font-size:var(--fs-sm);text-decoration:underline;min-height:44px;display:flex;align-items:center;justify-content:center;list-style:none}
+.gps__det>summary::-webkit-details-marker{display:none}
+.gps__det[open]>summary{margin-bottom:var(--s-2)}
+@media (prefers-reduced-motion:reduce){#gpsRing{transition:none}.btn-lock--ready{animation:none}}
+.gps__title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gps__badge{max-width:58%;overflow:hidden;text-overflow:ellipsis}
+/* HU-17 · permiso negado */
+.gps__permiso{padding:var(--s-4);text-align:center}
+.gps__permiso[hidden]{display:none}
+.gps--permiso .gps__body,.gps--permiso .gps__fijo{display:none!important}
+.gps--permiso .gps__head{background:var(--c-err)}
+.gps__permiso-ico{font-size:48px;line-height:1.1}
+.gps__permiso-tit{font-size:var(--fs-lg);font-weight:800;margin:6px 0 2px}
+.gps__permiso-sub{font-size:var(--fs-sm);color:var(--c-n-600);margin-bottom:var(--s-3)}
+.gps__permiso-pasos{text-align:left;background:var(--c-n-100);border-radius:var(--r-md);padding:var(--s-3) var(--s-3) var(--s-3) 34px;font-size:var(--fs-md);line-height:1.5;margin-bottom:var(--s-3)}
+.gps__permiso-pasos li+li{margin-top:6px}
+/* HU-15 · jornada en una tarjeta */
+.jornada{display:none}
+.section--resumen .section__body>*{display:none}
+.section--resumen .section__body>.jornada{display:block}
+.jornada__top{display:flex;justify-content:space-between;align-items:center;gap:var(--s-2)}
+.jornada__kicker{font-size:var(--fs-xs);font-weight:800;color:var(--c-p-700);letter-spacing:.5px;text-transform:uppercase}
+.jornada__ok{font-size:var(--fs-xs);font-weight:700;background:#C8E6C9;color:#1B5E20;border-radius:var(--r-full);padding:3px 10px}
+.jornada__parque{font-size:var(--fs-xl);font-weight:800;color:var(--c-n-900);margin-top:6px;line-height:1.2}
+.jornada__linea{font-size:var(--fs-sm);color:var(--c-n-600);margin-top:2px}
+.jornada__cambiar{margin-top:var(--s-2);border:0;background:transparent;color:var(--c-p-700);font:inherit;font-size:var(--fs-sm);font-weight:700;padding:10px 0;min-height:44px;cursor:pointer}
+.jornada__listo{display:none;width:100%;margin-top:var(--s-3);min-height:48px;border:1.5px solid var(--c-p-700);background:var(--c-p-50);color:var(--c-p-800);border-radius:var(--r-md);font:inherit;font-size:var(--fs-md);font-weight:700;cursor:pointer}
+.section--jornada-lista .jornada__listo{display:block}
+/* HU-18 · barra con faltantes */
+.save-bar__info{display:flex;flex-direction:column;align-items:flex-start;gap:2px;justify-content:center}
+.save-bar__falta{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--c-warn);background:#FFF3E0;color:#8A2A00;border-radius:var(--r-full);padding:6px 12px;min-height:40px;font:inherit;font-size:var(--fs-sm);font-weight:700;cursor:pointer;max-width:100%}
+.save-bar__falta-lbl{font-weight:600;color:#8A2A00}
+.save-bar__falta #saveBarFaltaTxt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.save-bar__mas{font-size:var(--fs-xs);color:var(--c-n-600);font-weight:600}
+html[data-fs="2"]{--savebar-h:132px}
+html[data-fs="2"] .save-bar{flex-direction:column;align-items:stretch;gap:6px}
+html[data-fs="2"] .save-bar .btn-save{max-width:none;width:100%}
+.save-bar__listo{display:none;font-size:var(--fs-md);font-weight:800;color:var(--c-ok)}
+.save-bar--listo .save-bar__falta,.save-bar--listo .save-bar__mas{display:none}
+.save-bar--listo .save-bar__listo{display:block}
+.save-bar--listo .btn-save{font-size:var(--fs-lg);min-height:54px}
+/* HU-20 · confirmación al guardar */
+.confirma{position:fixed;inset:0;z-index:1200}
+.confirma[hidden]{display:none}
+.confirma__fondo{position:absolute;inset:0;background:rgba(15,20,25,.55)}
+.confirma__hoja{position:absolute;left:0;right:0;bottom:0;background:var(--c-w);border-radius:20px 20px 0 0;padding:20px var(--s-4) calc(var(--s-4) + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(0,0,0,.25);max-width:600px;margin:0 auto;animation:subeHoja .22s ease-out}
+@keyframes subeHoja{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.confirma__hoja{animation:none}}
+.confirma__check{width:60px;height:60px;border-radius:50%;background:var(--c-p-600);color:var(--c-w);font-size:32px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.confirma__tit{text-align:center;font-size:var(--fs-xl);font-weight:800;margin-top:8px}
+.confirma__id{text-align:center;font-family:var(--ff-mono);font-weight:700;color:var(--c-p-800);font-size:var(--fs-md);margin-top:2px;word-break:break-all}
+.confirma__fila{display:flex;gap:var(--s-2);align-items:center;margin:var(--s-3) 0}
+.confirma__foto{width:68px;height:68px;border-radius:var(--r-md);object-fit:cover;background:var(--c-n-100);flex:none}
+.confirma__foto:not([src]){display:none}
+.confirma__datos{display:flex;flex-direction:column;font-size:var(--fs-sm);line-height:1.45;min-width:0}
+.confirma__datos b{font-size:var(--fs-md)}
+.confirma__hoy{color:var(--c-n-600)}
+.confirma__sig{min-height:56px}
+.confirma__acts{display:flex;gap:var(--s-2);margin-top:var(--s-2)}
+.confirma__sec{flex:1;min-height:48px;border:1.5px solid var(--c-p-700);background:var(--c-w);color:var(--c-p-700);border-radius:var(--r-md);font:inherit;font-size:var(--fs-sm);font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -408,9 +495,16 @@ html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:1
   <button class="tab-btn" id="tb-list" role="tab" aria-selected="false" onclick="switchTab('registros')"><span aria-hidden="true">📋</span><span>Registros</span><span class="tab-btn__badge" id="navBadge">0</span></button>
   <button class="tab-btn" id="tb-mon" role="tab" aria-selected="false" onclick="switchTab('monitoreo')"><span aria-hidden="true">🔎</span><span>Monitoreo</span><span class="tab-btn__badge" id="monBadge">0</span></button>
 </nav>
-<div class="progress-strip" id="progressStrip" aria-live="polite">
-  <div class="progress-strip__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-strip__fill" id="progressFill"></div></div>
-  <span class="progress-strip__pct" id="progressPct">0%</span>
+<div class="progress-strip pasos" id="progressStrip">
+  <nav class="pasos__nav" aria-label="Pasos para registrar el árbol">
+    <button type="button" class="paso" data-g="gps" onclick="irAPaso('gps')"><span class="paso__ico" aria-hidden="true">📍</span><span class="paso__txt">GPS</span></button>
+    <button type="button" class="paso" data-g="datos" onclick="irAPaso('datos')"><span class="paso__ico" aria-hidden="true">📋</span><span class="paso__txt">Datos</span></button>
+    <button type="button" class="paso" data-g="especie" onclick="irAPaso('especie')"><span class="paso__ico" aria-hidden="true">🌿</span><span class="paso__txt">Especie</span></button>
+    <button type="button" class="paso" data-g="id" onclick="irAPaso('id')"><span class="paso__ico" aria-hidden="true">🔢</span><span class="paso__txt">ID</span></button>
+    <button type="button" class="paso" data-g="itree" onclick="irAPaso('itree')"><span class="paso__ico" aria-hidden="true">📏</span><span class="paso__txt">Medidas</span></button>
+    <button type="button" class="paso" data-g="fotos" onclick="irAPaso('fotos')"><span class="paso__ico" aria-hidden="true">📸</span><span class="paso__txt">Fotos</span></button>
+  </nav>
+  <div class="sr-only" role="progressbar" aria-label="Avance del registro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill"></div><span id="progressPct">0%</span></div>
 </div>
 <div class="banner banner--ok" id="bannerOk" role="status"><span aria-hidden="true">✅</span><div>Árbol guardado — ID: <strong id="bannerOkID"></strong></div></div>
 
@@ -437,7 +531,29 @@ html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:1
       <div class="gps__fijo-txt"><b id="gpsFijoPrec">Ubicación fijada</b><span id="gpsFijoCoords"></span></div>
       <button type="button" onclick="cambiarUbicacion()">Cambiar</button>
     </div>
+    <div class="gps__permiso" id="gpsPermiso" hidden>
+      <div class="gps__permiso-ico" aria-hidden="true">📵</div>
+      <h2 class="gps__permiso-tit">La app no puede ver tu ubicación</h2>
+      <p class="gps__permiso-sub">Sin GPS no se puede registrar el árbol. Dale permiso así:</p>
+      <ol class="gps__permiso-pasos">
+        <li>Toca el candado 🔒 o la <b>ⓘ</b> junto a la dirección de la página. Si abriste la app desde su ícono: mantén presionado el ícono → <b>ⓘ Información</b>.</li>
+        <li>Entra a <b>Permisos → Ubicación</b>.</li>
+        <li>Elige <b>Permitir</b> y vuelve aquí.</li>
+      </ol>
+      <button type="button" class="btn-lock btn-lock--ready gps__permiso-btn" onclick="reintentarGPS()">🔄 Ya lo activé, reintentar</button>
+    </div>
     <div class="gps__body">
+      <div class="gps__anillo">
+        <svg class="gps__ring" viewBox="0 0 160 160" aria-hidden="true">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--c-n-200)" stroke-width="14"/>
+          <circle id="gpsRing" style="opacity:0" cx="80" cy="80" r="68" fill="none" stroke="var(--c-p-600)" stroke-width="14" stroke-linecap="round" stroke-dasharray="427.3" stroke-dashoffset="427.3" transform="rotate(-90 80 80)"/>
+        </svg>
+        <div class="gps__ring-txt"><span class="gps__ring-num" id="gpsRingNum">--</span><span class="gps__ring-lbl">metros · meta ±1</span></div>
+      </div>
+      <p class="gps__head-txt" id="gpsHeadTxt" aria-live="polite">Buscando satélites…</p>
+      <p class="gps__sub-txt" id="gpsSubTxt">Sal al exterior si estás adentro.</p>
+      <details class="gps__det">
+      <summary>Ver detalles técnicos</summary>
       <div class="gps__quality">
         <div><div class="gps__quality-pct" id="gpsQuality">0%</div><div class="gps__quality-label">Calidad de señal</div></div>
         <div style="text-align:right"><div class="gps__quality-pct" id="gpsAccVal" style="font-size:var(--fs-xl);color:var(--c-n-700)">±-- m</div><div class="gps__quality-label">Precisión estimada</div></div>
@@ -453,14 +569,22 @@ html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:1
         <span class="gps__meta-chip" id="gpsStable">⏳ Estabilizando</span>
       </div>
       <p class="gps__msg" id="gpsMsg">Iniciando GPS…</p>
+      </details>
       <button class="btn-lock" id="btnLock" disabled onclick="lockGPS()">🔒 <span>Esperando señal…</span></button>
       <div class="gps__warn" id="gpsWarn">⚠️ Coordenadas fuera de Culiacán — verifica el GPS y que estés en campo.</div>
     </div>
   </div>
 
-  <div class="section" id="sec-datos" data-group="datos" data-nombre="Datos del registro">
-    <div class="section__head"><div class="section__head__title"><span aria-hidden="true">📋</span> Datos del registro</div><span class="section__head__status" id="stDatos">0/5</span></div>
+  <div class="section" id="sec-datos" data-group="datos" data-nombre="Datos de la jornada">
+    <div class="section__head"><div class="section__head__title"><span aria-hidden="true">📋</span> Datos de la jornada</div><span class="section__head__status" id="stDatos">0/5</span></div>
     <div class="section__body">
+      <div class="jornada" id="jornadaResumen">
+        <div class="jornada__top"><span class="jornada__kicker">Jornada de hoy</span><span class="jornada__ok">✓ Lista</span></div>
+        <div class="jornada__parque" id="jorParque">—</div>
+        <div class="jornada__linea" id="jorLinea1">—</div>
+        <div class="jornada__linea" id="jorLinea2">—</div>
+        <button type="button" class="jornada__cambiar" onclick="editarJornada()">✎ Cambiar datos de la jornada</button>
+      </div>
       <div class="field" id="f-idParque"><label class="field__label" for="idParque">ID de Parque <span class="req">*</span></label>
         <input type="text" id="idParque" inputmode="numeric" placeholder="Ej: 14664" autocomplete="off" oninput="buscarParque()">
         <div class="itree-bd" id="idParqueStatus" style="display:none;margin-top:6px"></div>
@@ -502,6 +626,7 @@ html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:1
       <div class="field" id="f-colonia"><label class="field__label" for="colonia">Colonia</label>
         <input type="text" id="colonia" placeholder="Se completa al ingresar el ID (opcional en modo manual)" autocomplete="off" readonly>
       </div>
+      <button type="button" class="jornada__listo" id="jornadaListo" onclick="cerrarJornada()">✓ Listo, guardar datos de la jornada</button>
     </div>
   </div>
 
@@ -853,8 +978,13 @@ html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:1
 </section>
 
 <div class="save-bar" id="saveBar">
-  <div class="save-bar__info"><span class="save-bar__count" id="saveBarCount">0 / 15</span><span class="save-bar__hint" id="saveBarHint">Comienza por bloquear el GPS</span></div>
-  <button class="btn-save" id="btnSave" disabled onclick="guardarRegistro()">💾 <span>Guardar y siguiente árbol</span></button>
+  <div class="save-bar__info">
+    <span class="save-bar__mas" id="saveBarMas">Falta (toca para ir):</span>
+    <button type="button" class="save-bar__falta" id="saveBarFalta" onclick="irAFaltante()"><span id="saveBarFaltaTxt">📍 GPS</span></button>
+    <span class="save-bar__listo" id="saveBarListo">✅ Todo completo</span>
+    <span class="sr-only"><span id="saveBarCount">0 / 15</span> <span id="saveBarHint"></span></span>
+  </div>
+  <button class="btn-save" id="btnSave" disabled onclick="guardarRegistro()">💾 <span>Guardar árbol</span></button>
 </div>
 <div class="visor" id="visorFotos" data-open="false" role="dialog" aria-modal="true" aria-label="Fotos del árbol">
   <div class="visor__id" id="visorId">—</div>
@@ -863,6 +993,24 @@ html[data-fs="1"] .especie-card img,html[data-fs="2"] .especie-card img{height:1
   <div class="visor__acciones">
     <button class="btn-action btn-action--secondary" onclick="cerrarVisor()">← Volver</button>
     <button class="btn-action" id="visorConfirmar">✓ Es este árbol</button>
+  </div>
+</div>
+<div class="confirma" id="confirma" hidden>
+  <div class="confirma__fondo" onclick="cerrarConfirmacion()"></div>
+  <div class="confirma__hoja" role="dialog" aria-modal="true" aria-labelledby="confTit">
+    <div class="confirma__check" aria-hidden="true">✓</div>
+    <h2 class="confirma__tit" id="confTit">Árbol guardado</h2>
+    <div class="confirma__id" id="confId">—</div>
+    <div class="confirma__fila">
+      <img class="confirma__foto" id="confF1" alt="Foto de frente">
+      <img class="confirma__foto" id="confF2" alt="Foto desde arriba">
+      <div class="confirma__datos"><b id="confEsp">—</b><span id="confMeta">—</span><span class="confirma__hoy" id="confHoy">—</span></div>
+    </div>
+    <button type="button" class="btn-compartir confirma__sig" id="confSig" onclick="cerrarConfirmacion()">➕ Siguiente árbol</button>
+    <div class="confirma__acts">
+      <button type="button" class="confirma__sec" onclick="confirmaVerRegistro()">Ver registro</button>
+      <button type="button" class="confirma__sec" onclick="confirmaEnviar()">📤 Enviar jornada</button>
+    </div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1028,6 +1176,10 @@ window.addEventListener('load', () => {
   // El sistema puede cerrar la pestaña sin avisar: último guardado al ocultarse
   document.addEventListener('visibilitychange', () => { if (document.hidden) guardarBorrador(); });
   window.addEventListener('pagehide', guardarBorrador);
+  /* HU-15: si los datos de la jornada ya vienen completos del árbol anterior, se muestran en una tarjeta */
+  jornadaAbierta = !grupoCompleto('datos', contarGrupos());
+  actualizarValidacion();
+  vigilarPermiso();
   iniciarGPS();
   valTimer=setInterval(actualizarValidacion, 350);
 });
@@ -1206,7 +1358,7 @@ async function revisarMemoria(){
 function reactivarGuardar(){
   const bs=$('btnSave');
   bs.classList.remove('btn-save--saving');
-  bs.innerHTML='💾 <span>Guardar y siguiente árbol</span>';
+  bs.innerHTML=etiquetaGuardar(); barraFirma='';
   bs.disabled=false;
 }
 /* Compartir necesita un toque reciente del usuario. Si preparar los archivos tardó,
@@ -1495,6 +1647,7 @@ function toDMS(deg,isLat){
   return d+'°'+m+"'"+s+'"'+dir;
 }
 function onGPS(pos) {
+  if (!$('gpsPermiso').hidden) mostrarPermiso(false);
   const {latitude:lat,longitude:lon,accuracy:acc}=pos.coords;
   readings.push({lat,lon,acc});
   if (readings.length>WIN) readings.shift();
@@ -1547,10 +1700,13 @@ function onGPS(pos) {
       !estable ? '⏳ Estabilizando…' : '⏳ Afinando ±'+p+' m (meta ±'+PREC_BLOQUEO+' m)';
   }
   btn._bLat=bLat; btn._bLon=bLon; btn._bAcc=bAcc; btn._prec=prec;
+  if (!gpsLocked) pintarAnillo({prec, bAcc, n:readings.length, puede, estable, enCuliacan});
 }
 function onGPSErr(err){
   const m={1:'❌ Permiso denegado. Ajustes → Chrome → Ubicación → Permitir.',2:'❌ GPS no detectado. Sal al exterior.',3:'⏳ Tiempo agotado. Reintentando…'};
   setGPSMsg(m[err.code]||'Error GPS desconocido.','poor');
+  if (err.code===1){ mostrarPermiso(true); return; }
+  if (err.code===2){ $('gpsHeadTxt').textContent='No se detecta el GPS'; gpsEstadoTxt=''; $('gpsSubTxt').textContent='Activa la ubicación del celular y sal al exterior.'; }
   if (err.code===3){ navigator.geolocation.clearWatch(watchId); setTimeout(iniciarGPS,3000); }
 }
 function lockGPS(){
@@ -1567,7 +1723,7 @@ function lockGPS(){
   $('gpsLon').textContent=gpsLocked.lon.toFixed(7);
   setGPSMsg('✅ Coordenadas bloqueadas — precisión estimada ±'+fmtPrec(gpsLocked.prec)+' m.','good');
   setGPSBadge('🔒 ±'+fmtPrec(gpsLocked.prec)+' m','good');
-  vibrate(40);
+  vibrate(40); sonar([660,880]);
   anotarBorrador();
 }
 /* Cambiar la ubicación descarta la fijada: se confirma, porque volver a fijarla
@@ -1578,7 +1734,7 @@ function cambiarUbicacion(){
   unlockGPS();
 }
 function unlockGPS(){
-  gpsLocked=null;
+  gpsLocked=null; readings=[]; reiniciarAnillo();
   $('gpsCard').classList.remove('gps--fijo');
   const btn=$('btnLock');
   btn.disabled=true; btn.className='btn-lock'; btn.innerHTML='🔒 Esperando señal…'; btn.onclick=lockGPS;
@@ -1713,6 +1869,9 @@ function actualizarValidacion(){
   $('btnSave').disabled = restantes!==0;
   renderPendientes(okCount);
   aplicarCadena(groupOk);
+  pintarPasos(groupOk);
+  pintarJornada(groupOk);
+  pintarBarra();
 }
 function grupoCompleto(g, groupOk){ return groupOk[g]===GROUP_COUNTS[g]; }
 function seccionActual(groupOk){
@@ -1803,6 +1962,200 @@ function actualizarID(){
   revisarDuplicado();
 }
 
+/* ════════════════════════════════════════════════════════════
+   SPRINT 4 · «Menos pasos y menos dudas por árbol» (v32)
+   HU-15 jornada en una tarjeta · HU-16 GPS con anillo · HU-17 permiso negado
+   HU-18 barra con faltantes · HU-19 pasos con íconos · HU-20 confirmación
+   HU-21 vibración y sonido
+   ════════════════════════════════════════════════════════════ */
+const ORDEN_PASOS=['gps','datos','especie','id','itree','fotos'];
+const ICO_GRUPO={gps:'📍',datos:'📋',especie:'🌿',id:'🔢',itree:'📏',fotos:'📸'};
+const NOMBRE_PASO={gps:'GPS',datos:'Datos',especie:'Especie',id:'ID',itree:'Medidas',fotos:'Fotos'};
+function faltantes(){
+  return ORDEN_PASOS.flatMap(g => FIELDS.filter(f => f.group===g && !valOf(f.id)));
+}
+/* HU-19 */
+let pasosFirma='';
+function pintarPasos(groupOk){
+  const ok = g => g==='gps' ? !!gpsLocked : grupoCompleto(g, groupOk);
+  const actual = ORDEN_PASOS.find(g => !ok(g));
+  const firma = ORDEN_PASOS.map(g => ok(g)?'1':(g===actual?'a':'0')).join('');
+  if (firma===pasosFirma) return;
+  pasosFirma=firma;
+  document.querySelectorAll('.paso').forEach(b => {
+    const g=b.dataset.g, hecho=ok(g), esActual=g===actual;
+    b.classList.toggle('paso--ok', hecho);
+    b.classList.toggle('paso--actual', esActual);
+    b.querySelector('.paso__ico').textContent = hecho ? '✓' : ICO_GRUPO[g];
+    b.setAttribute('aria-label', NOMBRE_PASO[g]+': '+(hecho?'completo':esActual?'paso actual':'pendiente'));
+    if (esActual) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');
+  });
+}
+function irAPaso(g){
+  if (g==='gps'){ scrollToField('gps'); return; }
+  if (g==='datos' && $('sec-datos').classList.contains('section--resumen')){
+    $('sec-datos').scrollIntoView({behavior:'smooth',block:'center'}); return;
+  }
+  const f=FIELDS.find(x => x.group===g && !valOf(x.id));
+  if (f) scrollToField(f.id);
+  else { const sec=$('sec-'+g); if (sec) sec.scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+/* HU-18 */
+let barraFirma='';
+function etiquetaGuardar(){
+  const n=numArbol();
+  return '💾 <span>Guardar árbol'+(n?' '+n:'')+'</span>';
+}
+function pintarBarra(){
+  const falta=faltantes(), bar=$('saveBar'), listo=!falta.length;
+  const firma=(listo?'L':falta[0].id+'|'+falta.length)+'|'+numArbol();
+  if (firma===barraFirma) return;
+  barraFirma=firma;
+  bar.classList.toggle('save-bar--listo', listo);
+  if (!listo){
+    const f=falta[0];
+    const corto = f.group==='gps' ? 'Bloquear GPS' : f.label;
+    $('saveBarFaltaTxt').textContent=ICO_GRUPO[f.group]+' '+corto;
+    $('saveBarFalta').setAttribute('aria-label','Falta '+corto+'. Toca para ir al campo');
+    $('saveBarMas').textContent = 'Falta'+(falta.length>1 ? ' esto y '+(falta.length-1)+' más' : ' solo esto')+':';
+  }
+  const btn=$('btnSave');
+  if (!btn.classList.contains('btn-save--saving')) btn.innerHTML=etiquetaGuardar();
+}
+function irAFaltante(){
+  const f=faltantes()[0];
+  if (f) scrollToField(f.id);
+}
+/* HU-15 */
+let jornadaAbierta=true;
+function textoJornada(){
+  const parque=$('parque').value.trim()||'—', id=$('idParque').value.trim();
+  $('jorParque').textContent=parque;
+  $('jorLinea1').textContent=[id?'ID '+id:'Sin ID (manual)', $('asesor').value?'Asesor '+$('asesor').value:'', $('mes').value].filter(Boolean).join(' · ');
+  $('jorLinea2').textContent='Planta: '+($('ejecutor').value||'—')+' · Registra: '+($('registrante').value.trim()||'—');
+}
+function pintarJornada(groupOk){
+  const sec=$('sec-datos'), completo=grupoCompleto('datos', groupOk);
+  const avisoMes=$('mesAviso').classList.contains('borrador--show');
+  if (!completo || avisoMes) jornadaAbierta=true;
+  const resumen=completo && !jornadaAbierta;
+  if (resumen) textoJornada();
+  sec.classList.toggle('section--resumen', resumen);
+  sec.classList.toggle('section--jornada-lista', completo && jornadaAbierta);
+}
+function editarJornada(){
+  jornadaAbierta=true; actualizarValidacion();
+  $('sec-datos').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function cerrarJornada(){
+  jornadaAbierta=false; actualizarValidacion();
+  $('sec-datos').scrollIntoView({behavior:'smooth',block:'start'});
+  vibrate(15);
+}
+/* HU-16 · anillo de progreso hacia ±1 m */
+const RING_C=2*Math.PI*68;
+let gpsEstadoTxt='';
+function pintarAnillo(o){
+  const ring=$('gpsRing');
+  let prog=0;
+  if (o.prec) prog=Math.min(1, PREC_BLOQUEO/o.prec);
+  if (!o.puede) prog=Math.min(prog, .95);
+  ring.style.strokeDashoffset=String(RING_C*(1-prog));
+  ring.style.opacity = prog>0 ? '1' : '0';
+  ring.style.stroke = o.bAcc>MAX_RAW || !o.enCuliacan ? 'var(--c-warn)' : 'var(--c-p-600)';
+  $('gpsRingNum').textContent = o.prec ? '±'+fmtPrec(o.prec) : '--';
+  let tit, sub;
+  if (!o.enCuliacan){ tit='Estás fuera de Culiacán'; sub='Revisa que el GPS del celular esté activo.'; }
+  else if (o.bAcc>MAX_RAW){ tit='Busca cielo abierto'; sub='Señal débil (celular ±'+o.bAcc.toFixed(1)+' m): aléjate de techos y árboles grandes.'; }
+  else if (o.n<MIN_READS){ tit='Quédate quieto sobre el árbol'; sub='Leyendo satélites… '+o.n+' de '+MIN_READS; }
+  else if (!o.estable){ tit='Quédate completamente quieto'; sub='La señal todavía se está moviendo.'; }
+  else if (!o.puede){
+    const necesarias=Math.ceil(Math.pow(o.bAcc/PREC_BLOQUEO,2));
+    const faltan=Math.max(1, necesarias-o.n);
+    tit='Quédate quieto sobre el árbol';
+    sub = necesarias>WIN ? 'Con esta señal no llega a ±'+PREC_BLOQUEO+' m: busca cielo abierto.'
+        : 'Faltan unos '+faltan+' segundo'+(faltan===1?'':'s')+' para ±'+PREC_BLOQUEO+' m.';
+  }
+  else { tit='¡Listo! Toca «Bloquear GPS»'; sub='Precisión estimada ±'+fmtPrec(o.prec)+' m.'; }
+  if (tit!==gpsEstadoTxt){ $('gpsHeadTxt').textContent=tit; gpsEstadoTxt=tit; }
+  $('gpsSubTxt').textContent=sub;
+}
+function reiniciarAnillo(){
+  $('gpsRing').style.strokeDashoffset=String(RING_C); $('gpsRing').style.opacity='0';
+  $('gpsRing').style.stroke='var(--c-p-600)';
+  $('gpsRingNum').textContent='--';
+  $('gpsHeadTxt').textContent='Quédate quieto sobre el árbol'; gpsEstadoTxt='';
+  $('gpsSubTxt').textContent='Leyendo satélites…';
+}
+/* HU-17 · permiso de ubicación negado */
+function mostrarPermiso(on){
+  $('gpsPermiso').hidden=!on;
+  $('gpsCard').classList.toggle('gps--permiso', on);
+  setGPSBadge(on?'⚠️ Sin permiso':'Esperando…', on?'poor':'wait');
+}
+function reintentarGPS(){
+  mostrarPermiso(false);
+  try{ if (watchId!==null) navigator.geolocation.clearWatch(watchId); }catch(_){}
+  readings=[]; reiniciarAnillo();
+  iniciarGPS();
+}
+function vigilarPermiso(){
+  if (!navigator.permissions || !navigator.permissions.query) return;
+  navigator.permissions.query({name:'geolocation'}).then(st => {
+    if (st.state==='denied') mostrarPermiso(true);
+    st.onchange = () => { if (st.state==='granted' && !$('gpsPermiso').hidden) reintentarGPS(); else if (st.state==='denied') mostrarPermiso(true); };
+  }).catch(()=>{});
+}
+/* HU-21 · sonido corto (usa el volumen multimedia del celular) */
+let audioCtx=null;
+function sonar(notas){
+  try{
+    const C=window.AudioContext||window.webkitAudioContext; if (!C) return;
+    audioCtx = audioCtx || new C();
+    let t=audioCtx.currentTime;
+    notas.forEach(f => {
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.type='sine'; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.18,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+      o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+0.18); t+=0.12;
+    });
+  }catch(_){}
+}
+/* HU-20 · confirmación al guardar */
+let confirmaAbierta=false, confirmaUid=null, focoPrevio=null;
+function mostrarConfirmacion(reg, f1, f2){
+  confirmaUid=uidDe(reg);
+  $('confId').textContent=reg.id;
+  $('confEsp').textContent=(reg.especie||'').split('(')[0].trim()||'—';
+  const nf=(f1?1:0)+(f2?1:0);
+  $('confMeta').textContent='±'+fmtPrec(precDe(reg))+' m · 📷 '+nf+'/2';
+  const hoy=new Date().toLocaleDateString('es-MX');
+  const n=registros.filter(r=>(r.fecha||'').startsWith(hoy)).length;
+  $('confHoy').textContent='Hoy llevas '+n+' árbol'+(n===1?'':'es');
+  [['confF1',f1],['confF2',f2]].forEach(([id,src]) => { const im=$(id); if (src) im.src=src; else im.removeAttribute('src'); });
+  const sig=numArbol();
+  $('confSig').textContent='➕ Siguiente árbol'+(sig?' ('+sig+')':'');
+  focoPrevio=document.activeElement;
+  $('confirma').hidden=false; confirmaAbierta=true;
+  setTimeout(()=>$('confSig').focus(), 50);
+}
+function cerrarConfirmacion(){
+  if (!confirmaAbierta) return;
+  $('confirma').hidden=true; confirmaAbierta=false;
+  ['confF1','confF2'].forEach(id => $(id).removeAttribute('src'));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (actualizacionPendiente) setTimeout(() => location.reload(), 400);
+}
+function confirmaVerRegistro(){
+  const uid=confirmaUid; cerrarConfirmacion(); switchTab('registros');
+  setTimeout(() => {
+    const card=document.querySelector('.reg-card[data-uid="'+(window.CSS&&CSS.escape?CSS.escape(uid):uid)+'"]');
+    if (card){ const b=card.querySelector('.reg-card__resumen'); if (b && b.getAttribute('aria-expanded')!=='true') toggleRegistro(b); card.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 80);
+}
+function confirmaEnviar(){ cerrarConfirmacion(); switchTab('registros'); compartirJornada(); }
+document.addEventListener('keydown', e => { if (e.key==='Escape' && confirmaAbierta) cerrarConfirmacion(); });
+
 function guardarRegistro(){
   /* El botón ya se deshabilita sin número válido, pero el guardado no dependía de
      eso: cualquier otra ruta habría creado un árbol con el ID terminado en 00000. */
@@ -1862,9 +2215,11 @@ function guardarRegistro(){
     pedirPersistencia();
     renderRegistros();
     sellarFotosRegistro(reg, f1, f2);  // graba el ID en la foto, sin detener la captura
-    resetForm(reg.id);
+    resetForm();
+    jornadaAbierta=false; actualizarValidacion();
+    mostrarConfirmacion(reg, f1, f2);
     revisarMemoria();
-    vibrate([30,40,30]);
+    vibrate([30,40,30]); sonar([523,659,784]);
   },250);
 }
 
@@ -1903,8 +2258,8 @@ function resetForm(idGuardado){
   setGPSMsg('⏳ Acumulando lecturas… quédate quieto sobre el árbol.','wait');
   const btnS=$('btnSave');
   btnS.classList.remove('btn-save--saving');
-  btnS.innerHTML='💾 <span>Guardar árbol</span>';
   btnS.disabled=true;
+  reiniciarAnillo(); barraFirma=''; pasosFirma='';
   if (idGuardado){
     $('bannerOkID').textContent=idGuardado;
     const b=$('bannerOk');
@@ -1918,7 +2273,7 @@ function resetForm(idGuardado){
   switchTab('registrar');
   window.scrollTo({top:0,behavior:'smooth'});
   // El registro ya quedó en localStorage: se puede recargar con seguridad
-  if (actualizacionPendiente) setTimeout(() => location.reload(), 2600);
+  // v32: la recarga por versión nueva se hace al cerrar la confirmación (cerrarConfirmacion)
 }
 
 /* ════════════════════════════════════════════════════════════
