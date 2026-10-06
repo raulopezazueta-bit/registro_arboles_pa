@@ -408,12 +408,15 @@ html[data-fs="2"]{--progress-h:72px}
 .paso--actual .paso__txt{color:var(--c-n-900);font-weight:800}
 html[data-fs="2"] .paso__ico{width:36px;height:36px;font-size:17px}
 /* HU-16 · GPS con anillo */
-.gps__anillo{position:relative;width:168px;height:168px;margin:0 auto var(--s-2)}
+.gps__anillo{--ring:176px;position:relative;width:var(--ring);height:var(--ring);margin:0 auto var(--s-2)}
+html[data-fs="1"] .gps__anillo{--ring:196px}
+html[data-fs="2"] .gps__anillo{--ring:216px}
 .gps__ring{width:100%;height:100%;display:block}
 #gpsRing{transition:stroke-dashoffset .4s ease-out,stroke .3s}
-.gps__ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.gps__ring-num{font-size:40px;font-weight:800;color:var(--c-p-800);font-variant-numeric:tabular-nums;line-height:1}
-.gps__ring-lbl{font-size:var(--fs-xs);color:var(--c-n-600);margin-top:4px}
+/* v38: el texto se queda dentro del círculo interior (≈ 76 % del anillo) en los 3 tamaños de letra */
+.gps__ring-txt{position:absolute;inset:19%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.gps__ring-num{font-size:calc(var(--ring) * .2);font-weight:800;color:var(--c-p-800);font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap;letter-spacing:-.5px}
+.gps__ring-lbl{font-size:calc(var(--ring) * .075);color:var(--c-n-600);margin-top:4px;line-height:1.2}
 .gps__head-txt{text-align:center;font-size:var(--fs-lg);font-weight:800;color:var(--c-n-900);margin:0}
 .gps__sub-txt{text-align:center;font-size:var(--fs-sm);color:var(--c-n-600);margin:2px 0 var(--s-3);min-height:1.3em}
 .gps__det{margin-bottom:var(--s-3)}
@@ -500,6 +503,15 @@ html[data-fs="2"] .save-bar .btn-save{max-width:none;width:100%}
 .envio-bar__nota{text-align:center;font-size:var(--fs-xs);color:var(--c-n-600);margin-top:4px}
 .btn-compartir--sec{background:var(--c-w);color:var(--c-p-700);border:1.5px solid var(--c-p-700);box-shadow:none}
 @media(min-width:640px){.reg-dia{max-width:600px;margin-left:auto;margin-right:auto}}
+/* ── v38 · envío de la jornada en .zip ── */
+.zip-arch{display:flex;flex-direction:column;gap:2px;background:var(--c-p-50);border:1.5px solid var(--c-p-100);border-radius:var(--r-md);padding:10px 12px;margin-bottom:var(--s-2)}
+.zip-arch b{font-family:var(--ff-mono);font-size:var(--fs-sm);word-break:break-all;color:var(--c-p-800)}
+.zip-arch span{font-size:var(--fs-xs);color:var(--c-n-600)}
+.zip-pasos{margin:0 0 var(--s-3) 1.3em;padding:0;font-size:var(--fs-sm);line-height:1.45}
+.zip-pasos li{margin-bottom:6px}
+.zip-pasos b{word-break:break-word}
+.zip-ya{margin-top:var(--s-2)}
+.zip-otros{display:flex;flex-direction:column;margin-top:var(--s-2)}
 /* ── v34 · HU-24 menú de pantalla y modo sol ── */
 .hoja{position:fixed;inset:0;z-index:1300}
 .hoja[hidden]{display:none}
@@ -643,7 +655,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
           <circle cx="80" cy="80" r="68" fill="none" stroke="var(--c-n-200)" stroke-width="14"/>
           <circle id="gpsRing" style="opacity:0" cx="80" cy="80" r="68" fill="none" stroke="var(--c-p-600)" stroke-width="14" stroke-linecap="round" stroke-dasharray="427.3" stroke-dashoffset="427.3" transform="rotate(-90 80 80)"/>
         </svg>
-        <div class="gps__ring-txt"><span class="gps__ring-num" id="gpsRingNum">--</span><span class="gps__ring-lbl">metros · meta ±1</span></div>
+        <div class="gps__ring-txt"><span class="gps__ring-num" id="gpsRingNum">--</span><span class="gps__ring-lbl">metros<br>meta ±1</span></div>
       </div>
       <p class="gps__head-txt" id="gpsHeadTxt" aria-live="polite">Buscando satélites…</p>
       <p class="gps__sub-txt" id="gpsSubTxt">Sal al exterior si estás adentro.</p>
@@ -1084,7 +1096,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 
 <div class="envio-bar" id="envioBar" data-hidden="true">
   <button type="button" class="btn-compartir" id="btnEnvioBar" onclick="compartirJornada()">📤 <span id="envioBarTxt">Compartir jornada</span></button>
-  <div class="envio-bar__nota">Gmail recomendado: las fotos llegan con su ID</div>
+  <div class="envio-bar__nota">Un solo .zip para ecosistemicaconsultoria@gmail.com</div>
 </div>
 <div class="save-bar" id="saveBar">
   <div class="save-bar__info">
@@ -1119,6 +1131,24 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     <div class="confirma__acts">
       <button type="button" class="confirma__sec" onclick="confirmaVerRegistro()">Ver registro</button>
       <button type="button" class="confirma__sec" onclick="confirmaEnviar()">📤 Enviar jornada</button>
+    </div>
+  </div>
+</div>
+<div class="hoja" id="zipEnvio" hidden>
+  <div class="hoja__fondo" onclick="cerrarZipEnvio()"></div>
+  <div class="hoja__panel" role="dialog" aria-modal="true" aria-labelledby="zipTit">
+    <h2 class="hoja__tit" id="zipTit">📦 Jornada lista para enviar</h2>
+    <div class="zip-arch"><b id="zipNombre">—</b><span id="zipInfo">—</span></div>
+    <ol class="zip-pasos">
+      <li>El archivo ya se guardó en <b>Descargas</b>.</li>
+      <li>Toca <b>Abrir Gmail</b>: el correo ya va dirigido a <b id="zipPara">—</b> con el asunto escrito.</li>
+      <li>En Gmail toca <b>📎 → Adjuntar archivo</b>, elige el <b>.zip</b> en Descargas y envía.</li>
+    </ol>
+    <button type="button" class="btn-compartir" onclick="abrirGmailZip()">✉ Abrir Gmail</button>
+    <button type="button" class="btn-compartir btn-compartir--sec zip-ya" onclick="confirmarZipEnviado()">✓ Ya lo envié</button>
+    <div class="zip-otros">
+      <button type="button" class="hoja__link" onclick="descargarZipOtraVez()">⬇ Descargar el .zip otra vez</button>
+      <button type="button" class="hoja__link" onclick="cerrarZipEnvio(); compartirSueltos()">📤 Otra forma: compartir archivos sueltos</button>
     </div>
   </div>
 </div>
@@ -2213,7 +2243,8 @@ function pintarAnillo(o){
   ring.style.strokeDashoffset=String(RING_C*(1-prog));
   ring.style.opacity = prog>0 ? '1' : '0';
   ring.style.stroke = o.bAcc>MAX_RAW || !o.enCuliacan ? 'var(--c-warn)' : 'var(--c-p-600)';
-  $('gpsRingNum').textContent = o.prec ? '±'+fmtPrec(o.prec) : '--';
+  /* v38: de 10 m en adelante, sin decimal (±20 en vez de ±20.2) y tope ±99 para que quepa en el anillo */
+  $('gpsRingNum').textContent = !o.prec ? '--' : o.prec>=99 ? '±99+' : o.prec>=10 ? '±'+Math.round(o.prec) : '±'+fmtPrec(o.prec);
   let tit, sub;
   if (!o.enCuliacan){ tit='Estás fuera de Culiacán'; sub='Revisa que el GPS del celular esté activo.'; }
   else if (o.bAcc>MAX_RAW){ tit='Busca cielo abierto'; sub='Señal débil (celular ±'+o.bAcc.toFixed(1)+' m): aléjate de techos y árboles grandes.'; }
@@ -3095,7 +3126,100 @@ async function compartirArchivos(archivos, titulo){
     return false;
   }
 }
+/* ════════════════════════════════════════════════════════════
+   v38 · ENVÍO DE LA JORNADA EN UN .ZIP
+   Un solo archivo con el CSV y las fotos selladas (sin recomprimir: el ID dentro
+   de cada foto se conserva). Chrome en Android no deja compartir .zip desde una
+   página, así que se guarda en Descargas y se abre Gmail ya dirigido al correo
+   de Ecosistémica; la persona adjunta el .zip. Como la app no puede saber si el
+   correo salió, la jornada queda «Enviado» solo cuando tocan «Ya lo envié».
+   ════════════════════════════════════════════════════════════ */
+const CORREO_DESTINO='ecosistemicaconsultoria@gmail.com';
+const CRC_TABLA=(()=>{ const t=new Uint32Array(256); for (let n=0;n<256;n++){ let c=n; for (let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(b){ let c=0xFFFFFFFF; for (let i=0;i<b.length;i++) c=CRC_TABLA[(c^b[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+/* ZIP «store» (sin compresión): los JPG ya vienen comprimidos y así no se tocan */
+function crearZip(archivos){
+  const enc=new TextEncoder(), partes=[], central=[]; let ofs=0;
+  const d=new Date();
+  const hora=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+  const fecha=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  for (const a of archivos){
+    const nom=enc.encode(a.nombre), datos=a.bytes, crc=crc32(datos), n=datos.length;
+    const loc=new DataView(new ArrayBuffer(30));
+    loc.setUint32(0,0x04034b50,true); loc.setUint16(4,20,true); loc.setUint16(6,0x0800,true);
+    loc.setUint16(8,0,true); loc.setUint16(10,hora,true); loc.setUint16(12,fecha,true);
+    loc.setUint32(14,crc,true); loc.setUint32(18,n,true); loc.setUint32(22,n,true);
+    loc.setUint16(26,nom.length,true); loc.setUint16(28,0,true);
+    partes.push(loc.buffer, nom, datos);
+    const cen=new DataView(new ArrayBuffer(46));
+    cen.setUint32(0,0x02014b50,true); cen.setUint16(4,20,true); cen.setUint16(6,20,true); cen.setUint16(8,0x0800,true);
+    cen.setUint16(10,0,true); cen.setUint16(12,hora,true); cen.setUint16(14,fecha,true);
+    cen.setUint32(16,crc,true); cen.setUint32(20,n,true); cen.setUint32(24,n,true);
+    cen.setUint16(28,nom.length,true); cen.setUint32(42,ofs,true);
+    central.push(cen.buffer, nom);
+    ofs+=30+nom.length+n;
+  }
+  const tamCentral=central.reduce((t,x)=>t+x.byteLength,0);
+  const fin=new DataView(new ArrayBuffer(22));
+  fin.setUint32(0,0x06054b50,true); fin.setUint16(8,archivos.length,true); fin.setUint16(10,archivos.length,true);
+  fin.setUint32(12,tamCentral,true); fin.setUint32(16,ofs,true);
+  return new Blob([...partes, ...central, fin.buffer], { type:'application/zip' });
+}
+function nombreSeguro(t){ return String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,24); }
+let zipEnvio=null;
 async function compartirJornada(){
+  if (!registros.length){ toast('Sin registros','err'); return; }
+  toast('📦 Preparando el .zip…');
+  const regs=[...registros], hoy=new Date().toLocaleDateString('en-CA');  // fecha local AAAA-MM-DD (de noche, la UTC ya es mañana)
+  const archivos=[{ nombre:'CoberVegetal_'+hoy+'.csv', bytes:new TextEncoder().encode('﻿'+csvPlantacion()) }];
+  let faltan=0;
+  for (const r of regs){
+    if (!r.foto1 && !r.foto2) continue;
+    const fotos=await fotosDe(r);
+    for (const n of [1,2]){
+      if (!r['foto'+n]) continue;
+      const d=fotos[n-1]; if (!d){ faltan++; continue; }
+      const f=dataUrlAFile(d, r.id+(n===1?'_finalizado.jpg':'_cenital.jpg'), selloDeRegistro(r, n===1?'frente':'cenital'));
+      archivos.push({ nombre:f.name, bytes:new Uint8Array(await f.arrayBuffer()) });
+    }
+  }
+  const quien=nombreSeguro(regs[regs.length-1].registrante);
+  const nombre='ArbolesPA_'+hoy+(quien?'_'+quien:'')+'_'+regs.length+'arboles.zip';
+  const blob=crearZip(archivos);
+  zipEnvio={ blob, nombre, uids:regs.map(uidDe), n:regs.length, fotos:archivos.length-1, hoy, quien:regs[regs.length-1].registrante||'' };
+  descargarZipOtraVez();
+  const mb=blob.size/1048576;
+  $('zipNombre').textContent=nombre;
+  $('zipInfo').textContent=regs.length+' árbol'+(regs.length===1?'':'es')+' · '+zipEnvio.fotos+' fotos · '+(mb<1?Math.max(1,Math.round(blob.size/1024))+' KB':mb.toFixed(1)+' MB')
+    +(mb>24?' · Gmail lo enviará como enlace de Drive (pesa más de 25 MB)':'')
+    +(faltan?' · ⚠️ '+faltan+' foto(s) no se encontraron en el celular':'');
+  $('zipPara').textContent=CORREO_DESTINO;
+  $('zipEnvio').hidden=false;
+}
+function descargarZipOtraVez(){
+  if (!zipEnvio) return;
+  const url=URL.createObjectURL(zipEnvio.blob), a=document.createElement('a');
+  a.href=url; a.download=zipEnvio.nombre; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+function urlGmailZip(){
+  const asunto='Árboles PA · '+zipEnvio.hoy+' · '+zipEnvio.n+' árbol'+(zipEnvio.n===1?'':'es')+(zipEnvio.quien?' · '+zipEnvio.quien:'');
+  const cuerpo='Jornada de Árboles PA (Cobertura Vegetal 2026).\n\n'
+    +'Árboles: '+zipEnvio.n+'\nFotos: '+zipEnvio.fotos+'\nRegistró: '+(zipEnvio.quien||'—')+'\n'
+    +'Archivo adjunto: '+zipEnvio.nombre+'\n\n(Adjunta el .zip desde Descargas antes de enviar.)';
+  return 'mailto:'+CORREO_DESTINO+'?subject='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(cuerpo);
+}
+function abrirGmailZip(){ if (zipEnvio) location.href=urlGmailZip(); }
+function confirmarZipEnviado(){
+  if (!zipEnvio) return;
+  marcarEnviados('c', zipEnvio.uids.filter(u => registros.some(r => uidDe(r)===u)));
+  cerrarZipEnvio();
+  toast('✅ Jornada marcada como enviada. Usa «Limpiar» cuando Ecosistémica confirme que la recibió','ok');
+}
+function cerrarZipEnvio(){ $('zipEnvio').hidden=true; }
+document.addEventListener('keydown', e => { if (e.key==='Escape' && !$('zipEnvio').hidden) cerrarZipEnvio(); });
+/* Forma anterior (v30): archivos sueltos en paquetes de 10, por si el .zip no se puede adjuntar */
+async function compartirSueltos(){
   if (!registros.length){ toast('Sin registros','err'); return; }
   const t0 = Date.now();
   toast('📤 Preparando archivos…');
@@ -3950,7 +4074,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v37';
+const APP_VERSION='v38';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));
@@ -3974,7 +4098,7 @@ function alternarSol(){
 const GUIA=[
   {ico:'pin', tit:'Permite ubicación y cámara', txt:'La app usa el GPS para ubicar cada árbol y la cámara para sus 2 fotos. Cuando el celular pregunte, toca «Permitir».'},
   {ico:'sun', tit:'Ajusta la pantalla', txt:'Con el botón Aa de arriba a la derecha agrandas la letra o activas el modo sol para leer a pleno sol.'},
-  {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Compartir jornada → Gmail → correo del coordinador. Usa «Limpiar» solo cuando confirme que la recibió.'}
+  {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Compartir jornada. Se guarda un .zip y se abre Gmail dirigido a Ecosistémica: adjunta el .zip y envía. Usa «Limpiar» solo cuando confirmen que lo recibieron.'}
 ];
 let guiaPaso=0;
 function abrirGuia(n){ guiaPaso=n||0; pintarGuia(); $('guia').hidden=false; setTimeout(()=>$('guiaSig').focus(),40); }

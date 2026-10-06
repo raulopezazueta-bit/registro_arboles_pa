@@ -74,7 +74,9 @@
    actualizar.html para destrabar celulares sin tocar registros ni fotos. */
 /* v37-1 (06-oct-2026): solo sitio de pruebas. Nuevo "id" en manifest.json para que Chrome deje
    instalar la app otra vez cuando guardó un registro viejo de una instalación borrada. */
-const CACHE_VERSION = 'apa-2026-10-06-v37-1';
+/* v38 (07-oct-2026): la jornada se envía en un solo .zip (CSV + fotos) a ecosistemicaconsultoria@gmail.com
+   y la cifra del anillo del GPS ya no se sale del círculo. */
+const CACHE_VERSION = 'apa-2026-10-07-v38';
 const CORE = [
   './',
   './index.html',
