@@ -2,7 +2,7 @@
   "name": "Árboles PA — Registro de Campo",
   "short_name": "Árboles PA",
   "description": "Registro de campo de árboles plantados — Parques Alegres, Culiacán. Reforestación 11K · 2026.",
-  "id": "/registro_arboles_pa/",
+  "id": "/registro_arboles_pa/?app=2",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

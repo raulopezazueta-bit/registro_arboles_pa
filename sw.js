@@ -72,7 +72,9 @@
    máxima 3 s); la copia guardada se usa sin señal. Antes siempre abría la copia guardada.
    v37 (06-oct-2026): corrige la v36 (la petición a la red fallaba siempre) y agrega
    actualizar.html para destrabar celulares sin tocar registros ni fotos. */
-const CACHE_VERSION = 'apa-2026-10-06-v37';
+/* v37-1 (06-oct-2026): solo sitio de pruebas. Nuevo "id" en manifest.json para que Chrome deje
+   instalar la app otra vez cuando guardó un registro viejo de una instalación borrada. */
+const CACHE_VERSION = 'apa-2026-10-06-v37-1';
 const CORE = [
   './',
   './index.html',
