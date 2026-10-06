@@ -65,8 +65,10 @@
    «Quédate quieto» aunque ya marcara ±0.9 m.
    v34 (06-oct-2026): Sprint 5. Íconos SVG en lugar de emojis, Registros agrupados por día con
    barra fija de envío, menú de pantalla con modo sol, guía de primer uso, ejemplos de fotos,
-   «Hoy: N» en el encabezado, versión visible y «Actualizar ahora». */
-const CACHE_VERSION = 'apa-2026-10-06-v34';
+   «Hoy: N» en el encabezado, versión visible y «Actualizar ahora».
+   v35 (06-oct-2026): la app busca versión nueva al abrir, al volver a primer plano y cada
+   30 min (antes solo al cargar la página desde cero). */
+const CACHE_VERSION = 'apa-2026-10-06-v35';
 const CORE = [
   './',
   './index.html',
