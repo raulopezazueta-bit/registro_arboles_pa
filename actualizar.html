@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#145219">
+<title>Actualizar Árboles PA</title>
+<style>
+  :root{--verde:#145219;--texto:#1A1A1A;--gris:#3A3A3A}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#F1F9F2;color:var(--texto);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+  main{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(15,69,20,.12);padding:28px 22px;max-width:420px;width:100%;text-align:center}
+  h1{font-size:22px;margin:12px 0 6px}
+  p{font-size:16px;line-height:1.5;color:var(--gris);margin:6px 0}
+  .ico{width:72px;height:72px;border-radius:50%;background:#D4EDDA;color:var(--verde);display:flex;align-items:center;justify-content:center;margin:0 auto}
+  .ico svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .ok{font-weight:700;color:var(--verde)}
+  a.btn{display:block;margin-top:18px;background:var(--verde);color:#fff;text-decoration:none;font-weight:700;font-size:17px;padding:15px;border-radius:10px}
+  @media (prefers-reduced-motion:no-preference){.gira svg{animation:g 1.2s linear infinite}@keyframes g{to{transform:rotate(360deg)}}}
+</style>
+</head>
+<body>
+<main>
+  <div class="ico gira" id="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+  <h1 id="tit">Actualizando Árboles PA…</h1>
+  <p id="txt">Se borra solo la copia guardada de la app para bajar la versión nueva. <b>Tus árboles, fotos y datos se conservan.</b></p>
+  <a class="btn" id="btn" href="./" hidden>Abrir la app</a>
+</main>
+<script>
+/* Destraba un celular que se quedó en una versión vieja de la app.
+   Borra el service worker y la Cache Storage (la copia de la app).
+   NO toca localStorage ni IndexedDB, que es donde están los registros y las fotos. */
+(async () => {
+  const txt=document.getElementById('txt'), tit=document.getElementById('tit'), btn=document.getElementById('btn');
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      const claves = await caches.keys();
+      await Promise.all(claves.map(k => caches.delete(k)));
+    }
+    tit.textContent='Listo';
+    txt.innerHTML='<span class="ok">La app se actualizó.</span> Tus árboles y fotos siguen en este celular. Abriendo…';
+    document.getElementById('ico').classList.remove('gira');
+    btn.href='./?r='+Date.now(); btn.hidden=false;
+    setTimeout(() => location.replace(btn.href), 1200);
+  } catch (e) {
+    tit.textContent='No se pudo actualizar';
+    txt.textContent='Revisa que tengas señal y vuelve a abrir esta página. Tus árboles no se borraron.';
+    btn.hidden=false;
+  }
+})();
+</script>
+</body>
+</html>

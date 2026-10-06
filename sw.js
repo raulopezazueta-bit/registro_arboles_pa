@@ -69,8 +69,10 @@
    v35 (06-oct-2026): la app busca versión nueva al abrir, al volver a primer plano y cada
    30 min (antes solo al cargar la página desde cero).
    v36 (06-oct-2026): al abrir la app con señal se carga la versión del servidor (espera
-   máxima 3 s); la copia guardada se usa sin señal. Antes siempre abría la copia guardada. */
-const CACHE_VERSION = 'apa-2026-10-06-v36';
+   máxima 3 s); la copia guardada se usa sin señal. Antes siempre abría la copia guardada.
+   v37 (06-oct-2026): corrige la v36 (la petición a la red fallaba siempre) y agrega
+   actualizar.html para destrabar celulares sin tocar registros ni fotos. */
+const CACHE_VERSION = 'apa-2026-10-06-v37';
 const CORE = [
   './',
   './index.html',
@@ -108,7 +110,9 @@ self.addEventListener('fetch', event => {
      plano, así que el celular quedaba una versión atrás y a veces no se actualizaba.
      Sin señal, o si la red tarda, se usa la copia guardada: sigue funcionando sin internet. */
   if (req.mode === 'navigate') {
-    const red = fetch(req, { cache: 'no-store' }).then(resp => {
+    /* v37: una petición de navegación no admite opciones (fetch(req, {...}) lanza TypeError);
+       por eso en la v36 siempre caía a la copia guardada. Se pide la misma URL como GET normal. */
+    const red = fetch(req.url, { cache: 'no-store', credentials: 'same-origin' }).then(resp => {
       if (resp && resp.status === 200) {
         const copia = resp.clone();
         caches.open(CACHE_VERSION).then(c => c.put('./index.html', copia));
@@ -117,9 +121,9 @@ self.addEventListener('fetch', event => {
     });
     const espera = new Promise(res => setTimeout(res, 3000));
     event.respondWith(
-      Promise.race([red, espera.then(() => null)]).then(r => r ||
+      Promise.race([red.catch(() => null), espera.then(() => null)]).then(r => r ||
         caches.match('./index.html').then(c => c || red)
-      ).catch(() => caches.match('./index.html'))
+      ).catch(() => caches.match('./index.html').then(c => c || fetch(req)))
     );
     return;
   }
