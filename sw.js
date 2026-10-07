@@ -82,7 +82,8 @@
 /* v39 (06-oct-2026): Sprint 6 «Listo para el patronato». La copia sin señal solo guarda la app. */
 /* v39-1: meta 3,500, Cacaloxóchitl, Parques Alegres como institución de Fundación GC1. */
 /* v39-2: encabezados en verde oscuro, ilustraciones realistas de las fotos, fotos de iNaturalist en la demostración. */
-const CACHE_VERSION = 'apa-2026-10-06-v39-2';
+/* v39-3: «Protocolo de plantación» también se bloquea hasta completar las mediciones. */
+const CACHE_VERSION = 'apa-2026-10-06-v39-3';
 const CORE = [
   './',
   './index.html',

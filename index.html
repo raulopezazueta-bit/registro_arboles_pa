@@ -2298,6 +2298,19 @@ function aplicarCadena(groupOk){
     /* v39: el aviso solo en la siguiente sección; repetirlo en todas parecía pantalla rota */
     if (msg) msg.style.visibility = (bloqueada && i===idxActual+1) ? 'visible' : 'hidden';
   });
+  /* v39-3: el protocolo es opcional (nunca es «la sección actual»), pero se llena después de
+     las mediciones: antes quedaba abierto entre secciones bloqueadas y se podía llenar fuera de orden. */
+  const proto=$('sec-proto');
+  if (proto){
+    const bloq = idxActual <= SECCIONES_CADENA.indexOf('itree');
+    if (proto.classList.contains('section--locked')!==bloq){
+      proto.classList.toggle('section--locked', bloq);
+      const body=proto.querySelector('.section__body');
+      if (bloq) body.setAttribute('inert',''); else body.removeAttribute('inert');
+    }
+    const msg=proto.querySelector('.section__lock-msg');
+    if (msg){ if (bloq) msg.textContent='🔒 Primero completa «'+nombreActual+'» · toca aquí'; msg.style.visibility = (bloq && actual==='itree') ? 'visible' : 'hidden'; }
+  }
 }
 function irAPendiente(){
   const actual = seccionActual();
