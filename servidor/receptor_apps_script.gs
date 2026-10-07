@@ -11,7 +11,7 @@
  * Para cambiar el correo de aviso (p. ej. a uno de Parques Alegres): ejecuta cambiarCorreo().
  */
 
-const VERSION = 's7-2';
+const VERSION = 's7-3';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -157,15 +157,17 @@ function recibirRevisita_(pedido, prop) {
 function cerrarJornada_(pedido, prop) {
   const r = pedido.datos || {};
   const ss = SpreadsheetApp.openById(prop.getProperty('HOJA_ID'));
-  ss.getSheetByName('Envios').appendRow([new Date(), 'jornada', texto_(pedido.dispositivo), texto_(r.brigada), texto_(r.parques),
-    Number(r.arboles) || 0, texto_(r.detalle)]);
+  const esMon = r.tipo === 'monitoreo';                  // s7-3: el cierre de un envío de monitoreo
+  const n = Number(r.arboles) || 0, que = esMon ? (n === 1 ? 'revisita' : 'revisitas') : (n === 1 ? 'árbol' : 'árboles');
+  ss.getSheetByName('Envios').appendRow([new Date(), esMon ? 'monitoreo' : 'jornada', texto_(pedido.dispositivo), texto_(r.brigada), texto_(r.parques),
+    n, texto_(r.detalle)]);
   const correo = prop.getProperty('CORREO_AVISO');
   if (correo && MailApp.getRemainingDailyQuota() > 5) {
     MailApp.sendEmail({
       to: correo,
-      subject: 'Árboles PA · Jornada recibida · ' + (Number(r.arboles) || 0) + ' árboles · ' + texto_(r.brigada),
-      htmlBody: '<p>Se recibió una jornada de <b>Árboles PA</b>.</p><ul>' +
-        '<li>Árboles: <b>' + (Number(r.arboles) || 0) + '</b></li><li>Registró: ' + esc_(r.brigada) + '</li>' +
+      subject: 'Árboles PA · ' + (esMon ? 'Monitoreo recibido · ' : 'Jornada recibida · ') + n + ' ' + que + ' · ' + texto_(r.brigada),
+      htmlBody: '<p>Se recibió ' + (esMon ? 'un envío de <b>monitoreo</b>' : 'una jornada') + ' de <b>Árboles PA</b>.</p><ul>' +
+        '<li>' + (esMon ? 'Revisitas' : 'Árboles') + ': <b>' + n + '</b></li><li>' + (esMon ? 'Revisó' : 'Registró') + ': ' + esc_(r.brigada) + '</li>' +
         '<li>Parques: ' + esc_(r.parques) + '</li><li>Fecha: ' + esc_(r.fecha) + '</li></ul>' +
         '<p><a href="https://docs.google.com/spreadsheets/d/' + prop.getProperty('HOJA_ID') + '">Abrir la hoja maestra</a> · ' +
         '<a href="https://drive.google.com/drive/folders/' + prop.getProperty('CARPETA_FOTOS_ID') + '">Fotos</a></p>'

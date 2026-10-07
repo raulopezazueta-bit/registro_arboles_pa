@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0F4514">
@@ -71,7 +71,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .app-bar{background:linear-gradient(135deg,var(--c-p-900) 0%,var(--c-p-700) 100%);color:var(--c-w);padding:var(--s-3) var(--s-4);position:sticky;top:0;z-index:100;box-shadow:var(--sh-2);display:flex;align-items:center;gap:var(--s-3);height:var(--header-h)}
 .app-bar__logo{width:36px;height:36px;border-radius:8px;background:#fff;padding:3px;object-fit:contain;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .app-bar__title{font-size:var(--fs-lg);font-weight:700;letter-spacing:.2px;line-height:1.15}
-.app-bar__sub{font-size:var(--fs-xs);color:#A8D5B0;margin-top:2px;font-weight:500}
+.app-bar__sub{font-size:var(--fs-xs);color:#D4ECD6;margin-top:2px;font-weight:500}
 .app-bar__txt{flex:1;min-width:0}
 .app-bar__sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
 .btn-fs{flex-shrink:0;display:flex;align-items:center;gap:6px;min-height:40px;padding:4px 12px;border-radius:var(--r-full);border:1.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:var(--c-w);font-weight:800;font-size:var(--fs-md);line-height:1}
@@ -80,7 +80,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .btn-fs__dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
 .btn-fs__dot.is-on{background:var(--c-w)}
 .tabs{display:flex;background:var(--c-p-800);position:sticky;top:var(--header-h);z-index:99;height:var(--tabs-h)}
-.tab-btn{flex:1;padding:0 var(--s-3);border:none;background:none;color:#A8D5B0;font-size:var(--fs-sm);font-weight:600;display:flex;align-items:center;justify-content:center;gap:var(--s-2);border-bottom:3px solid transparent;transition:all var(--t-base) var(--easing)}
+.tab-btn{flex:1;padding:0 var(--s-3);border:none;background:none;color:#D4ECD6;font-size:var(--fs-sm);font-weight:600;display:flex;align-items:center;justify-content:center;gap:var(--s-2);border-bottom:3px solid transparent;transition:all var(--t-base) var(--easing)}
 .tab-btn[aria-selected="true"]{color:var(--c-w);border-bottom-color:var(--c-w)}
 .tab-btn__badge{background:rgba(255,255,255,.20);color:var(--c-w);font-size:var(--fs-xs);font-weight:700;padding:1px 8px;border-radius:var(--r-full);min-width:22px}
 .tab-btn[aria-selected="true"] .tab-btn__badge{background:var(--c-w);color:var(--c-p-700)}
@@ -212,7 +212,7 @@ input[readonly]{background:var(--c-n-100);color:var(--c-n-700);cursor:not-allowe
 .pending{margin:var(--s-3) var(--s-4);background:var(--c-w);border-radius:var(--r-lg);box-shadow:var(--sh-2);overflow:hidden}
 .pending__head{background:#FFF3E0;color:var(--c-warn);padding:var(--s-3) var(--s-4);font-size:var(--fs-md);font-weight:700;display:flex;align-items:center;gap:var(--s-2)}
 .pending__list{padding:var(--s-3)}
-.pending__item{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fs-sm);color:var(--c-n-700);padding:var(--s-1) var(--s-2);border-radius:var(--r-sm);cursor:pointer;transition:background var(--t-fast)}
+.pending__item{width:100%;border:0;background:none;font:inherit;text-align:left;min-height:40px;display:flex;align-items:center;gap:var(--s-2);font-size:var(--fs-sm);color:var(--c-n-700);padding:var(--s-1) var(--s-2);border-radius:var(--r-sm);cursor:pointer;transition:background var(--t-fast)}
 .pending__item:hover{background:var(--c-n-100)}
 .pending__item::before{content:"○";color:var(--c-warn);font-size:var(--fs-md);font-weight:700}
 .pending__ok{display:none;padding:var(--s-4);text-align:center;font-size:var(--fs-md);color:var(--c-ok);font-weight:700}
@@ -523,6 +523,8 @@ html[data-fs="2"] .save-bar .btn-save{max-width:none;width:100%}
 .btn-compartir--sec{background:var(--c-w);color:var(--c-p-700);border:1.5px solid var(--c-p-700);box-shadow:none}
 @media(min-width:640px){.reg-dia{max-width:600px;margin-left:auto;margin-right:auto}}
 /* ── v40 · HU-29 envío directo ── */
+.mon-enviar{width:100%;margin-bottom:10px}
+.mon-card__env{display:inline-block;font-size:var(--fs-2xs);font-weight:700;color:var(--c-ok);margin-left:6px}
 .envio-bar__alt{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer}
 .dir-txt{font-size:var(--fs-md);font-weight:700;margin:0 0 8px}
 .dir-barra{height:10px;background:var(--c-n-100);border-radius:5px;overflow:hidden;margin-bottom:10px}
@@ -1186,10 +1188,11 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
   <div class="section">
     <div class="section__head"><div class="section__head__title"><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Revisitas de hoy</div><span class="section__head__status" id="monHoyCount">0</span></div>
     <div class="section__body">
+      <button type="button" class="btn-compartir mon-enviar" id="btnMonEnviar" onclick="enviarMonitoreoDirecto()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> <span id="monEnviarTxt">Enviar a Ecosistémica</span></button>
       <div class="reg-actions" style="margin-bottom:12px">
-        <button class="btn-action" onclick="exportCSVMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> CSV Monitoreo</button>
+        <button class="btn-action btn-action--secondary" onclick="exportCSVMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> CSV</button>
         <button class="btn-action btn-action--secondary" onclick="exportFotosMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg> Fotos</button>
-        <button class="btn-action btn-action--secondary" onclick="compartirMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Compartir</button>
+        <button class="btn-action btn-action--secondary" onclick="compartirMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Archivos sueltos</button>
         <button class="btn-action btn-action--danger" onclick="limpiarMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Limpiar</button>
       </div>
       <div id="monListaHoy"></div>
@@ -1240,7 +1243,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 <div class="hoja" id="directo" hidden>
   <div class="hoja__fondo" onclick="cerrarDirecto()"></div>
   <div class="hoja__panel" role="dialog" aria-modal="true" aria-labelledby="dirTit">
-    <h2 class="hoja__tit" id="dirTit">📤 Enviando a Ecosistémica</h2>
+    <h2 class="hoja__tit" id="dirTit">Enviando a Ecosistémica</h2>
     <p class="dir-txt" id="dirTxt" aria-live="polite">Preparando…</p>
     <div class="dir-barra" role="progressbar" aria-labelledby="dirTxt"><div id="dirBarra"></div></div>
     <p class="dir-nota" id="dirNota">No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.</p>
@@ -2391,7 +2394,7 @@ function renderPendientes(okCount){
   if (okCount===TOTAL_FIELDS){ wrap.classList.add('pending--ok'); return; }
   wrap.classList.remove('pending--ok');
   const html=FIELDS.filter(f=>!valOf(f.id))
-    .map(f=>'<div class="pending__item" onclick="scrollToField(\''+f.id+'\')">'+f.label+'</div>').join('');
+    .map(f=>'<button type="button" class="pending__item" data-id="'+f.id+'" onclick="scrollToField(this.dataset.id)">'+esc(f.label)+'</button>').join('');
   $('pendingList').innerHTML=html;
 }
 function scrollToField(id, forzar){
@@ -2623,6 +2626,9 @@ function cerrarConfirmacion(){
   $('confirma').hidden=true; confirmaAbierta=false;
   ['confF1','confF2'].forEach(id => $(id).removeAttribute('src'));
   window.scrollTo({top:0,behavior:'smooth'});
+  /* v41 · HU-39: el foco regresa a donde estaba (antes quedaba en la hoja oculta y el lector se perdía) */
+  if (focoPrevio && document.contains(focoPrevio) && focoPrevio.offsetParent!==null){ try{ focoPrevio.focus({preventScroll:true}); }catch(_){} }
+  else { try{ $('tb-reg').focus({preventScroll:true}); }catch(_){} }
   /* Se revisa al momento de recargar: «Enviar jornada» cierra esta hoja y enseguida arma el .zip */
   if (actualizacionPendiente) setTimeout(() => { if (!ocupadoEnOtraCosa() && !hayCaptura()) location.reload(); else $('versionBar').classList.add('undo--show'); }, 400);
 }
@@ -3554,12 +3560,12 @@ function cerrarDirecto(){ $('directo').hidden=true; }
 async function enviarDirecto(opts){
   const silencioso = opts && opts.silencioso;
   if (bloqueoDemo()) return;
-  if (directoEnCurso) { if (!silencioso) $('directo').hidden=false; return; }
+  if (directoEnCurso || monEnCurso) { if (!silencioso) $('directo').hidden=false; return; }
   const pend=sinEnviar();
   if (!pend.length){ if (!silencioso) toast('✓ Todo está enviado a Ecosistémica','ok'); return; }
   if (!navigator.onLine){ if (!silencioso) toast('Sin señal: se enviará solo al recuperarla','err'); try{ localStorage.setItem('envioPendiente','1'); }catch(_){} return; }
   directoEnCurso=true; directoDetalle=''; try{ localStorage.setItem('envioPendiente','1'); }catch(_){}
-  if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirTit').textContent='📤 Enviando a Ecosistémica'; }
+  if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirReintentar').onclick=()=>enviarDirecto(); $('dirTit').textContent='📤 Enviando a Ecosistémica'; }
   pintarDirecto('Preparando '+pend.length+' árbol'+(pend.length===1?'':'es')+'…', 0, 'No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.');
   let ok=0, fallo=null; const parques=new Set(), quien=new Set();
   for (let i=0;i<pend.length;i++){
@@ -3598,8 +3604,67 @@ async function enviarDirecto(opts){
   $('dirOk').hidden=false; $('dirReintentar').hidden=!faltan;
   if (silencioso && !faltan) toast('✅ Se enviaron '+ok+' árbol'+(ok===1?'':'es')+' pendientes a Ecosistémica','ok');
 }
-/* Reintento automático: al recuperar señal, al volver a la app y al abrirla */
-function reintentarPendiente(){ try{ if (localStorage.getItem('envioPendiente')==='1' && navigator.onLine && !DEMO) setTimeout(()=>enviarDirecto({silencioso:$('directo').hidden}), 1500); }catch(_){} }
+/* ════════════════════════════════════════════════════════════
+   v41 · HU-45 ENVÍO DIRECTO DE MONITOREO (igual que la jornada)
+   Cada revisita va con su foto al mismo Apps Script (tipo «monitoreo»: pestaña Monitoreo
+   de la hoja maestra y foto en Drive/Fotos/AAAA-MM-DD/Monitoreo). Queda «Enviada» cuando
+   el servidor confirma; lo pendiente se reintenta solo como en la jornada.
+   ════════════════════════════════════════════════════════════ */
+let monEnCurso=false;
+function filaMonitoreo(r){
+  const t=new Date(r.ts||Date.now()), nombres=nombresFotosMonitoreo();
+  return { ID_Monitoreo:r.idMonitoreo, UID:uidDe(r), ID_Arbol:r.idArbol, Fecha_ISO:r.ts||'', Fecha:t.toLocaleDateString('en-CA'),
+    Mes_Revision:r.mes||'', Estado:r.estado||'', DAP_Actual_cm:numONada(r.dap), ID_Parque:String(r.idArbol||'').split('-')[0],
+    Parque:r.parque||'', Nombre_Comun:(r.especie||'').split('(')[0].trim(), Revisado_Por:r.revisor||'', Observaciones:r.obs||'',
+    Latitud:numONada(r.lat), Longitud:numONada(r.lon), Foto:r.foto?nombres[r.idMonitoreo]:'' };
+}
+function guardarMonitoreoLocal(){ try{ localStorage.setItem('monitoreo_v1', JSON.stringify(monitoreoRegistros)); }catch(_){} }
+async function enviarMonitoreoDirecto(opts){
+  const silencioso = opts && opts.silencioso;
+  if (bloqueoDemo()) return;
+  if (monEnCurso || directoEnCurso){ if (!silencioso) $('directo').hidden=false; return; }
+  const pend=monitoreoRegistros.filter(r=>!r.enviado);
+  if (!pend.length){ if (!silencioso) toast('✓ Las revisitas ya están enviadas','ok'); return; }
+  if (!navigator.onLine){ if (!silencioso) toast('Sin señal: se enviarán solas al recuperarla','err'); try{ localStorage.setItem('envioPendienteMon','1'); }catch(_){} return; }
+  monEnCurso=true; directoDetalle=''; try{ localStorage.setItem('envioPendienteMon','1'); }catch(_){}
+  if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirReintentar').onclick=()=>enviarMonitoreoDirecto(); $('dirTit').textContent='📤 Enviando revisitas'; }
+  let ok=0, fallo=null; const quien=new Set(), parques=new Set();
+  for (let i=0;i<pend.length;i++){
+    const r=pend[i];
+    pintarDirecto('Enviando revisita '+(i+1)+' de '+pend.length+' · '+r.idArbol, i/pend.length, 'No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.');
+    try{
+      const d=await fotoMonDe(r), fotos={};
+      if (d) fotos.revision=await blobADataUrl(inyectarSello(dataUrlABytes(d), selloTexto({ id:r.idArbol, tipo:'revision', lat:r.lat, lon:r.lon, fecha:r.fecha })));
+      const resp=await postDirecto({ tipo:'monitoreo', datos:filaMonitoreo(r), fotos });
+      if (!resp || !resp.ok){ fallo = resp && resp.error==='clave' ? 'clave' : (resp && resp.error) || 'servidor'; directoDetalle = resp && resp.detalle ? resp.detalle : ''; if (!resp || resp.reintentar!==false) break; continue; }
+      if (d || !r.foto){ r.enviado=true; guardarMonitoreoLocal(); }
+      ok++; quien.add(r.revisor||''); parques.add(r.parque||'');
+    }catch(e){ fallo = e.tipo || 'preparar'; directoDetalle = e.message || String(e); break; }
+  }
+  if (ok){ try{ await postDirecto({ tipo:'fin_jornada', datos:{ arboles:ok, brigada:'Monitoreo · '+[...quien].filter(Boolean).join(', '),
+    parques:[...parques].filter(Boolean).join(', '), fecha:new Date().toLocaleDateString('es-MX'), tipo:'monitoreo', detalle:'revisitas de monitoreo'+(fallo?' · incompleto: '+fallo:'') } }); }catch(_){} }
+  monEnCurso=false;
+  renderMonitoreoHoy();
+  const faltan=monitoreoRegistros.filter(r=>!r.enviado).length;
+  if (!faltan){ try{ localStorage.removeItem('envioPendienteMon'); }catch(_){} }
+  $('dirTit').textContent = faltan ? '⚠️ Envío incompleto' : '✅ Revisitas recibidas';
+  pintarDirecto(faltan ? ok+' revisita'+(ok===1?'':'s')+' enviada'+(ok===1?'':'s')+' · faltan '+faltan : 'Ecosistémica recibió '+ok+' revisita'+(ok===1?'':'s')+' con su foto', faltan ? ok/(ok+faltan) : 1,
+    faltan ? (fallo==='clave' ? 'El servidor rechazó la clave de la app. Avisa a Ecosistémica; mientras, usa «Archivos sueltos».'
+      : fallo==='red' ? 'Se cortó la señal. Lo que falta se envía solo al recuperarla, o toca «Reintentar ahora».'
+      : fallo==='tiempo' ? 'El servidor tardó demasiado en responder. Toca «Reintentar ahora».'
+      : fallo==='conexion' ? 'Hay señal, pero no se pudo conectar con el servidor de Ecosistémica. Toca «Reintentar ahora»; si sigue, usa «Archivos sueltos» y avisa a Ecosistémica.'
+      : fallo==='respuesta' ? 'El servidor respondió con una página en lugar de confirmar la revisita (revisar permisos de la implementación). Avisa a Ecosistémica.'
+      : 'El servidor no respondió bien ('+fallo+'). Se reintentará solo; si sigue, usa «Archivos sueltos».')+(directoDetalle?'\nDetalle técnico: '+directoDetalle:'')
+      : 'Usa «Limpiar» cuando ya no necesites estas revisitas en el celular: la copia quedó en la hoja maestra.');
+  $('dirOk').hidden=false; $('dirReintentar').hidden=!faltan;
+  if (silencioso && !faltan) toast('✅ Se enviaron '+ok+' revisita'+(ok===1?'':'s')+' pendientes','ok');
+}
+/* Reintento automático: al recuperar señal, al volver a la app y al abrirla (jornada y monitoreo) */
+function reintentarPendiente(){ try{
+  if (!navigator.onLine || DEMO) return;
+  if (localStorage.getItem('envioPendiente')==='1') setTimeout(()=>enviarDirecto({silencioso:$('directo').hidden}), 1500);
+  else if (localStorage.getItem('envioPendienteMon')==='1') setTimeout(()=>enviarMonitoreoDirecto({silencioso:$('directo').hidden}), 1500);
+}catch(_){} }
 window.addEventListener('online', reintentarPendiente);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) reintentarPendiente(); });
 window.addEventListener('load', reintentarPendiente);
@@ -4492,7 +4557,15 @@ function renderMonitoreoHoy(){
       <strong>${esc(r.idArbol)}</strong> · ${esc(r.mes||'—')} · ${esc(r.estado)}${r.dap?' · DAP '+esc(r.dap)+' cm':''}<br>
       <span style="font-size:var(--fs-sm);color:var(--c-n-600)">${esc(r.parque||'—')} · Revisó: ${esc(r.revisor)} · ${esc(r.fecha)}</span>
       ${r.obs?'<div style="font-size:var(--fs-sm);margin-top:4px">'+esc(r.obs)+'</div>':''}
+      ${r.enviado?'<span class="mon-card__env">✓ Enviada a Ecosistémica</span>':''}
     </div>`).join('');
+  pintarEnvioMon();
+}
+function pintarEnvioMon(){
+  const pend=monitoreoRegistros.filter(r=>!r.enviado).length, btn=$('btnMonEnviar'); if (!btn) return;
+  btn.hidden = !monitoreoRegistros.length;
+  $('monEnviarTxt').textContent = pend ? 'Enviar a Ecosistémica · '+pend+' sin enviar' : '✓ Revisitas enviadas';
+  btn.classList.toggle('btn-compartir--sec', !pend);
 }
 
 /* Nombre de archivo de cada foto de verificación. Si un árbol se revisó varias veces,
@@ -4555,7 +4628,8 @@ function exportCSVMonitoreo(){
 
 function limpiarMonitoreo(){
   if (!monitoreoRegistros.length) return;
-  if (!confirm('¿Borrar '+monitoreoRegistros.length+' revisitas? Exporta el CSV y las fotos primero.')) return;
+  const pendM=monitoreoRegistros.filter(r=>!r.enviado).length;
+  if (!confirm((pendM ? '⚠️ '+pendM+' revisita(s) NO se han enviado a Ecosistémica.\n\n' : '')+'¿Borrar '+monitoreoRegistros.length+' revisitas de este celular?')) return;
   evBorrar(monitoreoRegistros.map(claveFotoMon));
   monitoreoRegistros=[]; localStorage.removeItem('monitoreo_v1'); renderMonitoreoHoy();
   toast('Revisitas eliminadas','ok');
@@ -4613,7 +4687,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v40';
+const APP_VERSION='v41';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));
@@ -4682,7 +4756,7 @@ let actualizacionPendiente = false;
 /* v39: además del árbol en captura, no se recarga encima de una revisita a medias, de la hoja
    «Ya lo envié» (al volver de Gmail) ni de un envío en paquetes sin terminar. */
 function ocupadoEnOtraCosa(){
-  return !!(arbolSeleccionado || fotoMonitoreo || !$('zipEnvio').hidden || zipEnCurso || directoEnCurso
+  return !!(arbolSeleccionado || fotoMonitoreo || !$('zipEnvio').hidden || zipEnCurso || directoEnCurso || monEnCurso
     || $('listoBar').classList.contains('undo--show') || confirmaAbierta);
 }
 if ('serviceWorker' in navigator) {
