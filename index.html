@@ -1068,7 +1068,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         <div class="foto-slot" id="slot2"><img class="foto-slot__img" id="prev2" alt="Árbol finalizado desde arriba"><span class="foto-slot__icon"><svg class="ic" aria-hidden="true"><use href="#i-arrowdown"/></svg></span><span class="foto-slot__label">2 · Desde arriba<br>Cepa, tutor y riego vistos en vertical</span><span class="foto-slot__check"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><input type="file" accept="image/*" capture="environment" id="fi2" onchange="capturarFoto(2,this)"></div>
       </div>
       <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> Foto 1: de frente, árbol completo. Foto 2: con el celular sobre el árbol, apuntando hacia abajo.</p>
-      <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Para enviarlas usa <strong>Registros → Compartir jornada</strong>. Si las adjuntas desde la galería pierden el ID en el nombre.</p>
+      <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Para enviarlas usa <strong>Registros → Enviar a Ecosistémica</strong>: van solas con el ID de cada árbol. No las adjuntes desde la galería: ahí pierden el ID en el nombre.</p>
       <div class="field" style="margin-top:var(--s-3)"><label class="field__label" for="obs">Observaciones <span class="opt">opcional</span></label>
         <textarea id="obs" placeholder="Estado del árbol, condiciones del terreno, incidencias…"></textarea>
       </div>
@@ -2697,7 +2697,7 @@ function guardarRegistro(){
       registros.pop();
       evBorrar([claveFoto(reg,1),claveFoto(reg,2)]);
       reactivarGuardar();
-      toast('❌ Memoria llena. Comparte la jornada y limpia los registros.','err');
+      toast('❌ Memoria llena. Envía la jornada a Ecosistémica y limpia los registros.','err');
       return;
     }
     if (guardado){
@@ -3841,7 +3841,7 @@ function limpiarRegistros(){
     : '';
   const pend=sinEnviar().length;
   const avisoEnvio = pend
-    ? '⚠️ '+pend+' de '+registros.length+' árbol(es) NO se han enviado. Usa «Compartir jornada» antes de limpiar.\n\n'
+    ? '⚠️ '+pend+' de '+registros.length+' árbol(es) NO se han enviado. Usa «Enviar a Ecosistémica» antes de limpiar.\n\n'
     : '';
   if (!confirm(avisoEnvio+'¿Borrar '+registros.length+' registros de este celular?'+avisoPap)) return;
   evBorrar(registros.flatMap(r => [claveFoto(r,1), claveFoto(r,2)]));
