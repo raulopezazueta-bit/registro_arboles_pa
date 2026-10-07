@@ -86,7 +86,8 @@
 /* v39-4: «Fundación GC1» sin «Grupo». */
 /* v39-5: «Parques Alegres I.A.P. y Fundación GC1 - Iniciativa Cobertura Vegetal 2026». */
 /* v40 (07-oct-2026): HU-29 envío directo a Ecosistémica (Apps Script). */
-const CACHE_VERSION = 'apa-2026-10-07-v40';
+/* v40-1: errores de envío diferenciados con detalle técnico. */
+const CACHE_VERSION = 'apa-2026-10-07-v40-1';
 const CORE = [
   './',
   './index.html',

@@ -527,7 +527,7 @@ html[data-fs="2"] .save-bar .btn-save{max-width:none;width:100%}
 .dir-txt{font-size:var(--fs-md);font-weight:700;margin:0 0 8px}
 .dir-barra{height:10px;background:var(--c-n-100);border-radius:5px;overflow:hidden;margin-bottom:10px}
 .dir-barra>div{height:100%;width:0;background:var(--c-p-600);transition:width .3s}
-.dir-nota{font-size:var(--fs-sm);color:var(--c-n-600);line-height:1.4;margin:0 0 var(--s-3)}
+.dir-nota{font-size:var(--fs-sm);color:var(--c-n-600);line-height:1.4;margin:0 0 var(--s-3);white-space:pre-line;overflow-wrap:anywhere}
 /* ── v38 · envío de la jornada en .zip ── */
 .zip-arch{display:flex;flex-direction:column;gap:2px;background:var(--c-p-50);border:1.5px solid var(--c-p-100);border-radius:var(--r-md);padding:10px 12px;margin-bottom:var(--s-2)}
 .zip-arch b{font-family:var(--ff-mono);font-size:var(--fs-sm);word-break:break-all;color:var(--c-p-800)}
@@ -3472,13 +3472,26 @@ function filaDirecto(r){
     Foto_Frente:r.foto1?nombreFotoZip(r,1):'', Foto_Cenital:r.foto2?nombreFotoZip(r,2):'',
     Observaciones:r.obs||'', Mediciones_Por_Opcion:medidasPorOpcion(r), Origen:'APP' };
 }
+/* v40-1: los errores se distinguen (antes todo decía «se cortó la señal») y se guarda el detalle
+   para diagnosticar: red, conexión con el servidor o respuesta que no es del script (permisos). */
+let directoDetalle='';
+class ErrorEnvio extends Error { constructor(tipo, detalle){ super(detalle); this.tipo=tipo; } }
 async function postDirecto(cuerpo){
   const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(), 60000);
+  let resp;
   try{
-    const resp=await fetch(ENVIO_URL,{ method:'POST', body:JSON.stringify({ clave:ENVIO_CLAVE, dispositivo:deviceToken, version:APP_VERSION, ...cuerpo }),
+    resp=await fetch(ENVIO_URL,{ method:'POST', body:JSON.stringify({ clave:ENVIO_CLAVE, dispositivo:deviceToken, version:APP_VERSION, ...cuerpo }),
       headers:{'Content-Type':'text/plain;charset=utf-8'}, redirect:'follow', signal:ctl.signal });
-    return await resp.json();
-  } finally { clearTimeout(t); }
+  }catch(e){
+    throw new ErrorEnvio(!navigator.onLine ? 'red' : e.name==='AbortError' ? 'tiempo' : 'conexion', (e.name||'')+': '+(e.message||''));
+  }finally{ clearTimeout(t); }
+  const txt=await resp.text().catch(()=> '');
+  try{ return JSON.parse(txt); }
+  catch(_){ throw new ErrorEnvio('respuesta', 'HTTP '+resp.status+' · '+txt.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,160)); }
+}
+async function probarServidor(){
+  try{ const r=await fetch(ENVIO_URL+'?t='+Date.now(),{cache:'no-store',redirect:'follow'}); const t=await r.text(); return 'GET '+r.status+' · '+t.slice(0,120); }
+  catch(e){ return 'GET falló · '+(e.name||'')+': '+(e.message||''); }
 }
 function pintarDirecto(txt, frac, nota){
   $('dirTxt').textContent=txt; $('dirBarra').style.width=Math.round(100*frac)+'%';
@@ -3492,7 +3505,7 @@ async function enviarDirecto(opts){
   const pend=sinEnviar();
   if (!pend.length){ if (!silencioso) toast('✓ Todo está enviado a Ecosistémica','ok'); return; }
   if (!navigator.onLine){ if (!silencioso) toast('Sin señal: se enviará solo al recuperarla','err'); try{ localStorage.setItem('envioPendiente','1'); }catch(_){} return; }
-  directoEnCurso=true; try{ localStorage.setItem('envioPendiente','1'); }catch(_){}
+  directoEnCurso=true; directoDetalle=''; try{ localStorage.setItem('envioPendiente','1'); }catch(_){}
   if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirTit').textContent='📤 Enviando a Ecosistémica'; }
   pintarDirecto('Preparando '+pend.length+' árbol'+(pend.length===1?'':'es')+'…', 0, 'No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.');
   let ok=0, fallo=null; const parques=new Set(), quien=new Set();
@@ -3504,13 +3517,13 @@ async function enviarDirecto(opts){
       if (f1) fotos.frente=await blobADataUrl(inyectarSello(dataUrlABytes(f1), selloTexto(selloDeRegistro(r,'frente'))));
       if (f2) fotos.cenital=await blobADataUrl(inyectarSello(dataUrlABytes(f2), selloTexto(selloDeRegistro(r,'cenital'))));
       const resp=await postDirecto({ tipo:'arbol', datos:filaDirecto(r), fotos });
-      if (!resp || !resp.ok){ fallo = resp && resp.error==='clave' ? 'clave' : (resp && resp.error) || 'servidor'; if (!resp || resp.reintentar!==false) break; continue; }
+      if (!resp || !resp.ok){ fallo = resp && resp.error==='clave' ? 'clave' : (resp && resp.error) || 'servidor'; directoDetalle = resp && resp.detalle ? resp.detalle : ''; if (!resp || resp.reintentar!==false) break; continue; }
       /* Se marca «Enviado» solo si llegaron todas las fotos que el árbol tenía */
       const fotosCompletas=(f1||!r.foto1) && (f2||!r.foto2);
       const llegaron = resp.duplicado || (resp.fotos||0) >= Object.keys(fotos).length;
       if (fotosCompletas && llegaron) marcarEnviados('c',[uidDe(r)]);
       ok++; parques.add(r.parque||r.idParque); quien.add(r.registrante||'');
-    }catch(e){ fallo='red'; break; }
+    }catch(e){ fallo = e.tipo || 'preparar'; directoDetalle = e.message || String(e); break; }
   }
   if (ok){
     try{ await postDirecto({ tipo:'fin_jornada', datos:{ arboles:ok, brigada:[...quien].filter(Boolean).join(', '), parques:[...parques].filter(Boolean).join(', '),
@@ -3523,7 +3536,11 @@ async function enviarDirecto(opts){
   pintarDirecto(faltan ? ok+' árbol'+(ok===1?'':'es')+' enviado'+(ok===1?'':'s')+' · faltan '+faltan : 'Ecosistémica recibió '+ok+' árbol'+(ok===1?'':'es')+' con sus fotos', faltan ? ok/(ok+faltan) : 1,
     faltan ? (fallo==='clave' ? 'El servidor rechazó la clave de la app. Avisa a Ecosistémica; mientras, usa el .zip por Gmail.'
       : fallo==='red' ? 'Se cortó la señal. Lo que falta se envía solo al recuperarla, o toca «Reintentar ahora».'
+      : fallo==='tiempo' ? 'El servidor tardó demasiado en responder. Toca «Reintentar ahora».'
+      : fallo==='conexion' ? 'Hay señal, pero no se pudo conectar con el servidor de Ecosistémica. Toca «Reintentar ahora»; si sigue, usa el .zip por Gmail y avisa a Ecosistémica.'
+      : fallo==='respuesta' ? 'El servidor respondió con una página en lugar de confirmar el árbol (revisar permisos de la implementación). Usa el .zip por Gmail y avisa a Ecosistémica.'
       : 'El servidor no respondió bien ('+fallo+'). Se reintentará solo; si sigue, usa el .zip por Gmail.')
+      + (directoDetalle ? '\nDetalle técnico: '+directoDetalle : '')
       : 'Usa «Limpiar» solo cuando ya no necesites estos árboles en el celular: la copia quedó en la hoja maestra de Ecosistémica.');
   $('dirOk').hidden=false; $('dirReintentar').hidden=!faltan;
   if (silencioso && !faltan) toast('✅ Se enviaron '+ok+' árbol'+(ok===1?'':'es')+' pendientes a Ecosistémica','ok');
