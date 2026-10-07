@@ -69,7 +69,7 @@ function resumenConfig_() {
   return 'Hoja maestra: https://docs.google.com/spreadsheets/d/' + p.HOJA_ID + '\n' +
          'Carpeta: https://drive.google.com/drive/folders/' + p.CARPETA_RAIZ_ID + '\n' +
          'Correo de aviso: ' + p.CORREO_AVISO + '\n' +
-         'CLAVE_ENVIO (pásala a Claude junto con la URL de la aplicación web): ' + p.CLAVE_ENVIO;
+         'CLAVE_ENVIO (va dentro de la app, junto con la URL de la aplicación web): ' + p.CLAVE_ENVIO;
 }
 
 function prepararHoja_(h, cols) {
