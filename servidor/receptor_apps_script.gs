@@ -11,7 +11,7 @@
  * Para cambiar el correo de aviso (p. ej. a uno de Parques Alegres): ejecuta cambiarCorreo().
  */
 
-const VERSION = 's7-1';
+const VERSION = 's7-2';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -209,3 +209,5 @@ function guardarFoto_(carpeta, dataUrl, nombre, d) {
   archivo.setDescription('Árbol ' + texto_(d.ID_Arbol) + ' · ' + texto_(d.Nombre_Comun) + ' · ' + texto_(d.Parque));
   return archivo.getUrl();
 }
+
+// ═══ FIN DEL ARCHIVO · si no ves esta línea en el editor, el código se pegó incompleto ═══
