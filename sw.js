@@ -81,7 +81,8 @@
 /* v38-2: los íconos fijos ya vienen en SVG desde el HTML (no se ven emojis al abrir) y el clip del envío también es SVG. */
 /* v39 (06-oct-2026): Sprint 6 «Listo para el patronato». La copia sin señal solo guarda la app. */
 /* v39-1: meta 3,500, Cacaloxóchitl, Parques Alegres como institución de Fundación GC1. */
-const CACHE_VERSION = 'apa-2026-10-06-v39-1';
+/* v39-2: encabezados en verde oscuro, ilustraciones realistas de las fotos, fotos de iNaturalist en la demostración. */
+const CACHE_VERSION = 'apa-2026-10-06-v39-2';
 const CORE = [
   './',
   './index.html',
