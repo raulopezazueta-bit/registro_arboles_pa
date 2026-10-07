@@ -522,6 +522,12 @@ html[data-fs="2"] .save-bar .btn-save{max-width:none;width:100%}
 .envio-bar__nota{text-align:center;font-size:var(--fs-xs);color:var(--c-n-600);margin-top:4px}
 .btn-compartir--sec{background:var(--c-w);color:var(--c-p-700);border:1.5px solid var(--c-p-700);box-shadow:none}
 @media(min-width:640px){.reg-dia{max-width:600px;margin-left:auto;margin-right:auto}}
+/* ── v40 · HU-29 envío directo ── */
+.envio-bar__alt{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer}
+.dir-txt{font-size:var(--fs-md);font-weight:700;margin:0 0 8px}
+.dir-barra{height:10px;background:var(--c-n-100);border-radius:5px;overflow:hidden;margin-bottom:10px}
+.dir-barra>div{height:100%;width:0;background:var(--c-p-600);transition:width .3s}
+.dir-nota{font-size:var(--fs-sm);color:var(--c-n-600);line-height:1.4;margin:0 0 var(--s-3)}
 /* ── v38 · envío de la jornada en .zip ── */
 .zip-arch{display:flex;flex-direction:column;gap:2px;background:var(--c-p-50);border:1.5px solid var(--c-p-100);border-radius:var(--r-md);padding:10px 12px;margin-bottom:var(--s-2)}
 .zip-arch b{font-family:var(--ff-mono);font-size:var(--fs-sm);word-break:break-all;color:var(--c-p-800)}
@@ -1192,8 +1198,8 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 </section>
 
 <div class="envio-bar" id="envioBar" data-hidden="true">
-  <button type="button" class="btn-compartir" id="btnEnvioBar" onclick="compartirJornada()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> <span id="envioBarTxt">Compartir jornada</span></button>
-  <div class="envio-bar__nota">Un solo .zip para ecosistemicaconsultoria@gmail.com</div>
+  <button type="button" class="btn-compartir" id="btnEnvioBar" onclick="enviarDirecto()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> <span id="envioBarTxt">Enviar a Ecosistémica</span></button>
+  <div class="envio-bar__nota">Se envía directo con señal · <button type="button" class="envio-bar__alt" onclick="compartirJornada()">o en .zip por Gmail</button></div>
 </div>
 <div class="save-bar" id="saveBar">
   <div class="save-bar__info">
@@ -1229,6 +1235,18 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
       <button type="button" class="confirma__sec" onclick="confirmaVerRegistro()">Ver registro</button>
       <button type="button" class="confirma__sec" onclick="confirmaEnviar()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Enviar jornada</button>
     </div>
+  </div>
+</div>
+<div class="hoja" id="directo" hidden>
+  <div class="hoja__fondo" onclick="cerrarDirecto()"></div>
+  <div class="hoja__panel" role="dialog" aria-modal="true" aria-labelledby="dirTit">
+    <h2 class="hoja__tit" id="dirTit">📤 Enviando a Ecosistémica</h2>
+    <p class="dir-txt" id="dirTxt" aria-live="polite">Preparando…</p>
+    <div class="dir-barra" role="progressbar" aria-labelledby="dirTxt"><div id="dirBarra"></div></div>
+    <p class="dir-nota" id="dirNota">No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.</p>
+    <button type="button" class="btn-compartir" id="dirOk" hidden onclick="cerrarDirecto()">Listo</button>
+    <button type="button" class="btn-compartir btn-compartir--sec" id="dirReintentar" hidden onclick="enviarDirecto()">Reintentar ahora</button>
+    <button type="button" class="hoja__link" onclick="cerrarDirecto(); compartirJornada()">⬇ Otra forma: .zip por Gmail</button>
   </div>
 </div>
 <div class="hoja" id="zipEnvio" hidden>
@@ -2573,7 +2591,7 @@ function confirmaVerRegistro(){
     if (card){ const b=card.querySelector('.reg-card__resumen'); if (b && b.getAttribute('aria-expanded')!=='true') toggleRegistro(b); card.scrollIntoView({behavior:'smooth',block:'center'}); }
   }, 80);
 }
-function confirmaEnviar(){ cerrarConfirmacion(); switchTab('registros'); compartirJornada(); }
+function confirmaEnviar(){ cerrarConfirmacion(); switchTab('registros'); enviarDirecto(); }
 document.addEventListener('keydown', e => { if (e.key==='Escape' && confirmaAbierta) cerrarConfirmacion(); });
 
 function guardarRegistro(){
@@ -3050,7 +3068,7 @@ function pintarEnvio(){
   const total=registros.length, pend=sinEnviar().length;
   $('regLimpiarBox').style.display = total ? '' : 'none';
   if ($('envioBar')){
-    $('envioBarTxt').textContent = !total ? 'Compartir jornada' : pend ? 'Compartir jornada · '+pend+' sin enviar' : 'Compartir de nuevo (todo enviado)';
+    $('envioBarTxt').textContent = !total ? 'Enviar a Ecosistémica' : pend ? 'Enviar a Ecosistémica · '+pend+' sin enviar' : '✓ Todo enviado';
     $('btnEnvioBar').classList.toggle('btn-compartir--sec', total>0 && !pend);
     if ($('tab-registros').dataset.active==='true') $('envioBar').dataset.hidden = total ? 'false' : 'true';
   }
@@ -3428,6 +3446,93 @@ async function compartirArchivos(archivos, titulo){
     return false;
   }
 }
+/* ════════════════════════════════════════════════════════════
+   v40 · HU-29 ENVÍO DIRECTO A ECOSISTÉMICA
+   Árbol por árbol a un Apps Script de la cuenta de Ecosistémica: guarda las fotos en
+   Drive y una fila en la hoja maestra. Cada árbol se marca «Enviado» cuando el servidor
+   lo confirma, así que un corte de señal solo deja pendiente lo que faltó; se reintenta
+   solo al recuperar señal o al volver a abrir la app. El servidor no duplica (UID).
+   La URL y la clave están en el código público: solo permiten ENVIAR, no leer datos.
+   ════════════════════════════════════════════════════════════ */
+const ENVIO_URL='https://script.google.com/macros/s/AKfycbz48WmyA8xeP3uNdW4Ys9q4r5cF5gLxo1q_ZBLLtNj9XQHEmruoo3_nNTp3NzbHekvN/exec';
+const ENVIO_CLAVE='bb829b2b5d6542e6b5f8';
+let directoEnCurso=false;
+function blobADataUrl(bytes){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=()=>rej(fr.error); fr.readAsDataURL(new Blob([bytes],{type:'image/jpeg'})); }); }
+function numONada(v){ const n=parseFloat(v); return isNaN(n) ? '' : n; }
+function filaDirecto(r){
+  const t=new Date(r.ts||Date.now());
+  return { ID_Arbol:r.id, UID:uidDe(r), Fecha_ISO:r.ts||'', Fecha:t.toLocaleDateString('en-CA'), Mes:r.mes||'',
+    ID_Parque:r.idParque||'', Parque:r.parque||'', Colonia:r.colonia||'', Asesor:r.asesor||'', Brigada:r.registrante||'', Ejecutor:r.ejecutor||'',
+    Nombre_Comun:(r.especie||'').split('(')[0].trim(), Nombre_Cientifico:r.nombreCientifico||'', Codigo_iTree:r.itreeCode||'',
+    iTree_En_BD:r.itreeInBD||'', iTree_Alternativa:r.itreeAlt||'', Latitud:r.lat, Longitud:r.lon,
+    Precision_Estimada_m:precDe(r), Precision_Raw_m:numONada(r.acc), Precision_Metodo:r.precMetodo||'celular',
+    DAP_cm:numONada(r.dap), Altura_m:numONada(r.altura), Suelo_Circundante:r.suelo||'', Copa_Viva_pct:numONada(r.copa), Condicion_General:r.condicion||'',
+    Proto_Hoyo:r.protoHoyo?'Sí':'No', Proto_Cama:siNoNA(r.protoCama), Proto_Tutor:siNoNA(r.protoTutor), Proto_Riego:r.protoRiego?'Sí':'No',
+    Protocolo_Completo:(r.protoHoyo&&r.protoCama&&r.protoTutor&&r.protoRiego)?'Sí':'No',
+    Foto_Frente:r.foto1?nombreFotoZip(r,1):'', Foto_Cenital:r.foto2?nombreFotoZip(r,2):'',
+    Observaciones:r.obs||'', Mediciones_Por_Opcion:medidasPorOpcion(r), Origen:'APP' };
+}
+async function postDirecto(cuerpo){
+  const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(), 60000);
+  try{
+    const resp=await fetch(ENVIO_URL,{ method:'POST', body:JSON.stringify({ clave:ENVIO_CLAVE, dispositivo:deviceToken, version:APP_VERSION, ...cuerpo }),
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, redirect:'follow', signal:ctl.signal });
+    return await resp.json();
+  } finally { clearTimeout(t); }
+}
+function pintarDirecto(txt, frac, nota){
+  $('dirTxt').textContent=txt; $('dirBarra').style.width=Math.round(100*frac)+'%';
+  if (nota!==undefined) $('dirNota').textContent=nota;
+}
+function cerrarDirecto(){ $('directo').hidden=true; }
+async function enviarDirecto(opts){
+  const silencioso = opts && opts.silencioso;
+  if (bloqueoDemo()) return;
+  if (directoEnCurso) { if (!silencioso) $('directo').hidden=false; return; }
+  const pend=sinEnviar();
+  if (!pend.length){ if (!silencioso) toast('✓ Todo está enviado a Ecosistémica','ok'); return; }
+  if (!navigator.onLine){ if (!silencioso) toast('Sin señal: se enviará solo al recuperarla','err'); try{ localStorage.setItem('envioPendiente','1'); }catch(_){} return; }
+  directoEnCurso=true; try{ localStorage.setItem('envioPendiente','1'); }catch(_){}
+  if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirTit').textContent='📤 Enviando a Ecosistémica'; }
+  pintarDirecto('Preparando '+pend.length+' árbol'+(pend.length===1?'':'es')+'…', 0, 'No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.');
+  let ok=0, fallo=null; const parques=new Set(), quien=new Set();
+  for (let i=0;i<pend.length;i++){
+    const r=pend[i];
+    pintarDirecto('Enviando árbol '+(i+1)+' de '+pend.length+' · '+r.id, i/pend.length);
+    try{
+      const [f1,f2]=await fotosDe(r), fotos={};
+      if (f1) fotos.frente=await blobADataUrl(inyectarSello(dataUrlABytes(f1), selloTexto(selloDeRegistro(r,'frente'))));
+      if (f2) fotos.cenital=await blobADataUrl(inyectarSello(dataUrlABytes(f2), selloTexto(selloDeRegistro(r,'cenital'))));
+      const resp=await postDirecto({ tipo:'arbol', datos:filaDirecto(r), fotos });
+      if (!resp || !resp.ok){ fallo = resp && resp.error==='clave' ? 'clave' : (resp && resp.error) || 'servidor'; if (!resp || resp.reintentar!==false) break; continue; }
+      /* Se marca «Enviado» solo si llegaron todas las fotos que el árbol tenía */
+      const fotosCompletas=(f1||!r.foto1) && (f2||!r.foto2);
+      const llegaron = resp.duplicado || (resp.fotos||0) >= Object.keys(fotos).length;
+      if (fotosCompletas && llegaron) marcarEnviados('c',[uidDe(r)]);
+      ok++; parques.add(r.parque||r.idParque); quien.add(r.registrante||'');
+    }catch(e){ fallo='red'; break; }
+  }
+  if (ok){
+    try{ await postDirecto({ tipo:'fin_jornada', datos:{ arboles:ok, brigada:[...quien].filter(Boolean).join(', '), parques:[...parques].filter(Boolean).join(', '),
+      fecha:new Date().toLocaleDateString('es-MX'), detalle:fallo?('incompleto: '+fallo):'' } }); }catch(_){}
+  }
+  directoEnCurso=false;
+  const faltan=sinEnviar().length;
+  if (!faltan){ try{ localStorage.removeItem('envioPendiente'); }catch(_){} }
+  $('dirTit').textContent = faltan ? '⚠️ Envío incompleto' : '✅ Jornada recibida';
+  pintarDirecto(faltan ? ok+' árbol'+(ok===1?'':'es')+' enviado'+(ok===1?'':'s')+' · faltan '+faltan : 'Ecosistémica recibió '+ok+' árbol'+(ok===1?'':'es')+' con sus fotos', faltan ? ok/(ok+faltan) : 1,
+    faltan ? (fallo==='clave' ? 'El servidor rechazó la clave de la app. Avisa a Ecosistémica; mientras, usa el .zip por Gmail.'
+      : fallo==='red' ? 'Se cortó la señal. Lo que falta se envía solo al recuperarla, o toca «Reintentar ahora».'
+      : 'El servidor no respondió bien ('+fallo+'). Se reintentará solo; si sigue, usa el .zip por Gmail.')
+      : 'Usa «Limpiar» solo cuando ya no necesites estos árboles en el celular: la copia quedó en la hoja maestra de Ecosistémica.');
+  $('dirOk').hidden=false; $('dirReintentar').hidden=!faltan;
+  if (silencioso && !faltan) toast('✅ Se enviaron '+ok+' árbol'+(ok===1?'':'es')+' pendientes a Ecosistémica','ok');
+}
+/* Reintento automático: al recuperar señal, al volver a la app y al abrirla */
+function reintentarPendiente(){ try{ if (localStorage.getItem('envioPendiente')==='1' && navigator.onLine && !DEMO) setTimeout(()=>enviarDirecto({silencioso:$('directo').hidden}), 1500); }catch(_){} }
+window.addEventListener('online', reintentarPendiente);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) reintentarPendiente(); });
+window.addEventListener('load', reintentarPendiente);
 /* ════════════════════════════════════════════════════════════
    v38 · ENVÍO DE LA JORNADA EN UN .ZIP
    Un solo archivo con el CSV y las fotos selladas (sin recomprimir: el ID dentro
@@ -4418,7 +4523,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v39';
+const APP_VERSION='v40';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));
@@ -4443,7 +4548,7 @@ const GUIA=[
   {logo:true, tit:'Cobertura Vegetal 2026', txt:'Cada árbol que se planta en los parques de Culiacán queda registrado con su ubicación, especie, medidas y 2 fotos de evidencia.', marca:true},
   {ico:'pin', tit:'Permite ubicación y cámara', txt:'La app usa el GPS para ubicar cada árbol y la cámara para sus 2 fotos. Cuando el celular pregunte, toca «Permitir».'},
   {ico:'sun', tit:'Ajusta la pantalla', txt:'Con el botón Aa de arriba a la derecha agrandas la letra o activas el modo sol para leer a pleno sol.'},
-  {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Compartir jornada. Se guarda un .zip y se abre Gmail dirigido a Ecosistémica: adjunta el .zip y envía. Usa «Limpiar» solo cuando confirmen que lo recibieron.'}
+  {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Enviar a Ecosistémica. Con señal se envía directo, árbol por árbol; si se corta, lo que falte se envía solo después.'}
 ];
 let guiaPaso=0;
 function abrirGuia(n){ guiaPaso=n||0; pintarGuia(); $('guia').hidden=false; setTimeout(()=>$('guiaSig').focus(),40); }
@@ -4477,7 +4582,8 @@ function pintarHoy(){
 function actualizarAhora(){ try{ guardarBorrador(); }catch(_){} $('versionBar').classList.remove('undo--show'); setTimeout(()=>location.reload(), 150); }
 document.addEventListener('keydown', e => {
   if (e.key!=='Escape') return;
-  if (!$('acerca').hidden) cerrarAcerca();
+  if (!$('directo').hidden && !directoEnCurso) cerrarDirecto();
+  else if (!$('acerca').hidden) cerrarAcerca();
   else if (!$('pantalla').hidden) cerrarPantalla();
   else if (!$('guia').hidden) cerrarGuia();
 });
@@ -4486,7 +4592,7 @@ let actualizacionPendiente = false;
 /* v39: además del árbol en captura, no se recarga encima de una revisita a medias, de la hoja
    «Ya lo envié» (al volver de Gmail) ni de un envío en paquetes sin terminar. */
 function ocupadoEnOtraCosa(){
-  return !!(arbolSeleccionado || fotoMonitoreo || !$('zipEnvio').hidden || zipEnCurso
+  return !!(arbolSeleccionado || fotoMonitoreo || !$('zipEnvio').hidden || zipEnCurso || directoEnCurso
     || $('listoBar').classList.contains('undo--show') || confirmaAbierta);
 }
 if ('serviceWorker' in navigator) {
