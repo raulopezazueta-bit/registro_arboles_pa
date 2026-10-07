@@ -153,7 +153,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .field-unit{position:relative}
 .field-unit input{padding-right:54px}
 .field-unit__sufix{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:var(--fs-md);font-weight:700;color:var(--c-n-500);pointer-events:none}
+.id-display__value--pend{visibility:hidden}
 .itree-card{margin-top:var(--s-3);background:var(--c-a-100);border-radius:var(--r-md);padding:var(--s-3);display:flex;align-items:center;gap:var(--s-2);flex-wrap:wrap}
+.itree-card .itree-code{font-size:var(--fs-sm)!important;padding:2px 8px!important}
 .itree-card__label{font-size:var(--fs-xs);font-weight:700;color:var(--c-a-700);text-transform:uppercase;letter-spacing:.5px;width:100%}
 .itree-code{background:var(--c-p-700);color:var(--c-w);padding:6px 14px;border-radius:var(--r-sm);font-size:var(--fs-lg);font-weight:700;font-family:var(--ff-mono);letter-spacing:1.5px}
 .itree-bd{font-size:var(--fs-xs);font-weight:700;padding:4px 10px;border-radius:var(--r-full)}
@@ -444,7 +446,9 @@ html[data-fs="2"] .gps__anillo{--ring:216px}
 .gps__permiso{padding:var(--s-4);text-align:center}
 .gps__permiso[hidden]{display:none}
 .gps--permiso .gps__body,.gps--permiso .gps__fijo{display:none!important}
-.gps--permiso .gps__head{background:var(--c-err)}
+.gps--permiso .gps__head{background:#8A5A00}
+.gps__permiso-ico{color:#8A5A00!important}
+.gps__permiso-demo{margin-top:10px;background:none;border:0;color:var(--c-p-700);font:inherit;font-weight:700;text-decoration:underline;min-height:44px;cursor:pointer}
 .gps__permiso-ico{font-size:48px;line-height:1.1}
 .gps__permiso-tit{font-size:var(--fs-lg);font-weight:800;margin:6px 0 2px}
 .gps__permiso-sub{font-size:var(--fs-sm);color:var(--c-n-600);margin-bottom:var(--s-3)}
@@ -526,6 +530,42 @@ html[data-fs="2"] .save-bar .btn-save{max-width:none;width:100%}
 .zip-pasos b{word-break:break-word}
 .zip-ya{margin-top:var(--s-2)}
 .zip-otros{display:flex;flex-direction:column;margin-top:var(--s-2)}
+/* ── v39 · HU-34 resumen de impacto ── */
+.impacto{background:var(--c-w);border:1.5px solid var(--c-n-200);border-radius:var(--r-lg,14px);padding:14px;margin-bottom:var(--s-3)}
+.impacto__cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.impacto__tit{font-size:var(--fs-md);font-weight:800;color:var(--c-n-900)}
+.impacto__ambito{font-size:var(--fs-xs);color:var(--c-n-600)}
+.impacto__hero{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.impacto__num{font-size:calc(var(--fs-3xl) * 1.35);font-weight:900;color:var(--c-p-800);line-height:1;font-variant-numeric:tabular-nums}
+.impacto__meta{font-size:var(--fs-sm);color:var(--c-n-600)}
+.impacto__barra{height:8px;background:var(--c-n-100);border-radius:4px;margin:8px 0 12px;overflow:hidden}
+.impacto__barra>div{height:100%;background:var(--c-p-600);border-radius:4px;min-width:4px}
+.impacto__tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.impacto__tile{background:var(--c-p-50);border-radius:var(--r-md);padding:8px;text-align:center}
+.impacto__tile b{display:block;font-size:var(--fs-xl);color:var(--c-n-900);font-variant-numeric:tabular-nums}
+.impacto__tile span{font-size:var(--fs-2xs);color:var(--c-n-600)}
+.impacto__sec{font-size:var(--fs-xs);font-weight:800;color:var(--c-n-700);text-transform:uppercase;letter-spacing:.4px;margin:4px 0 6px}
+.impacto__fila{display:grid;grid-template-columns:minmax(0,9.2em) 1fr 3.2em;gap:8px;align-items:center;font-size:var(--fs-sm);margin-bottom:5px}
+.impacto__fila .lbl{color:var(--c-n-800);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.impacto__fila .val{text-align:right;color:var(--c-n-900);font-weight:700;font-variant-numeric:tabular-nums}
+.impacto__fila .bar{height:10px;background:var(--c-n-100);border-radius:0 4px 4px 0}
+.impacto__fila .bar>div{height:100%;background:var(--c-p-600);border-radius:0 4px 4px 0}
+.impacto__nota{font-size:var(--fs-2xs);color:var(--c-n-600);margin-top:8px;line-height:1.35}
+/* ── v39 · HU-33 demostración ── */
+html.demo .app-bar{background:#6B4A00}
+.demo-chip{flex:none;border:2px solid #FFD666;background:#FFD666;color:#3D2A00;font:inherit;font-weight:900;font-size:var(--fs-xs);letter-spacing:.5px;border-radius:999px;padding:6px 10px;min-height:40px;cursor:pointer;margin-right:6px}
+.demo-chip span{font-weight:700}
+.demo-aviso{background:#FFF4D6;border:1.5px solid #E0B44A;color:#4A3500;border-radius:var(--r-md);padding:10px 12px;margin:var(--s-3) var(--s-4) 0;font-size:var(--fs-sm);line-height:1.4}
+.demo-aviso b{color:#3D2A00}
+/* ── v39 · HU-32 Acerca de ── */
+.acerca__cab{display:flex;gap:12px;align-items:center;margin-bottom:var(--s-3)}
+.acerca__logo{width:56px;height:56px;object-fit:contain;flex:none}
+.acerca__sub{font-size:var(--fs-sm);color:var(--c-n-600)}
+.acerca__p{font-size:var(--fs-sm);line-height:1.5;margin:0 0 var(--s-3)}
+.acerca__lista{margin:0 0 var(--s-3) 1.1em;padding:0;font-size:var(--fs-sm);line-height:1.5}
+.acerca__datos{display:flex;flex-direction:column;gap:10px;background:var(--c-p-50);border-radius:var(--r-md);padding:12px;margin-bottom:var(--s-3);font-size:var(--fs-sm);line-height:1.4}
+.acerca__datos>div{display:flex;gap:8px;align-items:flex-start}
+.acerca__datos .ic{color:var(--c-p-700);margin-top:2px}
 /* ── v34 · HU-24 menú de pantalla y modo sol ── */
 .hoja{position:fixed;inset:0;z-index:1300}
 .hoja[hidden]{display:none}
@@ -570,6 +610,10 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 .guia__ico .ic{width:44px;height:44px;stroke-width:1.75;vertical-align:0}
 .guia__tit{font-size:var(--fs-xl);font-weight:800;color:var(--c-n-900)}
 .guia__txt{font-size:var(--fs-md);color:var(--c-n-700);line-height:1.5;margin:8px 0 14px}
+.guia__ico--logo{background:var(--c-w);box-shadow:0 0 0 3px var(--c-p-100)}
+.guia__logo{width:70px;height:70px;object-fit:contain}
+.guia__marca{display:flex;flex-direction:column;gap:2px;text-align:center;font-size:var(--fs-sm);color:var(--c-n-600);margin:0 0 14px;line-height:1.35}
+.guia__marca b{color:var(--c-p-800);font-size:var(--fs-md)}
 .guia__puntos{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
 .guia__puntos span{width:9px;height:9px;border-radius:50%;background:var(--c-n-300)}
 .guia__puntos span.on{background:var(--c-p-700);width:22px;border-radius:5px}
@@ -607,6 +651,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     <div class="app-bar__title">Árboles PA</div>
     <div class="app-bar__sub" id="appSub">Parques Alegres · Cobertura Vegetal · 2026</div>
   </div>
+  <button type="button" class="demo-chip" id="demoChip" hidden onclick="salirDemo()" aria-label="Salir de la demostración">DEMO <span>· Salir</span></button>
   <button type="button" class="btn-fs" id="btnFs" onclick="abrirPantalla()" aria-haspopup="dialog" aria-label="Ajustes de pantalla: tamaño de letra y modo sol">
     <span>Aa</span><span class="btn-fs__dots" aria-hidden="true"><span class="btn-fs__dot is-on"></span><span class="btn-fs__dot"></span><span class="btn-fs__dot"></span></span>
   </button>
@@ -644,7 +689,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
   <div class="gps" id="gpsCard">
     <div class="gps__head">
       <span class="gps__icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></span>
-      <span class="gps__title">Georreferenciación</span>
+      <span class="gps__title">Ubicación del árbol</span>
       <span class="gps__badge gps__badge--wait" id="gpsBadge" aria-live="polite">Esperando…</span>
     </div>
     <div class="gps__fijo" id="gpsFijo" role="status">
@@ -654,14 +699,15 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     </div>
     <div class="gps__permiso" id="gpsPermiso" hidden>
       <div class="gps__permiso-ico" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-pinoff"/></svg></div>
-      <h2 class="gps__permiso-tit">La app no puede ver tu ubicación</h2>
-      <p class="gps__permiso-sub">Sin GPS no se puede registrar el árbol. Dale permiso así:</p>
+      <h2 class="gps__permiso-tit">Falta el permiso de ubicación</h2>
+      <p class="gps__permiso-sub">La app ubica cada árbol con el GPS. Para registrar en el parque, dale permiso así:</p>
       <ol class="gps__permiso-pasos">
         <li>Toca el candado <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg> o la <b>ⓘ</b> junto a la dirección de la página. Si abriste la app desde su ícono: mantén presionado el ícono → <b>ⓘ Información</b>.</li>
         <li>Entra a <b>Permisos → Ubicación</b>.</li>
         <li>Elige <b>Permitir</b> y vuelve aquí.</li>
       </ol>
       <button type="button" class="btn-lock btn-lock--ready gps__permiso-btn" onclick="reintentarGPS()"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg> Ya lo activé, reintentar</button>
+      <button type="button" class="gps__permiso-demo" onclick="entrarDemo()">¿Solo quieres conocer la app? Ver demostración</button>
     </div>
     <div class="gps__body">
       <div class="gps__anillo">
@@ -735,17 +781,17 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
       </div>
       <div class="field-row">
         <div class="field" id="f-asesor"><label class="field__label" for="asesor">Asesor</label>
-          <input type="text" id="asesor" placeholder="Se completa al ingresar el ID" autocomplete="off" readonly>
+          <input type="text" id="asesor" placeholder="Automático con el ID" autocomplete="off" readonly>
         </div>
         <div class="field" id="f-registrante"><label class="field__label" for="registrante">Registrado por <span class="req">*</span></label>
           <input type="text" id="registrante" placeholder="Ej: María Pérez" autocomplete="off">
         </div>
       </div>
       <div class="field" id="f-parque"><label class="field__label" for="parque">Parque o área <span class="req">*</span></label>
-        <input type="text" id="parque" placeholder="Se completa al ingresar el ID" autocomplete="off" readonly>
+        <input type="text" id="parque" placeholder="Automático con el ID" autocomplete="off" readonly>
       </div>
       <div class="field" id="f-colonia"><label class="field__label" for="colonia">Colonia</label>
-        <input type="text" id="colonia" placeholder="Se completa al ingresar el ID (opcional en modo manual)" autocomplete="off" readonly>
+        <input type="text" id="colonia" placeholder="Automático con el ID" autocomplete="off" readonly>
       </div>
       <button type="button" class="jornada__listo" id="jornadaListo" onclick="cerrarJornada()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Listo, guardar datos de la jornada</button>
     </div>
@@ -835,7 +881,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         <input type="text" id="nombreCientifico" readonly placeholder="Se completa al elegir especie">
       </div>
       <div class="itree-card" id="itreeInfo" style="display:none">
-        <div class="itree-card__label">Código i-Tree Eco</div>
+        <div class="itree-card__label">Código para el cálculo de beneficios (i-Tree Eco)</div>
         <span class="itree-code" id="itreeCode">—</span>
         <span class="itree-bd" id="itreeBD">—</span>
         <div class="itree-alt" id="itreeAlt" style="display:none"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg> Alternativa en i-Tree: <strong id="itreeAltText"></strong></div>
@@ -862,15 +908,15 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         <p class="field__hint" id="numHint" style="color:var(--c-p-800);font-weight:600"></p>
         <p class="dup-warn" id="dupWarn"></p>
       </div>
-      <div class="id-display"><div class="id-display__value" id="arbolID">ARB-00000</div><div class="id-display__label">ID generado automáticamente</div></div>
+      <div class="id-display"><div class="id-display__value" id="arbolID">ARB-00000</div><div class="id-display__label" id="arbolIDLbl">ID generado automáticamente</div></div>
     </div>
   </div>
 
-  <div class="section" id="sec-itree" data-group="itree" data-nombre="Mediciones i-Tree Eco">
+  <div class="section" id="sec-itree" data-group="itree" data-nombre="Mediciones del árbol">
     <button type="button" class="section__lock" tabindex="-1" onclick="irAPendiente()"><span class="section__lock-msg"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg> Completa la sección anterior</span></button>
-    <div class="section__head section__head--itree"><div class="section__head__title"><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-ruler"/></svg></span> Mediciones i-Tree Eco</div><span class="section__head__status" id="stItree">0/5</span></div>
+    <div class="section__head section__head--itree"><div class="section__head__title"><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-ruler"/></svg></span> Mediciones del árbol</div><span class="section__head__status" id="stItree">0/5</span></div>
     <div class="section__body">
-      <div class="field" id="f-dap"><label class="field__label" for="dap">DAP <span class="req">*</span> <span class="opt">grosor del tallo a 1.30 m</span></label>
+      <div class="field" id="f-dap"><label class="field__label" for="dap">Grosor del tallo (DAP) <span class="req">*</span> <span class="opt">a 1.30 m</span></label>
           <div class="field-unit"><input type="number" id="dap" min="0.5" max="60" step="0.1" inputmode="decimal" placeholder="Toca una opción o escribe"><span class="field-unit__sufix">cm</span></div>
           <div class="opciones" id="op-dap" role="group" aria-label="Opciones rápidas de DAP">
             <button type="button" class="opcion" data-v="1" aria-pressed="false" onclick="elegirMedida('dap',1)">1 cm</button>
@@ -976,7 +1022,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         <div class="foto-slot" id="slot2"><img class="foto-slot__img" id="prev2" alt="Árbol finalizado desde arriba"><span class="foto-slot__icon"><svg class="ic" aria-hidden="true"><use href="#i-arrowdown"/></svg></span><span class="foto-slot__label">2 · Desde arriba<br>Cepa, tutor y riego vistos en vertical</span><span class="foto-slot__check"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><input type="file" accept="image/*" capture="environment" id="fi2" onchange="capturarFoto(2,this)"></div>
       </div>
       <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> Foto 1: de frente, árbol completo. Foto 2: con el celular sobre el árbol, apuntando hacia abajo.</p>
-      <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Para enviarlas al coordinador usa <strong>Registros → Compartir</strong>. Si las adjuntas desde la galería pierden el ID en el nombre.</p>
+      <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Para enviarlas usa <strong>Registros → Compartir jornada</strong>. Si las adjuntas desde la galería pierden el ID en el nombre.</p>
       <div class="field" style="margin-top:var(--s-3)"><label class="field__label" for="obs">Observaciones <span class="opt">opcional</span></label>
         <textarea id="obs" placeholder="Estado del árbol, condiciones del terreno, incidencias…"></textarea>
       </div>
@@ -992,6 +1038,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 
 <section id="tab-registros" class="tab-content" role="tabpanel">
   <div class="reg-toolbar">
+    <div class="impacto" id="impacto" hidden></div>
     <div class="reg-stats">
       <div class="reg-stat"><div class="reg-stat__value" id="kpiTotal">0</div><div class="reg-stat__label">Total</div></div>
       <div class="reg-stat"><div class="reg-stat__value" id="kpiMes">—</div><div class="reg-stat__label">Este mes</div></div>
@@ -1002,14 +1049,14 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     <div class="envio-estado" id="envioEstado" aria-live="polite"></div>
     <div class="reg-actions reg-actions--sec">
       <span class="reg-actions__lbl">Descargar:</span>
-      <button class="btn-action btn-action--secondary" onclick="exportCSV()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> CSV i-Tree</button>
+      <button class="btn-action btn-action--secondary" onclick="exportCSV()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Tabla (CSV)</button>
       <button class="btn-action btn-action--secondary" onclick="exportFotos()"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg> Fotos</button>
     </div>
   </div>
   <div id="regList"></div>
   <div class="reg-limpiar" id="regLimpiarBox">
     <button type="button" class="reg-limpiar__btn" onclick="limpiarRegistros()"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Limpiar registros de este celular</button>
-    <p class="reg-limpiar__txt">Úsalo solo cuando el coordinador confirme que recibió la jornada.</p>
+    <p class="reg-limpiar__txt">Úsalo solo cuando Ecosistémica confirme que recibió la jornada.</p>
   </div>
   <div class="papelera" id="papeleraBox" style="display:none">
     <button type="button" class="papelera__head" id="papeleraHead" onclick="togglePapelera()"></button>
@@ -1164,6 +1211,25 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     </div>
   </div>
 </div>
+<div class="hoja" id="acerca" hidden>
+  <div class="hoja__fondo" onclick="cerrarAcerca()"></div>
+  <div class="hoja__panel" role="dialog" aria-modal="true" aria-labelledby="acercaTit">
+    <div class="acerca__cab"><img class="acerca__logo" id="acercaLogo" alt="Parques Alegres"><div><h2 class="hoja__tit" id="acercaTit" style="margin:0">Árboles PA</h2><div class="acerca__sub">Registro de campo · Cobertura Vegetal 2026</div></div></div>
+    <p class="acerca__p">Herramienta de campo para registrar cada árbol que se planta en los parques de Culiacán, con evidencia verificable: ubicación GPS de ±1 m, especie, medidas, protocolo de plantación y 2 fotos con el ID del árbol grabado dentro.</p>
+    <ul class="acerca__lista">
+      <li><b>Parques Alegres I.A.P.</b> · iniciativa Cobertura Vegetal 2026</li>
+      <li><b>Fundación GC1</b> · con su apoyo</li>
+      <li><b>Ecosistémica – Consultoría Ambiental Integral</b> · diseño y desarrollo</li>
+    </ul>
+    <div class="acerca__datos">
+      <div><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span><b>Privacidad.</b> No hay servidor ni cuentas: los datos se quedan en este celular hasta que tú envías la jornada.</span></div>
+      <div><svg class="ic" aria-hidden="true"><use href="#i-sprout"/></svg><span><b>Funciona sin internet.</b> Después de abrirla una vez, registra y guarda sin señal.</span></div>
+      <div><svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg><span><b>Compatible con i-Tree Eco</b> (USDA Forest Service) para calcular los beneficios ambientales del arbolado.</span></div>
+    </div>
+    <div class="hoja__ver" id="acercaVer"></div>
+    <button type="button" class="btn-compartir" onclick="cerrarAcerca()">Cerrar</button>
+  </div>
+</div>
 <div class="hoja" id="pantalla" hidden>
   <div class="hoja__fondo" onclick="cerrarPantalla()"></div>
   <div class="hoja__panel" role="dialog" aria-modal="true" aria-labelledby="pantTit">
@@ -1177,6 +1243,8 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     <div class="hoja__lbl" id="lblSol">Modo sol</div>
     <button type="button" class="sol-toggle" id="btnSol" onclick="alternarSol()" aria-pressed="false"><span class="sol-toggle__txt"><b><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg> Alto contraste</b><small>Negro sobre blanco y bordes gruesos para leer a pleno sol</small></span><span class="sol-toggle__sw" aria-hidden="true"></span></button>
     <button type="button" class="hoja__link" onclick="cerrarPantalla(); abrirGuia(0)"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg> Ver la guía de uso</button>
+    <button type="button" class="hoja__link" onclick="cerrarPantalla(); abrirAcerca()"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> Acerca de Árboles PA</button>
+    <button type="button" class="hoja__link" id="btnDemoPant" onclick="cerrarPantalla(); alternarDemo()"><svg class="ic" aria-hidden="true"><use href="#i-tree"/></svg> <span id="btnDemoTxt">Ver demostración con datos de ejemplo</span></button>
     <div class="hoja__ver" id="pantVer"></div>
     <button type="button" class="btn-compartir" onclick="cerrarPantalla()">Listo</button>
   </div>
@@ -1186,8 +1254,10 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     <div class="guia__ico" id="guiaIco" aria-hidden="true"></div>
     <h2 class="guia__tit" id="guiaTit"></h2>
     <p class="guia__txt" id="guiaTxt"></p>
-    <div class="guia__puntos" id="guiaPuntos" aria-hidden="true"><span></span><span></span><span></span></div>
+    <p class="guia__marca" id="guiaMarca" hidden><b>Parques Alegres I.A.P.</b><span>con el apoyo de Fundación GC1</span><span>Desarrollo: Ecosistémica – Consultoría Ambiental Integral</span></p>
+    <div class="guia__puntos" id="guiaPuntos" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
     <button type="button" class="btn-compartir" id="guiaSig" onclick="guiaSiguiente()">Siguiente</button>
+    <button type="button" class="guia__saltar" id="guiaDemo" hidden onclick="cerrarGuia(); entrarDemo()">Ver una demostración con datos de ejemplo</button>
     <button type="button" class="guia__saltar" id="guiaSaltar" onclick="cerrarGuia()">Saltar</button>
   </div>
 </div>
@@ -1253,6 +1323,94 @@ const FS_NOMBRES = ['Normal','Grande','Extra grande'];
 const TOTAL_FIELDS = FIELDS.length;
 const GROUP_COUNTS = FIELDS.reduce((acc,f)=>{ acc[f.group]=(acc[f.group]||0)+1; return acc; },{});
 let watchId=null, readings=[], gpsLocked=null, foto1=null, foto2=null, gpsAsentado=false;
+/* ════════════════════════════════════════════════════════════
+   v39 · HU-33 MODO DEMOSTRACIÓN
+   Para mostrar la app completa sin GPS ni datos (p. ej. en una oficina). Mientras dura:
+   - lo que la app guarda va a una copia en memoria: los árboles reales del celular
+     no se ven, no se tocan y no se mezclan; al salir todo vuelve como estaba;
+   - la ubicación es simulada cerca de un parque de ejemplo (llega a ±1 m en ~15 s);
+   - no se envía ni se descarga nada.
+   Dura lo que dure la pestaña (sessionStorage); cerrar la app también la termina.
+   ════════════════════════════════════════════════════════════ */
+const DEMO = (() => { try{ return sessionStorage.getItem('demo_v1')==='1'; }catch(_){ return false; } })();
+const DEMO_PARQUES=['14622','14664','23938','14993','14819'];
+const DEMO_CENTROS={'14622':[24.8172,-107.3958],'14664':[24.8238,-107.3812],'23938':[24.7925,-107.4087],'14993':[24.8149,-107.3989],'14819':[24.8251,-107.3790]};
+if (DEMO){
+  /* 1) Almacenamiento en sombra: solo pasan las preferencias de pantalla y la guía */
+  const PASA=new Set(['fsLevel','modoSol','guia_v1']), sombra=new Map();
+  const get0=Storage.prototype.getItem, set0=Storage.prototype.setItem, rem0=Storage.prototype.removeItem;
+  Storage.prototype.getItem=function(k){ if (this!==localStorage || PASA.has(k)) return get0.call(this,k); return sombra.has(k) ? sombra.get(k) : null; };
+  Storage.prototype.setItem=function(k,v){ if (this!==localStorage || PASA.has(k)) return set0.call(this,k,v); sombra.set(k,String(v)); };
+  Storage.prototype.removeItem=function(k){ if (this!==localStorage || PASA.has(k)) return rem0.call(this,k); sombra.delete(k); };
+  /* 2) Ubicación simulada: lecturas de ±3–4 m alrededor del parque de ejemplo */
+  const centro=DEMO_CENTROS['14622'], m2g=1/111320;
+  const gauss=()=>{ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+  const lectura=()=>({ coords:{ latitude:centro[0]+gauss()*1.2*m2g, longitude:centro[1]+gauss()*1.2*m2g/Math.cos(centro[0]*Math.PI/180),
+    accuracy:3+Math.random()*1.2, speed:0 }, timestamp:Date.now() });
+  const relojes=new Map(); let sig=1;
+  try{
+    Object.defineProperty(navigator, 'geolocation', { configurable:true, value:{
+      watchPosition(ok){ const id=sig++; relojes.set(id, setInterval(()=>ok(lectura()), 900)); setTimeout(()=>ok(lectura()),300); return id; },
+      clearWatch(id){ clearInterval(relojes.get(id)); relojes.delete(id); },
+      getCurrentPosition(ok){ setTimeout(()=>ok(lectura()),300); } } });
+    if (navigator.permissions) navigator.permissions.query = d => Promise.resolve({ state:'granted', onchange:null });
+  }catch(_){}
+  /* 3) Datos de ejemplo: 34 árboles en 5 parques reales de la base, en las últimas 3 semanas */
+  (function sembrar(){
+    const fotoDe = nombre => { const img=document.querySelector('.especie-card img[alt="'+nombre+'"]'); return img ? img.src : null; };
+    const especies=Object.keys(ESPECIES_CAT), suelos=['Pasto / Jardín','Tierra sin vegetación','Pasto / Jardín','Adoquín'];
+    const pesos=[5,4,4,3,3,3,2,2,2,2,1,1,1,1];
+    const elegir=()=>{ const t=pesos.reduce((a,b)=>a+b,0); let r=Math.random()*t; for (let i=0;i<especies.length;i++){ r-=pesos[i%pesos.length]; if (r<=0) return especies[i]; } return especies[0]; };
+    const regs=[], base=[], revis=[];
+    let k=0;
+    DEMO_PARQUES.forEach((pid, ip) => {
+      const pq=PARQUES_DB[pid]||{nombre:'Parque',colonia:'',asesor:''}, c=DEMO_CENTROS[pid];
+      const n=[9,8,7,5,5][ip];
+      for (let i=1;i<=n;i++){
+        const dias=20-Math.floor((k++)*20/34), f=new Date(Date.now()-dias*86400000-((i*37)%300)*60000);
+        const esp=elegir(), cat=ESPECIES_CAT[esp], comun=esp.split('(')[0].trim();
+        const copa=[100,95,90,85,95,100,80][i%7], cond=copa>=90?'Buena':copa>=75?'Regular':'Mala';
+        const lat=c[0]+(Math.random()-.5)*0.0012, lon=c[1]+(Math.random()-.5)*0.0012;
+        const r={ id:pid+'-DEMO-'+String(i).padStart(5,'0'), num:i, idParque:pid, asesor:pq.asesor, mes:f.getMonth()===8?'Septiembre':'Octubre',
+          ejecutor:['Comité y vecinos','Voluntariado','Estudiantes'][i%3], parque:pq.nombre, colonia:pq.colonia, especie:esp,
+          nombreCientifico:cat.sci, itreeCode:cat.itree, itreeInBD:cat.inBD, itreeAlt:cat.alt||'', registrante:'Brigada de ejemplo', obs:'',
+          dap:+(1+Math.random()*2).toFixed(1), altura:+(1.2+Math.random()*1.3).toFixed(1), suelo:suelos[i%4], copa, condicion:cond, medOrigen:{},
+          protoHoyo:true, protoCama:i%5!==0, protoTutor:i%4!==0, protoRiego:true,
+          lat, lon, acc:+(3+Math.random()*1.5).toFixed(1), prec:+(0.6+Math.random()*0.4).toFixed(1), precMetodo:'estimada',
+          foto1:fotoDe(comun), foto2:fotoDe(comun), estado:'Plantado', ts:f.toISOString(), fecha:f.toLocaleString('es-MX') };
+        regs.push(r);
+        base.push({ id:r.id, especie:comun, parque:r.parque, colonia:r.colonia, lat, lon, fecha:r.fecha });
+      }
+    });
+    /* Revisitas de ejemplo para la sobrevivencia: 14 árboles revisados */
+    regs.slice(0,14).forEach((r,i) => revis.push({ idMonitoreo:'MON-DEMO-'+String(i+1).padStart(5,'0'), idArbol:r.id, parque:r.parque,
+      estado: i===5 ? 'Muerto' : i===11 ? 'Dañado' : 'Vivo', dap:'', revisor:'Brigada de ejemplo', obs:'', mes:'Octubre',
+      fecha:new Date(Date.now()-2*86400000).toLocaleString('es-MX'), lat:r.lat, lon:r.lon, foto:false }));
+    const enviados=regs.filter(r => (Date.now()-new Date(r.ts))>3*86400000).map(r => r.id+'@'+r.ts);
+    localStorage.setItem('r11k_v2', JSON.stringify(regs));
+    localStorage.setItem('baseMonitoreo', JSON.stringify(base));
+    localStorage.setItem('monitoreo_v1', JSON.stringify(revis));
+    localStorage.setItem('envios_v1', JSON.stringify({ c:enviados, v:[], f:[] }));
+    const ult={}; regs.forEach(r => { const k=r.idParque+'-DEMO-'; ult[k]=Math.max(ult[k]||0, r.num); });
+    localStorage.setItem('ultimoNum', JSON.stringify(ult));
+    localStorage.setItem('deviceToken','DEMO');
+    localStorage.setItem('lp','14622'); localStorage.setItem('lr','Brigada de ejemplo');
+    localStorage.setItem('le','Comité y vecinos'); localStorage.setItem('ls', new Date().getMonth()===8?'Septiembre':'Octubre');
+  })();
+}
+if (DEMO){
+  document.documentElement.classList.add('demo');
+  $('demoChip').hidden=false;
+  $('btnDemoTxt').textContent='Salir de la demostración';
+  const av=document.createElement('div'); av.className='demo-aviso'; av.setAttribute('role','note');
+  av.innerHTML='<b>Demostración.</b> Datos de ejemplo de 5 parques y ubicación simulada: puedes registrar un árbol completo. No se guarda ni se envía nada; tus árboles reales siguen intactos. Para salir toca <b>DEMO · Salir</b>.';
+  $('tab-registrar').prepend(av);
+}
+function entrarDemo(){ try{ sessionStorage.setItem('demo_v1','1'); }catch(_){ toast('Este navegador no permite la demostración','err'); return; } location.reload(); }
+function salirDemo(){ try{ sessionStorage.removeItem('demo_v1'); }catch(_){} location.reload(); }
+function alternarDemo(){ DEMO ? salirDemo() : entrarDemo(); }
+/* En la demostración no sale nada del celular */
+function bloqueoDemo(){ if (!DEMO) return false; toast('Es una demostración: no se envía ni se descarga nada. Sal de la demostración para enviar tu jornada.','err'); return true; }
 let registros = JSON.parse(localStorage.getItem('r11k_v2') || '[]');
 /* Papelera: los registros borrados se guardan 7 días por si el borrado fue un error.
    No aparecen en la lista, ni en los contadores, ni en el CSV, ni en las fotos. */
@@ -1387,7 +1545,12 @@ function evAbrir(){
     req.onerror=()=>rej(req.error);
   });
 }
+const evMemoria=new Map();
 function evTx(modo, fn){
+  if (DEMO){   // HU-33: las fotos de la demostración viven solo en memoria
+    const st={ get:k=>({__v:evMemoria.get(k)}), put:(v,k)=>{ evMemoria.set(k,v); }, getAllKeys:()=>({__v:[...evMemoria.keys()]}), delete:k=>{ evMemoria.delete(k); } };
+    try{ const out=fn(st); return Promise.resolve(out && typeof out==='object' && '__v' in out ? out.__v : out); }catch(e){ return Promise.reject(e); }
+  }
   return evAbrir().then(db => new Promise((res,rej)=>{
     const tx=db.transaction(EV_STORE,modo), st=tx.objectStore(EV_STORE);
     let out; try{ out=fn(st); }catch(e){ rej(e); return; }
@@ -1491,7 +1654,7 @@ async function limpiarHuerfanas(){
 async function prepararEvidencias(){
   try{
     const n = await migrarFotos();
-    if (n){ toast('📦 '+n+' foto(s) pasaron al nuevo almacenamiento','ok'); renderRegistros(); }
+    if (n){ if (!DEMO) toast('📦 '+n+' foto(s) pasaron al nuevo almacenamiento','ok'); renderRegistros(); }
     await limpiarHuerfanas();
   }catch(_){ /* sin IndexedDB: los datos siguen en localStorage */ }
   pedirPersistencia();
@@ -1524,8 +1687,8 @@ async function actualizarMedidor(){
   const alerta = m.pct >= 70;
   el.classList.toggle('memoria--alerta', alerta);
   el.innerHTML = '<div class="memoria__barra"><div class="memoria__fill" style="width:'+Math.min(100,Math.max(2,m.pct)).toFixed(0)+'%"></div></div>'+
-    '📦 Memoria usada: '+pctTxt+' · '+conFotos+' árbol'+(conFotos===1?'':'es')+' con sus 2 fotos en este celular'+
-    (alerta ? '<br>⚠️ Comparte la jornada y, cuando el coordinador confirme que la recibió, usa Limpiar.' : '');
+    '📦 Memoria usada: '+pctTxt+(registros.length ? ' · '+conFotos+' árbol'+(conFotos===1?'':'es')+' con sus 2 fotos en este celular' : ' · cabe la jornada completa')+
+    (alerta ? '<br>⚠️ Envía la jornada y, cuando Ecosistémica confirme que la recibió, usa Limpiar.' : '');
 }
 let avisoMemoria=false;
 async function revisarMemoria(){
@@ -2092,6 +2255,8 @@ function aplicarCadena(groupOk){
     sec.classList.toggle('section--current', i===idxActual);
     const msg=sec.querySelector('.section__lock-msg');
     if (msg && bloqueada) msg.textContent='🔒 Primero completa «'+nombreActual+'» · toca aquí';
+    /* v39: el aviso solo en la siguiente sección; repetirlo en todas parecía pantalla rota */
+    if (msg) msg.style.visibility = (bloqueada && i===idxActual+1) ? 'visible' : 'hidden';
   });
 }
 function irAPendiente(){
@@ -2153,6 +2318,10 @@ function actualizarID(){
   const n=numArbol();
   const prefix = $('idParque').value.trim() || 'MANUAL';
   $('arbolID').textContent = prefix+'-'+deviceToken+'-'+String(n).padStart(5,'0');
+  /* v39: antes de capturar el parque se veía «MANUAL-69E1-00001», que parece un dato de prueba */
+  const sinParque = !$('idParque').value.trim() && !$('manualToggle').checked;
+  $('arbolID').classList.toggle('id-display__value--pend', sinParque);
+  $('arbolIDLbl').textContent = sinParque ? 'Se forma al capturar el ID de Parque' : 'ID generado automáticamente';
   revisarDuplicado();
 }
 
@@ -2288,7 +2457,7 @@ function reiniciarAnillo(){
 function mostrarPermiso(on){
   $('gpsPermiso').hidden=!on;
   $('gpsCard').classList.toggle('gps--permiso', on);
-  setGPSBadge(on?'⚠️ Sin permiso':'Esperando…', on?'poor':'wait');
+  setGPSBadge(on?'Falta permiso':'Esperando…', on?'poor':'wait');
 }
 function reintentarGPS(){
   mostrarPermiso(false);
@@ -2835,11 +3004,53 @@ function pintarEnvio(){
   if (!total){ box.textContent=''; box.className='envio-estado'; return; }
   box.className='envio-estado '+(pend ? 'envio-estado--pend' : 'envio-estado--ok');
   box.textContent = pend
-    ? '⚠️ '+pend+' de '+total+' árbol'+(total===1?'':'es')+' sin enviar al coordinador'
+    ? '⚠️ '+pend+' de '+total+' árbol'+(total===1?'':'es')+' sin enviar'
     : '✓ Los '+total+' árboles ya se enviaron';
 }
 
+/* ════════════════════════════════════════════════════════════
+   v39 · HU-34 RESUMEN DE IMPACTO
+   Indicadores verificables de lo registrado en este celular: avance contra la meta de la
+   campaña, alcance (especies, parques, colonias), calidad de la evidencia y sobrevivencia.
+   El CO₂ y demás beneficios se calculan con i-Tree Eco a partir del CSV (no aquí).
+   ════════════════════════════════════════════════════════════ */
+const META_CAMPANA=11000;
+function renderImpacto(){
+  const box=$('impacto'); if (!box) return;
+  const n=registros.length;
+  if (!n){ box.hidden=true; return; }
+  box.hidden=false;
+  const pct=x=>Math.round(100*x/n);
+  const unicos=f=>new Set(registros.map(f).filter(Boolean)).size;
+  const conFotos=registros.filter(r=>r.foto1&&r.foto2).length;
+  const gps1=registros.filter(r=>precDe(r)<=1).length;
+  const proto=registros.filter(r=>r.protoHoyo&&r.protoCama&&r.protoTutor&&r.protoRiego).length;
+  const cuenta={}; registros.forEach(r=>{ const e=(r.especie||'Sin especie').split('(')[0].trim(); cuenta[e]=(cuenta[e]||0)+1; });
+  const orden=Object.entries(cuenta).sort((a,b)=>b[1]-a[1]);
+  const top=orden.slice(0,5), otras=orden.slice(5).reduce((t,x)=>t+x[1],0);
+  if (otras) top.push(['Otras ('+(orden.length-5)+')',otras]);
+  const max=Math.max(...top.map(x=>x[1]));
+  const fila=(lbl,val,frac,txt)=>'<div class="impacto__fila"><span class="lbl" title="'+esc(lbl)+'">'+esc(lbl)+'</span><span class="bar"><div style="width:'+Math.max(2,Math.round(frac*100))+'%"></div></span><span class="val">'+txt+'</span></div>';
+  const rev=monitoreoRegistros.length, vivos=monitoreoRegistros.filter(r=>r.estado!=='Muerto').length;
+  box.innerHTML=
+    '<div class="impacto__cab"><span class="impacto__tit">Impacto registrado</span><span class="impacto__ambito">'+(DEMO?'datos de ejemplo':'en este celular')+'</span></div>'+
+    '<div class="impacto__hero"><span class="impacto__num">'+n.toLocaleString('es-MX')+'</span><span class="impacto__meta">árbol'+(n===1?'':'es')+' de la meta de '+META_CAMPANA.toLocaleString('es-MX')+' de Cobertura Vegetal 2026</span></div>'+
+    '<div class="impacto__barra" role="img" aria-label="'+(100*n/META_CAMPANA).toFixed(1)+' % de la meta"><div style="width:'+Math.min(100,100*n/META_CAMPANA)+'%"></div></div>'+
+    '<div class="impacto__tiles"><div class="impacto__tile"><b>'+unicos(r=>(r.especie||'').split('(')[0].trim())+'</b><span>especies</span></div>'+
+    '<div class="impacto__tile"><b>'+unicos(r=>r.idParque||r.parque)+'</b><span>parques</span></div>'+
+    '<div class="impacto__tile"><b>'+unicos(r=>r.colonia)+'</b><span>colonias</span></div></div>'+
+    '<div class="impacto__sec">Evidencia de cada árbol</div>'+
+    fila('Con sus 2 fotos', conFotos, conFotos/n, pct(conFotos)+' %')+
+    fila('Ubicación ±1 m', gps1, gps1/n, pct(gps1)+' %')+
+    fila('Protocolo completo', proto, proto/n, pct(proto)+' %')+
+    (rev ? '<div class="impacto__sec" style="margin-top:10px">Sobrevivencia</div>'+fila('Vivos al revisar', vivos, vivos/rev, Math.round(100*vivos/rev)+' %')+
+      '<div class="impacto__nota">'+vivos+' de '+rev+' árboles revisados en monitoreo.</div>' : '')+
+    '<div class="impacto__sec" style="margin-top:10px">Especies más plantadas</div>'+
+    top.map(([e,c])=>fila(e,c,c/max,String(c))).join('')+
+    '<div class="impacto__nota">Los beneficios ambientales (CO₂, sombra, agua) se calculan con i-Tree Eco a partir de la tabla que envía la app.</div>';
+}
 function renderRegistros(){
+  renderImpacto();
   renderPapelera();
   actualizarMedidor();
   const list=$('regList'), total=registros.length;
@@ -2966,6 +3177,7 @@ function csvPlantacion(){
   return [cols.join(','),...rows].join('\n');
 }
 function exportCSV(){
+  if (bloqueoDemo()) return;
   if (!registros.length){ toast('Sin registros','err'); return; }
   const blob=new Blob(['﻿'+csvPlantacion()],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
@@ -2976,6 +3188,7 @@ function exportCSV(){
   marcarEnviados('v');
 }
 async function exportFotos(){
+  if (bloqueoDemo()) return;
   const items=[], completos=[];
   for (const r of registros){
     const [f1,f2] = await fotosDe(r);
@@ -3207,6 +3420,7 @@ function nombreSeguro(t){ return String(t||'').normalize('NFD').replace(/[̀-ͯ]
 let zipEnvio=null;
 let zipEnCurso=false;
 async function compartirJornada(){
+  if (bloqueoDemo()) return;
   if (!registros.length){ toast('Sin registros','err'); return; }
   if (zipEnCurso) return;                       // v39: un doble toque ya no arma dos .zip
   zipEnCurso=true; $('btnEnvioBar').disabled=true;
@@ -3287,6 +3501,7 @@ function cerrarZipEnvio(){ $('zipEnvio').hidden=true; }
 document.addEventListener('keydown', e => { if (e.key==='Escape' && !$('zipEnvio').hidden) cerrarZipEnvio(); });
 /* Forma anterior (v30): archivos sueltos en paquetes de 10, por si el .zip no se puede adjuntar */
 async function compartirSueltos(){
+  if (bloqueoDemo()) return;
   if (!registros.length){ toast('Sin registros','err'); return; }
   const t0 = Date.now();
   toast('📤 Preparando archivos…');
@@ -3308,6 +3523,7 @@ async function compartirSueltos(){
   });
 }
 async function compartirMonitoreo(){
+  if (bloqueoDemo()) return;
   if (!monitoreoRegistros.length){ toast('Sin revisitas','err'); return; }
   const nombres = nombresFotosMonitoreo();
   const t0 = Date.now();
@@ -3332,7 +3548,7 @@ function limpiarRegistros(){
     : '';
   const pend=sinEnviar().length;
   const avisoEnvio = pend
-    ? '⚠️ '+pend+' de '+registros.length+' árbol(es) NO se han enviado al coordinador. Usa Compartir antes de limpiar.\n\n'
+    ? '⚠️ '+pend+' de '+registros.length+' árbol(es) NO se han enviado. Usa «Compartir jornada» antes de limpiar.\n\n'
     : '';
   if (!confirm(avisoEnvio+'¿Borrar '+registros.length+' registros de este celular?'+avisoPap)) return;
   evBorrar(registros.flatMap(r => [claveFoto(r,1), claveFoto(r,2)]));
@@ -4046,6 +4262,7 @@ function nombresFotosMonitoreo(){
   return mapa;
 }
 async function exportFotosMonitoreo(){
+  if (bloqueoDemo()) return;
   const nombres = nombresFotosMonitoreo();
   const items = [];
   for (const r of monitoreoRegistros){
@@ -4072,6 +4289,7 @@ function csvMonitoreo(){
   return [cols.join(','),...rows].join('\n');
 }
 function exportCSVMonitoreo(){
+  if (bloqueoDemo()) return;
   if (!monitoreoRegistros.length){ toast('Sin revisitas para exportar','err'); return; }
   const blob=new Blob(['\ufeff'+csvMonitoreo()],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
@@ -4141,7 +4359,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v38';
+const APP_VERSION='v39';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));
@@ -4163,6 +4381,7 @@ function alternarSol(){
 }
 /* HU-25 */
 const GUIA=[
+  {logo:true, tit:'Cobertura Vegetal 2026', txt:'Cada árbol que se planta en los parques de Culiacán queda registrado con su ubicación, especie, medidas y 2 fotos de evidencia.', marca:true},
   {ico:'pin', tit:'Permite ubicación y cámara', txt:'La app usa el GPS para ubicar cada árbol y la cámara para sus 2 fotos. Cuando el celular pregunte, toca «Permitir».'},
   {ico:'sun', tit:'Ajusta la pantalla', txt:'Con el botón Aa de arriba a la derecha agrandas la letra o activas el modo sol para leer a pleno sol.'},
   {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Compartir jornada. Se guarda un .zip y se abre Gmail dirigido a Ecosistémica: adjunta el .zip y envía. Usa «Limpiar» solo cuando confirmen que lo recibieron.'}
@@ -4171,24 +4390,36 @@ let guiaPaso=0;
 function abrirGuia(n){ guiaPaso=n||0; pintarGuia(); $('guia').hidden=false; setTimeout(()=>$('guiaSig').focus(),40); }
 function pintarGuia(){
   const g=GUIA[guiaPaso];
-  $('guiaIco').innerHTML=ic(g.ico); $('guiaTit').textContent=g.tit; $('guiaTxt').textContent=g.txt;
+  $('guiaIco').innerHTML = g.logo ? '<img class="guia__logo" src="'+document.querySelector('.app-bar__logo').src+'" alt="">' : ic(g.ico);
+  $('guiaIco').classList.toggle('guia__ico--logo', !!g.logo);
+  $('guiaTit').textContent=g.tit; $('guiaTxt').textContent=g.txt;
+  $('guiaMarca').hidden=!g.marca; $('guiaDemo').hidden=!g.marca;
   $('guiaPuntos').querySelectorAll('span').forEach((s,i)=>s.classList.toggle('on', i===guiaPaso));
   $('guiaSig').textContent = guiaPaso<GUIA.length-1 ? 'Siguiente' : 'Empezar';
   $('guiaSaltar').style.visibility = guiaPaso<GUIA.length-1 ? 'visible' : 'hidden';
 }
 function guiaSiguiente(){ if (guiaPaso<GUIA.length-1){ guiaPaso++; pintarGuia(); } else cerrarGuia(); }
+let focoAcerca=null;
+function abrirAcerca(){
+  focoAcerca=document.activeElement;
+  $('acercaLogo').src=document.querySelector('.app-bar__logo').src;
+  $('acercaVer').textContent='Árboles PA '+APP_VERSION+' · octubre de 2026';
+  $('acerca').hidden=false;
+}
+function cerrarAcerca(){ $('acerca').hidden=true; if (focoAcerca) try{ focoAcerca.focus(); }catch(_){} }
 function cerrarGuia(){ $('guia').hidden=true; try{ localStorage.setItem('guia_v1','1'); }catch(_){} }
 /* HU-27 */
 function pintarHoy(){
   const hoy=new Date().toLocaleDateString('es-MX');
   const n=registros.filter(r=>(r.fecha||'').startsWith(hoy)).length;
-  $('appSub').textContent='Hoy: '+n+' árbol'+(n===1?'':'es')+' · Parques Alegres';
+  $('appSub').textContent = DEMO ? 'Demostración' : n ? 'Hoy: '+n+' · Cobertura Vegetal 2026' : 'Cobertura Vegetal 2026';
 }
 /* HU-28: el borrador guarda GPS, datos y fotos, así que se puede recargar sin perder el árbol */
 function actualizarAhora(){ try{ guardarBorrador(); }catch(_){} $('versionBar').classList.remove('undo--show'); setTimeout(()=>location.reload(), 150); }
 document.addEventListener('keydown', e => {
   if (e.key!=='Escape') return;
-  if (!$('pantalla').hidden) cerrarPantalla();
+  if (!$('acerca').hidden) cerrarAcerca();
+  else if (!$('pantalla').hidden) cerrarPantalla();
   else if (!$('guia').hidden) cerrarGuia();
 });
 
