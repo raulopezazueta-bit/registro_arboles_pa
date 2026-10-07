@@ -83,7 +83,8 @@
 /* v39-1: meta 3,500, Cacaloxóchitl, Parques Alegres como institución de Fundación GC1. */
 /* v39-2: encabezados en verde oscuro, ilustraciones realistas de las fotos, fotos de iNaturalist en la demostración. */
 /* v39-3: «Protocolo de plantación» también se bloquea hasta completar las mediciones. */
-const CACHE_VERSION = 'apa-2026-10-06-v39-3';
+/* v39-4: «Fundación GC1» sin «Grupo». */
+const CACHE_VERSION = 'apa-2026-10-06-v39-4';
 const CORE = [
   './',
   './index.html',
