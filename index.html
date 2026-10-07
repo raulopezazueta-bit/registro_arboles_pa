@@ -1535,7 +1535,9 @@ async function revisarMemoria(){
     setTimeout(() => toast('⚠️ Memoria al '+Math.round(m.pct)+' %: comparte la jornada y limpia los registros','err'), 2800);
   }
 }
+let guardando=false;
 function reactivarGuardar(){
+  guardando=false;
   const bs=$('btnSave');
   bs.classList.remove('btn-save--saving');
   bs.innerHTML=etiquetaGuardar(); barraFirma='';
@@ -1564,7 +1566,7 @@ async function compartirEnLotes(items, titulo, t0, alEnviar){
   const total=lotes.length;
   const preparar = async k => {
     const files=[];
-    for (const it of lotes[k]){ const f=await it.crear(); if (f) files.push(f); }
+    for (const it of lotes[k]){ const f=await it.crear(); if (f) files.push(f); else it.falto=true; }
     /* Si un paquete pasa del límite de peso, se parte en dos */
     let bytes=files.reduce((t,f)=>t+f.size,0);
     if (bytes>MAX_BYTES_ENVIO && lotes[k].length>1){
@@ -1580,7 +1582,7 @@ async function compartirEnLotes(items, titulo, t0, alEnviar){
     const n=lotes.length;
     const ok=await compartirArchivos(files, titulo+(n>1?' · paquete '+(k+1)+' de '+n:''));
     if (!ok){ if (n>1) mostrarListo('Paquete '+(k+1)+' de '+n+' sin enviar', enviar); return; }
-    if (alEnviar) alEnviar(lotes[k].map(it => it.clave));
+    if (alEnviar) alEnviar(lotes[k].filter(it => !it.falto).map(it => it.clave));   // v39: lo que no se generó no cuenta como enviado
     k++;
     if (k<lotes.length){
       files=await preparar(k);
@@ -2058,7 +2060,7 @@ function actualizarValidacion(){
   $('saveBarHint').textContent = restantes===0 ? '✅ Todo listo · presiona Guardar'
     : !gpsLocked ? 'Comienza por bloquear el GPS'
     : 'Falta'+(restantes>1?'n':'')+' '+restantes+' campo'+(restantes>1?'s':'');
-  $('btnSave').disabled = restantes!==0;
+  $('btnSave').disabled = restantes!==0 || guardando;
   renderPendientes(okCount);
   aplicarCadena(groupOk);
   pintarPasos(groupOk);
@@ -2339,7 +2341,8 @@ function cerrarConfirmacion(){
   $('confirma').hidden=true; confirmaAbierta=false;
   ['confF1','confF2'].forEach(id => $(id).removeAttribute('src'));
   window.scrollTo({top:0,behavior:'smooth'});
-  if (actualizacionPendiente) setTimeout(() => location.reload(), 400);
+  /* Se revisa al momento de recargar: «Enviar jornada» cierra esta hoja y enseguida arma el .zip */
+  if (actualizacionPendiente) setTimeout(() => { if (!ocupadoEnOtraCosa() && !hayCaptura()) location.reload(); else $('versionBar').classList.add('undo--show'); }, 400);
 }
 function confirmaVerRegistro(){
   const uid=confirmaUid; cerrarConfirmacion(); switchTab('registros');
@@ -2359,6 +2362,8 @@ function guardarRegistro(){
     $('arbolNum').focus();
     return;
   }
+  if (guardando) return;                 // v39: un segundo Enter o toque no crea otro árbol
+  guardando=true;
   const btn=$('btnSave');
   btn.disabled=true; btn.classList.add('btn-save--saving');
   btn.innerHTML='⏳ <span>Guardando…</span>';
@@ -2411,6 +2416,7 @@ function guardarRegistro(){
     renderRegistros();
     sellarFotosRegistro(reg, f1, f2);  // graba el ID en la foto, sin detener la captura
     resetForm();
+    guardando=false;
     jornadaAbierta=false; actualizarValidacion();
     mostrarConfirmacion(reg, f1, f2);
     revisarMemoria();
@@ -2492,6 +2498,9 @@ function hayCaptura(){
 
 function guardarBorrador(){
   if (!borradorActivo) return;
+  /* v39: mientras se ofrece recuperar un borrador no se toca: antes, cambiar de app o escribir
+     algo con el aviso en pantalla lo borraba y «Recuperar» ya no tenía qué restaurar. */
+  if ($('borradorAviso').classList.contains('borrador--show')) return;
   if (!hayCaptura()){ try{ localStorage.removeItem(BORRADOR_KEY); }catch(_){} return; }
   const b={ ts:Date.now(), gps:gpsLocked, foto1:!!foto1&&fotoBorradorOk[1], foto2:!!foto2&&fotoBorradorOk[2],
              campos:{}, proto:{}, medOrigen:{...medOrigen} };
@@ -2921,22 +2930,36 @@ function protoResumen(r){
 function siNoNA(v){ return v===undefined ? 'N/A' : (v?'Sí':'No'); }
 /* Un texto entre comillas que contiene comillas debe duplicarlas, o el archivo
    se recorre de columna al abrirlo. Aplica a observaciones, parque y colonia. */
-function csvTxt(v){ return '"' + String(v === undefined || v === null ? '' : v).replace(/"/g, '""') + '"'; }
+function csvTxt(v){
+  let t=String(v === undefined || v === null ? '' : v);
+  /* v39: Excel toma como fórmula un texto que empieza con = + - @ (p. ej. «-sin tutor» → #¿NOMBRE?) */
+  if (/^[=+\-@\t\r]/.test(t)) t="'"+t;
+  return '"' + t.replace(/"/g, '""') + '"';
+}
+function hoyLocal(){ return new Date().toLocaleDateString('en-CA'); }   // AAAA-MM-DD de Culiacán, no UTC
+/* v39: nombre de archivo de cada foto. Si dos árboles comparten ID (no debería pasar, pero el aviso
+   de repetido no lo impide), el segundo lleva _2 para que en el .zip no se pisen. El CSV usa el mismo. */
+function nombreFotoZip(r, n){
+  const base=r.id+(n===1?'_finalizado':'_cenital');
+  const iguales=registros.filter(x => x.id===r.id);
+  const k=iguales.indexOf(r);
+  return base+(k>0?'_'+(k+1):'')+'.jpg';
+}
 function csvPlantacion(){
   const cols=['ID_Arbol','Num','ID_Parque','Asesor','Mes','Ejecutor','Parque','Colonia','Nombre_Comun','Nombre_Cientifico','Codigo_iTree','iTree_En_BD','iTree_Alternativa','Registrado_Por','Latitud','Longitud','Precision_Estimada_m','Precision_Raw_m','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General','Proto_Hoyo','Proto_Riego_Asentamiento','Estado','Fecha_Hora','Observaciones','Foto','Proto_Cama_Tierra_Fertilizada','Proto_Tutor_Crecimiento','Foto_Cenital','Mediciones_Por_Opcion','Precision_Metodo'];
   const rows=registros.map(r=>[
-    r.id,r.num,r.idParque||'',r.asesor||'',r.mes||'',r.ejecutor,
+    csvTxt(r.id),r.num,csvTxt(r.idParque),csvTxt(r.asesor),csvTxt(r.mes),csvTxt(r.ejecutor),
     csvTxt(r.parque),csvTxt(r.colonia),csvTxt((r.especie||'').split('(')[0].trim()),
     csvTxt(r.nombreCientifico),r.itreeCode||'',r.itreeInBD||'',csvTxt(r.itreeAlt),
     csvTxt(r.registrante),
     r.lat.toFixed(7),r.lon.toFixed(7),fmtPrec(precDe(r)),r.acc.toFixed(1),
     (r.dap||'').toString(),(r.altura||'').toString(),
-    csvTxt(r.suelo), r.copa!==undefined?r.copa:'', r.condicion||'',
+    csvTxt(r.suelo), r.copa!==undefined?r.copa:'', csvTxt(r.condicion),
     r.protoHoyo?'Sí':'No', r.protoRiego?'Sí':'No',
-    r.estado, csvTxt(r.fecha), csvTxt(r.obs),
-    r.foto1?r.id+'_finalizado.jpg':'',
+    csvTxt(r.estado), csvTxt(r.fecha), csvTxt(r.obs),
+    r.foto1?csvTxt(nombreFotoZip(r,1)):'',
     siNoNA(r.protoCama), siNoNA(r.protoTutor),
-    r.foto2?r.id+'_cenital.jpg':'',
+    r.foto2?csvTxt(nombreFotoZip(r,2)):'',
     csvTxt(medidasPorOpcion(r)),
     r.precMetodo || 'celular'
   ].join(','));
@@ -2947,23 +2970,24 @@ function exportCSV(){
   const blob=new Blob(['﻿'+csvPlantacion()],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url; a.download='CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.href=url; a.download='CoberVegetal_'+hoyLocal()+'.csv';
   a.click(); URL.revokeObjectURL(url);
   toast('📥 CSV exportado ('+registros.length+' registros)','ok');
   marcarEnviados('v');
 }
 async function exportFotos(){
-  const items=[];
+  const items=[], completos=[];
   for (const r of registros){
     const [f1,f2] = await fotosDe(r);
-    if (f1) items.push({data:f1,nombre:r.id+'_finalizado.jpg',info:selloDeRegistro(r,'frente')});
-    if (f2) items.push({data:f2,nombre:r.id+'_cenital.jpg',info:selloDeRegistro(r,'cenital')});
+    if (f1) items.push({data:f1,nombre:nombreFotoZip(r,1),info:selloDeRegistro(r,'frente')});
+    if (f2) items.push({data:f2,nombre:nombreFotoZip(r,2),info:selloDeRegistro(r,'cenital')});
+    if ((!r.foto1 || f1) && (!r.foto2 || f2)) completos.push(uidDe(r));
   }
   if (!items.length){ toast('Sin fotos guardadas','err'); return; }
   toast('📷 Descargando '+items.length+' fotos…');
   let i=0;
   function next(){
-    if (i>=items.length){ marcarEnviados('f'); return; }
+    if (i>=items.length){ marcarEnviados('f', completos); return; }
     descargarFotoSellada(items[i].data, items[i].nombre, items[i].info);
     i++; setTimeout(next,700);
   }
@@ -3181,26 +3205,35 @@ function crearZip(archivos){
 }
 function nombreSeguro(t){ return String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,24); }
 let zipEnvio=null;
+let zipEnCurso=false;
 async function compartirJornada(){
   if (!registros.length){ toast('Sin registros','err'); return; }
+  if (zipEnCurso) return;                       // v39: un doble toque ya no arma dos .zip
+  zipEnCurso=true; $('btnEnvioBar').disabled=true;
+  try{ await armarYEnviarZip(); }
+  catch(e){ toast('No se pudo armar el .zip (memoria del celular). Usa «Otra forma: compartir archivos sueltos».','err'); }
+  finally{ zipEnCurso=false; $('btnEnvioBar').disabled=false; }
+}
+async function armarYEnviarZip(){
   toast('📦 Preparando el .zip…');
   const regs=[...registros], hoy=new Date().toLocaleDateString('en-CA');  // fecha local AAAA-MM-DD (de noche, la UTC ya es mañana)
   const archivos=[{ nombre:'CoberVegetal_'+hoy+'.csv', bytes:new TextEncoder().encode('﻿'+csvPlantacion()) }];
-  let faltan=0;
+  let faltan=0; const incompletos=new Set();
   for (const r of regs){
     if (!r.foto1 && !r.foto2) continue;
     const fotos=await fotosDe(r);
     for (const n of [1,2]){
       if (!r['foto'+n]) continue;
-      const d=fotos[n-1]; if (!d){ faltan++; continue; }
-      const f=dataUrlAFile(d, r.id+(n===1?'_finalizado.jpg':'_cenital.jpg'), selloDeRegistro(r, n===1?'frente':'cenital'));
-      archivos.push({ nombre:f.name, bytes:new Uint8Array(await f.arrayBuffer()) });
+      const d=fotos[n-1]; if (!d){ faltan++; incompletos.add(uidDe(r)); continue; }
+      /* Se decodifica una sola vez (sin File ni copia extra) para no agotar la memoria con muchas fotos */
+      archivos.push({ nombre:nombreFotoZip(r,n), bytes:inyectarSello(dataUrlABytes(d), selloTexto(selloDeRegistro(r, n===1?'frente':'cenital'))) });
     }
   }
   const quien=nombreSeguro(regs[regs.length-1].registrante);
   const nombre='ArbolesPA_'+hoy+(quien?'_'+quien:'')+'_'+regs.length+'arboles.zip';
   const blob=crearZip(archivos);
-  zipEnvio={ blob, nombre, uids:regs.map(uidDe), n:regs.length, fotos:archivos.length-1, hoy, quien:regs[regs.length-1].registrante||'' };
+  /* v39: un árbol al que le falta una foto no se marca «Enviado», para que «Limpiar» siga avisando */
+  zipEnvio={ blob, nombre, uids:regs.map(uidDe).filter(u => !incompletos.has(u)), n:regs.length, fotos:archivos.length-1, hoy, quien:regs[regs.length-1].registrante||'' };
   /* Si el celular deja compartir el .zip (iPhone, o Chrome si algún día lo permite), sale directo
      desde Compartir. Chrome en Android hoy lo rechaza: entonces se guarda y se abre Gmail. */
   const archivoZip=new File([blob], nombre, { type:'application/zip' });
@@ -3258,14 +3291,14 @@ async function compartirSueltos(){
   const t0 = Date.now();
   toast('📤 Preparando archivos…');
   const regs=[...registros];
-  const items=[{ clave:'csv', crear: async () => csvAFile(csvPlantacion(), 'CoberVegetal_'+new Date().toISOString().slice(0,10)+'.csv') }];
+  const items=[{ clave:'csv', crear: async () => csvAFile(csvPlantacion(), 'CoberVegetal_'+hoyLocal()+'.csv') }];
   /* Solo se agregan las fotos que existen, para no dejar huecos en los paquetes */
   const pend={};
   for (const r of regs){
     const u=uidDe(r); pend[u]=new Set();
     [1,2].forEach(n => { if (r['foto'+n]){ pend[u].add(n); items.push({ clave:u+'|'+n, crear: async () => {
       const d=(await fotosDe(r))[n-1];
-      return d ? dataUrlAFile(d, r.id+(n===1?'_finalizado.jpg':'_cenital.jpg'), selloDeRegistro(r, n===1?'frente':'cenital')) : null;
+      return d ? dataUrlAFile(d, nombreFotoZip(r,n), selloDeRegistro(r, n===1?'frente':'cenital')) : null;
     }}); } });
   }
   let csvOk=false;
@@ -3279,7 +3312,7 @@ async function compartirMonitoreo(){
   const nombres = nombresFotosMonitoreo();
   const t0 = Date.now();
   toast('📤 Preparando archivos…');
-  const items=[{ clave:'csv', crear: async () => csvAFile(csvMonitoreo(), 'Monitoreo_'+new Date().toISOString().slice(0,10)+'.csv') }];
+  const items=[{ clave:'csv', crear: async () => csvAFile(csvMonitoreo(), 'Monitoreo_'+hoyLocal()+'.csv') }];
   for (const r of monitoreoRegistros){
     if (!r.foto) continue;
     items.push({ clave:r.idMonitoreo, crear: async () => {
@@ -4033,7 +4066,7 @@ function csvMonitoreo(){
   const nombres = nombresFotosMonitoreo();
   const cols=['ID_Monitoreo','ID_Arbol','Fecha_Revision','Estado','DAP_Actual_cm','Foto_Verificacion','Revisado_Por','Observaciones','Mes_Revision'];
   const rows=monitoreoRegistros.map(r=>[
-    r.idMonitoreo, r.idArbol, csvTxt(r.fecha), r.estado, (r.dap||'').toString(),
+    csvTxt(r.idMonitoreo), csvTxt(r.idArbol), csvTxt(r.fecha), csvTxt(r.estado), (r.dap||'').toString(),
     r.foto?nombres[r.idMonitoreo]:'', csvTxt(r.revisor), csvTxt(r.obs), r.mes||''
   ].join(','));
   return [cols.join(','),...rows].join('\n');
@@ -4043,7 +4076,7 @@ function exportCSVMonitoreo(){
   const blob=new Blob(['\ufeff'+csvMonitoreo()],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url; a.download='Monitoreo_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.href=url; a.download='Monitoreo_'+hoyLocal()+'.csv';
   a.click(); URL.revokeObjectURL(url);
   toast('📥 CSV de monitoreo exportado ('+monitoreoRegistros.length+' revisitas)','ok');
 }
@@ -4160,6 +4193,12 @@ document.addEventListener('keydown', e => {
 });
 
 let actualizacionPendiente = false;
+/* v39: además del árbol en captura, no se recarga encima de una revisita a medias, de la hoja
+   «Ya lo envié» (al volver de Gmail) ni de un envío en paquetes sin terminar. */
+function ocupadoEnOtraCosa(){
+  return !!(arbolSeleccionado || fotoMonitoreo || !$('zipEnvio').hidden || zipEnCurso
+    || $('listoBar').classList.contains('undo--show') || confirmaAbierta);
+}
 if ('serviceWorker' in navigator) {
   const habiaControlador = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -4167,7 +4206,7 @@ if ('serviceWorker' in navigator) {
     actualizacionPendiente = true;
     /* hayCaptura() también mira el GPS bloqueado y el protocolo: antes la app se
        recargaba encima de un asesor que ya había bloqueado coordenadas. */
-    if (!hayCaptura()) location.reload();
+    if (!hayCaptura() && !ocupadoEnOtraCosa()) location.reload();
     else $('versionBar').classList.add('undo--show');
   });
   window.addEventListener('load', () => {

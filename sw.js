@@ -79,7 +79,8 @@
 /* v38-1: el .zip sale directo desde Compartir donde el celular lo permite; fotos anteriores de Ceiba y
    Pata de vaca; catálogo con el nombre bajo la foto y la seña de la hoja. */
 /* v38-2: los íconos fijos ya vienen en SVG desde el HTML (no se ven emojis al abrir) y el clip del envío también es SVG. */
-const CACHE_VERSION = 'apa-2026-10-06-v38-2';
+/* v39 (06-oct-2026): Sprint 6 «Listo para el patronato». La copia sin señal solo guarda la app. */
+const CACHE_VERSION = 'apa-2026-10-06-v39';
 const CORE = [
   './',
   './index.html',
@@ -117,18 +118,28 @@ self.addEventListener('fetch', event => {
      plano, así que el celular quedaba una versión atrás y a veces no se actualizaba.
      Sin señal, o si la red tarda, se usa la copia guardada: sigue funcionando sin internet. */
   if (req.mode === 'navigate') {
+    /* v39: solo la app misma (./ o ./index.html) se guarda como copia sin señal. Antes cualquier
+       página abierta (actualizar.html, la de inicio de sesión de un WiFi) reemplazaba a la app. */
+    const sinQuery = req.url.split('?')[0].split('#')[0];
+    const esApp = sinQuery === self.registration.scope || sinQuery === self.registration.scope + 'index.html';
+    if (!esApp) {
+      event.respondWith(fetch(req).catch(() => caches.match(req)));
+      return;
+    }
     /* v37: una petición de navegación no admite opciones (fetch(req, {...}) lanza TypeError);
        por eso en la v36 siempre caía a la copia guardada. Se pide la misma URL como GET normal. */
     const red = fetch(req.url, { cache: 'no-store', credentials: 'same-origin' }).then(resp => {
-      if (resp && resp.status === 200) {
+      if (resp && resp.ok && !resp.redirected && resp.type === 'basic') {
         const copia = resp.clone();
         caches.open(CACHE_VERSION).then(c => c.put('./index.html', copia));
       }
       return resp;
     });
     const espera = new Promise(res => setTimeout(res, 3000));
+    /* Un 404/503 pasajero de GitHub no sustituye a la copia guardada */
+    const buena = r => (r && r.ok && !r.redirected) ? r : null;
     event.respondWith(
-      Promise.race([red.catch(() => null), espera.then(() => null)]).then(r => r ||
+      Promise.race([red.then(buena).catch(() => null), espera.then(() => null)]).then(r => r ||
         caches.match('./index.html').then(c => c || red)
       ).catch(() => caches.match('./index.html').then(c => c || fetch(req)))
     );

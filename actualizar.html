@@ -33,6 +33,12 @@
 (async () => {
   const txt=document.getElementById('txt'), tit=document.getElementById('tit'), btn=document.getElementById('btn');
   try {
+    /* v39: antes de quitar la copia sin señal, se confirma que la versión nueva sí se puede bajar.
+       Sin señal, la app vieja sigue funcionando en vez de quedarse sin nada. */
+    /* Se pide el manifest: sin red, la copia vieja respondería con la página de la app (HTML), no con JSON */
+    if (!navigator.onLine) throw new Error('sin red');
+    const prueba = await fetch('./manifest.json?r='+Date.now(), { cache:'no-store' });
+    if (!prueba.ok || !(prueba.headers.get('content-type')||'').includes('json')) throw new Error('sin red');
     if ('serviceWorker' in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map(r => r.unregister()));
