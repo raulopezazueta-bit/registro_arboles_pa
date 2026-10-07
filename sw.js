@@ -84,7 +84,8 @@
 /* v39-2: encabezados en verde oscuro, ilustraciones realistas de las fotos, fotos de iNaturalist en la demostración. */
 /* v39-3: «Protocolo de plantación» también se bloquea hasta completar las mediciones. */
 /* v39-4: «Fundación GC1» sin «Grupo». */
-const CACHE_VERSION = 'apa-2026-10-06-v39-4';
+/* v39-5: «Parques Alegres I.A.P. y Fundación GC1 - Iniciativa Cobertura Vegetal 2026». */
+const CACHE_VERSION = 'apa-2026-10-06-v39-5';
 const CORE = [
   './',
   './index.html',
