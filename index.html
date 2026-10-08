@@ -44,6 +44,9 @@ html[data-fs="2"] .reg-stat__label{letter-spacing:0}
 #sec-itree.itree--muerto .section__body > :not(#f-estadoEnc){display:none}
 .modo-inv .proto-item--solo-plant{display:none}
 .foto-slot--opcional::after{content:'Opcional';position:absolute;top:6px;left:6px;font-size:var(--fs-2xs);font-weight:700;background:var(--c-w);color:var(--c-n-600);padding:2px 8px;border-radius:var(--r-full)}
+.mon-otra{margin-top:12px}.mon-otra summary{cursor:pointer;color:var(--c-p-700);font-weight:700;font-size:var(--fs-sm);min-height:44px;display:flex;align-items:center}
+.mon-hito{display:inline-block;font-size:var(--fs-2xs);font-weight:700;color:var(--c-p-800);background:var(--c-p-50);border-radius:var(--r-full);padding:2px 8px;margin-top:3px}
+.mon-hito--venc{color:#8A3B00;background:#FFF3E0}
 .inv-aviso{font-size:var(--fs-sm);color:var(--c-p-800);background:var(--c-p-50);border-radius:var(--r-md);padding:8px 10px;margin-top:var(--s-2)}
 .opcion{min-height:44px;border:1.5px solid var(--c-n-300);background:var(--c-w);border-radius:var(--r-md);font:inherit;font-size:var(--fs-md);font-weight:650;color:var(--c-n-800);cursor:pointer;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
 .opcion small{font-size:var(--fs-xs);font-weight:500;color:var(--c-n-600)}
@@ -1141,18 +1144,24 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 
 <section id="tab-monitoreo" class="tab-content" role="tabpanel">
   <ol class="mon-pasos" aria-label="Cómo revisitar un árbol">
-    <li><b>Carga la muestra</b> que te envió el coordinador.</li>
-    <li><b>Carga las fotos</b> de esos árboles.</li>
+    <li><b>Descarga las revisitas</b> de tu parque (con señal).</li>
+    <li>Si el coordinador te mandó archivos, <b>cárgalos</b> en su lugar.</li>
     <li><b>Busca el árbol</b> estando junto a él.</li>
   </ol>
   <div class="section">
-    <div class="section__head"><div class="section__head__title"><span class="mon-num" aria-hidden="true">1</span> Carga la muestra</div><span class="section__head__status" id="monBaseCount">0 cargados</span></div>
+    <div class="section__head"><div class="section__head__title"><span class="mon-num" aria-hidden="true">1</span> Revisitas de tu parque</div><span class="section__head__status" id="monBaseCount">0 cargados</span></div>
     <div class="section__body">
+      <div class="field"><label class="field__label" for="monParque">ID de tu parque</label>
+        <input type="text" id="monParque" inputmode="numeric" placeholder="Ej: 14622" autocomplete="off" maxlength="20"></div>
+      <button type="button" class="btn-compartir" id="btnDescRev" onclick="descargarRevisitas()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> <span>Descargar mis revisitas</span></button>
+      <div id="monDescStatus" class="mon-status" aria-live="polite"></div>
+      <details class="mon-otra"><summary>Otra forma: cargar el archivo del coordinador</summary>
       <p class="field__hint">Elige el archivo CSV de la muestra. Se queda en este celular hasta que cargues otro.</p>
       <label class="btn-action mon-carga">
         <svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg> <span>Cargar CSV de muestra</span>
         <input type="file" id="monCsvInput" onchange="cargarBaseMonitoreo(this)" style="display:none">
       </label>
+      </details>
       <div id="monBaseStatus" class="mon-status"></div>
     </div>
   </div>
@@ -1588,6 +1597,7 @@ window.addEventListener('load', () => {
   try{ const lm=JSON.parse(localStorage.getItem('lmanual')||'null');
     if (lm && !lp){ $('manualToggle').checked=true; toggleManualParque(); $('parque').value=lm.parque||''; $('colonia').value=lm.colonia||''; $('asesor').value=lm.asesor||'Sin asignar'; } }catch(_){}
   const lmr=localStorage.getItem('lmr'); if(lmr) $('monRevisor').value=lmr;
+  $('monParque').value = localStorage.getItem('monParque') || localStorage.getItem('lp') || '';
   renderRegistros();
   actualizarBaseMonitoreoStatus();
   refrescarFotosMuestra();
@@ -3726,7 +3736,7 @@ function filaMonitoreo(r){
   return { ID_Monitoreo:r.idMonitoreo, UID:uidDe(r), ID_Arbol:r.idArbol, Fecha_ISO:r.ts||'', Fecha:t.toLocaleDateString('en-CA'),
     Mes_Revision:r.mes||'', Estado:r.estado||'', DAP_Actual_cm:numONada(r.dap), ID_Parque:String(r.idArbol||'').split('-')[0],
     Parque:r.parque||'', Nombre_Comun:(r.especie||'').split('(')[0].trim(), Revisado_Por:r.revisor||'', Observaciones:r.obs||'',
-    Latitud:numONada(r.lat), Longitud:numONada(r.lon), Foto:r.foto?nombres[r.idMonitoreo]:'' };
+    Latitud:numONada(r.lat), Longitud:numONada(r.lon), Foto:r.foto?nombres[r.idMonitoreo]:'', Hito_Meses:r.hito||'' };
 }
 function guardarMonitoreoLocal(){ try{ localStorage.setItem('monitoreo_v1', JSON.stringify(monitoreoRegistros)); }catch(_){} }
 async function enviarMonitoreoDirecto(opts){
@@ -4422,6 +4432,51 @@ function cargarBaseMonitoreo(input){
   reader.readAsArrayBuffer(file);
 }
 
+/* ════════════════════════════════════════════════════════════
+   v43 · HU-52 REVISITAS DESDE LA HOJA MAESTRA
+   La muestra y el calendario (3, 6, 12, 24 y 36 meses desde Mes_Plantacion) los calcula el
+   receptor. El comité escribe el ID de su parque y descarga solo lo que le toca revisitar
+   este mes y el siguiente, con una foto de referencia de cada árbol.
+   ════════════════════════════════════════════════════════════ */
+const MESES_CORTOS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function mesLegible(ym){ const m=String(ym||'').match(/^(\d{4})-(\d{2})/); return m ? MESES_CORTOS[+m[2]-1]+' '+m[1] : ''; }
+function textoHito(t){ return t && t.hito ? 'Revisita de '+t.hito+' meses · '+mesLegible(t.programado)+(t.vencida?' · atrasada':'') : ''; }
+async function descargarRevisitas(){
+  if (bloqueoDemo()) return;
+  const id=$('monParque').value.trim().replace(/[^\w-]/g,'');
+  const st=$('monDescStatus');
+  if (!id){ toast('Escribe el ID de tu parque','err'); $('monParque').focus(); return; }
+  if (!navigator.onLine){ st.textContent='Sin señal: busca señal y vuelve a tocar «Descargar».'; return; }
+  const btn=$('btnDescRev'); btn.disabled=true; st.textContent='⏳ Consultando a Ecosistémica…';
+  try{
+    const ctl=new AbortController(), tm=setTimeout(()=>ctl.abort(), 60000);
+    const r=await fetch(ENVIO_URL+'?accion=revisitas&parque='+encodeURIComponent(id)+'&clave='+encodeURIComponent(ENVIO_CLAVE)+'&t='+Date.now(),{cache:'no-store',redirect:'follow',signal:ctl.signal});
+    clearTimeout(tm);
+    const d=JSON.parse(await r.text());
+    if (!d.ok) throw new Error(d.error==='clave' ? 'el servidor rechazó la clave de la app' : (d.detalle||d.error||'respuesta inválida'));
+    try{ localStorage.setItem('monParque', id); }catch(_){}
+    if (!d.arboles.length){
+      const e=d.estado;
+      st.textContent = !e ? 'Tu parque todavía no tiene muestra. Se sortea sola cuando el comité registra todos los árboles entregados.'
+        : e.estado==='Registrando' ? 'Tu comité lleva '+e.registrados+' de '+e.entregados+' árboles registrados. La muestra se sortea al registrar todos.'
+        : 'No te toca revisitar este mes.'+(d.proxima ? ' Próxima revisita: '+mesLegible(d.proxima)+'.' : '');
+      return;
+    }
+    baseMonitoreo=d.arboles.map(a=>({ id:a.id, lat:a.lat, lon:a.lon, parque:a.parque||'', especie:a.especie||'', colonia:'', ts:null,
+      hito:a.hito, programado:a.programado, vencida:!!a.vencida, origen:'servidor' }));
+    try{ localStorage.setItem('baseMonitoreo', JSON.stringify(baseMonitoreo)); }catch(_){}
+    baseRevision={corregidas:0, fuera:[]}; try{ localStorage.setItem('baseRevision', JSON.stringify(baseRevision)); }catch(_){}
+    await fotosClear().catch(()=>{});
+    for (const a of d.arboles){ if (a.foto) await fotosPut(a.id, { frente:a.foto, cenital:null }).catch(()=>{}); }
+    await refrescarFotosMuestra();
+    actualizarBaseMonitoreoStatus();
+    const venc=d.arboles.filter(a=>a.vencida).length;
+    st.textContent='✅ '+d.arboles.length+' árbol'+(d.arboles.length===1?'':'es')+' por revisitar'+(venc?' ('+venc+' atrasado'+(venc===1?'':'s')+')':'')+'. Ve al paso «Busca el árbol».';
+    toast('📥 Revisitas descargadas','ok');
+  }catch(e){
+    st.textContent='❌ No se pudo descargar: '+(e.name==='AbortError'?'el servidor tardó demasiado':(e.message||e))+'. Vuelve a intentar.';
+  }finally{ btn.disabled=false; }
+}
 let baseRevision = (()=>{ try{ return JSON.parse(localStorage.getItem('baseRevision')||'null') || {corregidas:0,fuera:[]}; }catch(_){ return {corregidas:0,fuera:[]}; } })();
 function actualizarBaseMonitoreoStatus(){
   $('monBaseCount').textContent = baseMonitoreo.length+' cargados';
@@ -4546,6 +4601,7 @@ function renderResultadosCercanos(lista){
         <span class="mon-result__info">
           <span class="mon-result__id">${esc(t.id)}</span>
           <span class="mon-result__meta">${esc(t.especie||'—')} · ${esc(t.parque||'—')}</span>
+          ${t.hito ? '<span class="mon-hito'+(t.vencida?' mon-hito--venc':'')+'">'+esc(textoHito(t))+'</span>' : ''}
         </span>
       </span>
       <span class="mon-result__dist">${fmtDist(t.dist)}</span>
@@ -4565,6 +4621,7 @@ function seleccionarArbol(idArbol){
   if (!t) return;
   arbolSeleccionado = t;
   $('monArbolInfo').innerHTML = '<strong>'+esc(t.id)+'</strong><br>'+esc(t.especie||'—')+' · '+esc(t.parque||'—')+(t.colonia?' — '+esc(t.colonia):'')
+    + (t.hito ? '<br><span class="mon-hito'+(t.vencida?' mon-hito--venc':'')+'">'+esc(textoHito(t))+'</span>' : '')
     + (fotosMuestraIds.has(t.id) ? '<div style="margin-top:8px"><img class="mon-arbol-foto" id="fichaFoto" alt="Foto de la plantación"><button type="button" class="btn-action btn-action--secondary" style="width:100%;justify-content:center" data-id="'+esc(t.id)+'" onclick="verFotosArbol(this.dataset.id)">🔍 Ver fotos de la plantación</button></div>' : '');
   if (fotosMuestraIds.has(t.id)){
     fotosGet(t.id).then(f => { const el=$('fichaFoto'); if (el && f) el.src = f.frente || f.cenital || ''; }).catch(()=>{});
@@ -4617,7 +4674,7 @@ async function guardarMonitoreo(){
     parque: arbolSeleccionado.parque,
     especie: arbolSeleccionado.especie,
     lat: arbolSeleccionado.lat, lon: arbolSeleccionado.lon,   // van dentro del sello de la foto
-    mes,
+    mes, hito: arbolSeleccionado.hito || '',
     estado,
     dap: parseFloat($('monDap').value)||'',
     foto: true,
@@ -4661,6 +4718,7 @@ function renderMonitoreoHoy(){
   const cont=$('monListaHoy');
   if (!monitoreoRegistros.length){
     cont.innerHTML='<div class="no-regs"><div class="no-regs__icon">🔎</div><div class="no-regs__msg">Sin revisitas registradas aún.</div></div>';
+    pintarEnvioMon();   // v43: sin revisitas no se ofrece «Enviar»
     return;
   }
   const claseEstado = e => e==='Muerto' ? 'mon-card--dead' : (e==='Dañado' ? 'mon-card--hurt' : '');
@@ -4714,10 +4772,10 @@ async function exportFotosMonitoreo(){
 }
 function csvMonitoreo(){
   const nombres = nombresFotosMonitoreo();
-  const cols=['ID_Monitoreo','ID_Arbol','Fecha_Revision','Estado','DAP_Actual_cm','Foto_Verificacion','Revisado_Por','Observaciones','Mes_Revision'];
+  const cols=['ID_Monitoreo','ID_Arbol','Fecha_Revision','Estado','DAP_Actual_cm','Foto_Verificacion','Revisado_Por','Observaciones','Mes_Revision','Hito_Meses'];
   const rows=monitoreoRegistros.map(r=>[
     csvTxt(r.idMonitoreo), csvTxt(r.idArbol), csvTxt(r.fecha), csvTxt(r.estado), (r.dap||'').toString(),
-    r.foto?nombres[r.idMonitoreo]:'', csvTxt(r.revisor), csvTxt(r.obs), r.mes||''
+    r.foto?nombres[r.idMonitoreo]:'', csvTxt(r.revisor), csvTxt(r.obs), r.mes||'', r.hito||''
   ].join(','));
   return [cols.join(','),...rows].join('\n');
 }
@@ -4793,7 +4851,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v42';
+const APP_VERSION='v43';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));

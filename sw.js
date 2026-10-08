@@ -87,7 +87,7 @@
 /* v39-5: «Parques Alegres I.A.P. y Fundación GC1 - Iniciativa Cobertura Vegetal 2026». */
 /* v40 (07-oct-2026): HU-29 envío directo a Ecosistémica (Apps Script). */
 /* v40-1: errores de envío diferenciados con detalle técnico. */
-const CACHE_VERSION = 'apa-2026-10-08-v42-2';
+const CACHE_VERSION = 'apa-2026-10-08-v43-1';
 const CORE = [
   './',
   './index.html',
@@ -119,6 +119,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  /* v43: lo que no es de la app (el servidor de Ecosistémica en Google) va directo a la red.
+     Antes, sin señal, una consulta GET al servidor recibía la página de la app en lugar de un error. */
+  if (!req.url.startsWith(self.location.origin)) return;
 
   /* v36 · Abrir la app (navegación): primero la red, con 3 s de espera máxima.
      Antes se servía siempre la copia guardada y la nueva solo se bajaba en segundo

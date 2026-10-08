@@ -12,11 +12,18 @@
  * s8-1 (HU-47): columnas Tipo_Registro, Estado_Encontrado y Mes_Plantacion (AAAA-MM) para los
  *   árboles ya plantados. Para monitoreo y tableros, la edad del árbol se cuenta desde Mes_Plantacion,
  *   no desde Fecha (que es el día en que se registró).
+ * s8-2 (HU-51): muestra de monitoreo y calendario de revisitas en la propia hoja maestra.
+ *   - Pestaña Entregas: lo entregado a cada comité (se pega del Sheets de entregas).
+ *   - Cuando un parque registra todo lo entregado, se sortea su muestra entre los árboles
+ *     vivos del primer registro (Cochran con población finita, reparto proporcional) y se
+ *     crean sus revisitas a 3, 6, 12, 24 y 36 meses en la pestaña Revisitas.
+ *   - El sorteo es verificable: ordena por SHA-256(semilla|UID), así que se puede repetir.
+ *   - La app descarga las revisitas de un parque con doGet ?accion=revisitas.
  *   La hoja existente se actualiza sola en el primer envío; también puedes ejecutar
  *   actualizarEncabezados() una vez desde el editor. No se borra ni se mueve ningún dato.
  */
 
-const VERSION = 's8-1';
+const VERSION = 's8-2';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -29,6 +36,20 @@ const COLS_PLANTACION = ['ID_Arbol','UID','Fecha_ISO','Fecha','Mes','ID_Parque',
 const COLS_MONITOREO = ['ID_Monitoreo','UID','ID_Arbol','Fecha_ISO','Fecha','Mes_Revision','Estado','DAP_Actual_cm','ID_Parque','Parque',
   'Nombre_Comun','Revisado_Por','Observaciones','Latitud','Longitud','Foto','Foto_URL','Dispositivo','Version_App','Recibido','Origen'];
 const COLS_ENVIOS = ['Recibido','Tipo','Dispositivo','Brigada','Parque','Arboles','Detalle'];
+const COLS_MONITOREO_S8 = COLS_MONITOREO.concat(['Hito_Meses']);
+const COLS_ENTREGAS = ['ID_Parque','Parque','Colonia','Especie','Cantidad','Fecha_Entrega','Comite','Asesor'];
+const COLS_MUESTRA_PARQUES = ['ID_Parque','Parque','Entregados','Registrados','Vivos_Primer_Registro','Muestra','Estado','Fecha_Sorteo'];
+const COLS_REVISITAS = ['Clave','ID_Arbol','ID_Parque','Parque','Nombre_Comun','Latitud','Longitud','Mes_Plantacion','Hito_Meses',
+  'Mes_Programado','Estado','ID_Monitoreo','Fecha_Realizada','Resultado','Foto_Frente_URL'];
+/* Parámetros del muestreo: se editan en la pestaña Muestreo de la hoja (columna Valor) */
+const MUESTREO_DEFECTO = [
+  ['Z', 1.96, 'Nivel de confianza 95 % (90 % = 1.645 · 99 % = 2.576)'],
+  ['Proporcion_p', 0.5, 'Proporción esperada; 0.5 da la muestra más conservadora'],
+  ['Margen_e', 0.03, 'Margen de error ±3 %'],
+  ['Poblacion_N', '', 'Vacío = suma de Cantidad en Entregas (3,747 en 2026)'],
+  ['Hitos_Meses', '3,6,12,24,36', 'Revisitas en meses desde Mes_Plantacion'],
+  ['Semilla', 'APA2026', 'No cambiar después del primer sorteo: con ella se puede repetir y verificar']
+];
 
 /* ─────────────── Configuración (una sola vez) ─────────────── */
 function configurar() {
@@ -49,6 +70,7 @@ function configurar() {
   prepararHoja_(hMe, ['Anio','Meta_Arboles','Inicio','Fin','Nota']);
   hMe.appendRow([2026, 3500, '2026-09-01', '2026-12-15', 'Meta de plantación de Cobertura Vegetal 2026']);
   prepararHoja_(ss.insertSheet('Envios'), COLS_ENVIOS);
+  prepararMuestreo_(ss);
 
   const clave = Utilities.getUuid().replace(/-/g, '').slice(0, 20);
   p.setProperties({ HOJA_ID: ss.getId(), CARPETA_FOTOS_ID: fotos.getId(), CARPETA_RAIZ_ID: raiz.getId(),
@@ -92,10 +114,182 @@ function asegurarEncabezados_(hoja, cols) {
 }
 /* Ejecutar una vez desde el editor después de pegar s8-1 (opcional: el primer envío lo hace solo) */
 function actualizarEncabezados() {
-  const hoja = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('HOJA_ID')).getSheetByName('Plantacion');
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('HOJA_ID'));
+  const hoja = ss.getSheetByName('Plantacion');
   const antes = hoja.getLastColumn();
   asegurarEncabezados_(hoja, COLS_PLANTACION);
-  Logger.log('Plantacion: ' + antes + ' → ' + hoja.getLastColumn() + ' columnas. Nada se movió ni se borró.');
+  asegurarEncabezados_(ss.getSheetByName('Monitoreo'), COLS_MONITOREO_S8);
+  prepararMuestreo_(ss);
+  Logger.log('Plantacion: ' + antes + ' → ' + hoja.getLastColumn() + ' columnas. Pestañas Entregas, Muestreo, Muestra_Parques y Revisitas listas. Nada se movió ni se borró.');
+}
+
+/* ─────────────── s8-2 · Muestra de monitoreo y revisitas (HU-51) ─────────────── */
+function prepararMuestreo_(ss) {
+  hojaCon_(ss, 'Entregas', COLS_ENTREGAS);
+  const m = ss.getSheetByName('Muestreo');
+  if (!m) {
+    const h = ss.insertSheet('Muestreo');
+    prepararHoja_(h, ['Parametro', 'Valor', 'Nota']);
+    h.getRange(2, 1, MUESTREO_DEFECTO.length, 3).setValues(MUESTREO_DEFECTO);
+  }
+  hojaCon_(ss, 'Muestra_Parques', COLS_MUESTRA_PARQUES);
+  hojaCon_(ss, 'Revisitas', COLS_REVISITAS);
+}
+function hojaCon_(ss, nombre, cols) {
+  let h = ss.getSheetByName(nombre);
+  if (!h) { h = ss.insertSheet(nombre); prepararHoja_(h, cols); return h; }
+  asegurarEncabezados_(h, cols);
+  return h;
+}
+/* Filas de una pestaña como objetos { encabezado: valor }, con su número de renglón */
+function filas_(hoja) {
+  if (!hoja || hoja.getLastRow() < 2) return [];
+  const v = hoja.getDataRange().getValues(), h = v[0].map(x => String(x).trim());
+  return v.slice(1).map((r, i) => { const o = { _fila: i + 2 }; h.forEach((c, j) => { if (c) o[c] = r[j]; }); return o; });
+}
+function parametros_(ss) {
+  const p = {};
+  MUESTREO_DEFECTO.forEach(r => { p[r[0]] = r[1]; });
+  filas_(ss.getSheetByName('Muestreo')).forEach(r => { if (r.Parametro && r.Valor !== '') p[r.Parametro] = r.Valor; });
+  p.hitos = String(p.Hitos_Meses).split(',').map(x => parseInt(x, 10)).filter(x => x > 0);
+  return p;
+}
+/* Cochran con corrección por población finita: el mismo cálculo del workbook de seguimiento */
+function tamanoMuestra_(N, p) {
+  const z = Number(p.Z), q = Number(p.Proporcion_p), e = Number(p.Margen_e);
+  const n0 = (z * z * q * (1 - q)) / (e * e);
+  return N > 0 ? Math.ceil(n0 / (1 + (n0 - 1) / N)) : 0;
+}
+let TZ_ = 'America/Mazatlan';
+function ym_(v) {   // 'AAAA-MM' de una fecha o texto (Sheets convierte «2026-07» en fecha: se lee en su zona horaria)
+  if (v instanceof Date) return Utilities.formatDate(v, TZ_, 'yyyy-MM');
+  const m = String(v || '').match(/^(\d{4})-(\d{2})/);
+  return m ? m[1] + '-' + m[2] : '';
+}
+function sumarMeses_(ym, n) {
+  const a = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7)) - 1 + n;
+  return (a + Math.floor(m / 12)) + '-' + String(m % 12 + 1).padStart(2, '0');
+}
+function vivoAlRegistrar_(r) {
+  const est = String(r.Estado_Encontrado || '');
+  return est ? (est === 'Vivo' || est === 'Dañado') : true;   // una plantación de hoy está viva
+}
+function huella_(semilla, uid) {
+  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, semilla + '|' + uid)
+    .map(b => ((b + 256) % 256).toString(16).padStart(2, '0')).join('');
+}
+
+/* Después de cada árbol: si el parque ya registró todo lo entregado, se sortea su muestra (una vez) */
+function revisarParque_(ss, idParque) {
+  TZ_ = ss.getSpreadsheetTimeZone() || TZ_;
+  idParque = String(idParque || '').trim();
+  if (!idParque) return;
+  const hMP = hojaCon_(ss, 'Muestra_Parques', COLS_MUESTRA_PARQUES);
+  const previo = filas_(hMP).filter(r => String(r.ID_Parque) === idParque)[0];
+  if (previo && previo.Estado === 'Sorteada') return;
+  const entregas = filas_(ss.getSheetByName('Entregas')).filter(r => String(r.ID_Parque).trim() === idParque);
+  const entregados = entregas.reduce((t, r) => t + (Number(r.Cantidad) || 0), 0);
+  if (!entregados) return;   // sin entrega registrada no hay contra qué comparar: sortearParque() a mano
+  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && r.Origen !== 'DEMO');
+  const vivos = arboles.filter(vivoAlRegistrar_);
+  const fila = [idParque, (entregas[0].Parque || (arboles[0] && arboles[0].Parque) || ''), entregados, arboles.length, vivos.length, '',
+    arboles.length >= entregados ? 'Sorteada' : 'Registrando', ''];
+  if (arboles.length >= entregados) {
+    const n = sortear_(ss, idParque, vivos);
+    fila[5] = n; fila[7] = new Date();
+  }
+  if (previo) hMP.getRange(previo._fila, 1, 1, fila.length).setValues([fila]);
+  else hMP.appendRow(fila);
+}
+function sortear_(ss, idParque, vivos) {
+  const p = parametros_(ss);
+  const N = Number(p.Poblacion_N) || filas_(ss.getSheetByName('Entregas')).reduce((t, r) => t + (Number(r.Cantidad) || 0), 0);
+  const nPrograma = tamanoMuestra_(N, p);
+  const nParque = Math.min(vivos.length, Math.ceil(nPrograma * vivos.length / N));
+  const elegidos = vivos.map(r => ({ r: r, h: huella_(p.Semilla, r.UID) })).sort((a, b) => a.h < b.h ? -1 : 1).slice(0, nParque).map(x => x.r);
+  const hRev = hojaCon_(ss, 'Revisitas', COLS_REVISITAS);
+  const nuevas = [];
+  elegidos.forEach(r => {
+    const mp = ym_(r.Mes_Plantacion) || ym_(r.Fecha), reg = ym_(r.Fecha);
+    p.hitos.forEach(h => {
+      const prog = sumarMeses_(mp, h);
+      /* Los plantados en junio y julio: su revisita de 3 meses es el registro inicial */
+      const hecha = reg && prog <= reg;
+      nuevas.push([r.ID_Arbol + '|' + h, r.ID_Arbol, idParque, r.Parque, r.Nombre_Comun, r.Latitud, r.Longitud, "'" + mp, h, "'" + prog,
+        hecha ? 'Hecha (registro inicial)' : 'Pendiente', '', hecha ? r.Fecha : '', hecha ? (r.Estado_Encontrado || 'Vivo') : '', r.Foto_Frente_URL || '']);
+    });
+  });
+  if (nuevas.length) hRev.getRange(hRev.getLastRow() + 1, 1, nuevas.length, COLS_REVISITAS.length).setValues(nuevas);
+  return nParque;
+}
+/* Para un parque sin entrega registrada o que no terminó: escribe el ID y ejecuta */
+function sortearParque() {
+  const idParque = '00000';   // ← ID del parque
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('HOJA_ID'));
+  TZ_ = ss.getSpreadsheetTimeZone() || TZ_;
+  const hMP = hojaCon_(ss, 'Muestra_Parques', COLS_MUESTRA_PARQUES);
+  if (filas_(hMP).some(r => String(r.ID_Parque) === idParque && r.Estado === 'Sorteada')) { Logger.log('Ese parque ya tiene muestra.'); return; }
+  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && r.Origen !== 'DEMO');
+  const vivos = arboles.filter(vivoAlRegistrar_);
+  const n = sortear_(ss, idParque, vivos);
+  hMP.appendRow([idParque, arboles[0] ? arboles[0].Parque : '', '', arboles.length, vivos.length, n, 'Sorteada (manual)', new Date()]);
+  Logger.log('Parque ' + idParque + ': ' + n + ' árboles en la muestra.');
+}
+
+/* Al recibir una revisita: se marca el hito que toca. Devuelve el hito asignado. */
+function marcarRevisita_(ss, d) {
+  const hRev = ss.getSheetByName('Revisitas');
+  if (!hRev) return '';
+  TZ_ = ss.getSpreadsheetTimeZone() || TZ_;
+  const filas = filas_(hRev).filter(r => r.ID_Arbol === d.ID_Arbol && (r.Estado === 'Pendiente'));
+  filas.forEach(r => { r.Mes_Programado = ym_(r.Mes_Programado); });
+  if (!filas.length) return '';
+  const visita = ym_(d.Fecha);
+  filas.sort((a, b) => Number(a.Hito_Meses) - Number(b.Hito_Meses));
+  /* El hito que dice la app; si no, el más antiguo que ya toca (o el próximo, si se adelantó) */
+  const elegida = filas.filter(r => String(r.Hito_Meses) === String(d.Hito_Meses))[0]
+    || filas.filter(r => r.Mes_Programado <= sumarMeses_(visita || r.Mes_Programado, 1)).slice(-1)[0] || filas[0];
+  const col = c => COLS_REVISITAS.indexOf(c) + 1;
+  hRev.getRange(elegida._fila, col('Estado')).setValue('Hecha');
+  hRev.getRange(elegida._fila, col('ID_Monitoreo'), 1, 3).setValues([[d.ID_Monitoreo || '', d.Fecha || '', d.Estado || '']]);
+  /* Las revisitas pendientes que quedaron atrás sin hacerse quedan como vencidas */
+  filas.filter(r => Number(r.Hito_Meses) < Number(elegida.Hito_Meses)).forEach(r => hRev.getRange(r._fila, col('Estado')).setValue('No se hizo'));
+  if (d.Estado === 'Muerto')
+    filas.filter(r => Number(r.Hito_Meses) > Number(elegida.Hito_Meses)).forEach(r => hRev.getRange(r._fila, col('Estado')).setValue('Cerrada (árbol muerto)'));
+  return Number(elegida.Hito_Meses);
+}
+
+/* GET ?accion=revisitas&parque=ID&clave=…: lo que le toca revisitar a un parque este mes y el siguiente */
+function revisitasDeParque_(idParque) {
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('HOJA_ID'));
+  TZ_ = ss.getSpreadsheetTimeZone() || TZ_;
+  const hoy = Utilities.formatDate(new Date(), 'America/Mazatlan', 'yyyy-MM'), hasta = sumarMeses_(hoy, 1);
+  const estado = filas_(ss.getSheetByName('Muestra_Parques')).filter(r => String(r.ID_Parque) === idParque)[0];
+  const pend = filas_(ss.getSheetByName('Revisitas')).filter(r => String(r.ID_Parque) === idParque && r.Estado === 'Pendiente');
+  pend.forEach(r => { r.Mes_Programado = ym_(r.Mes_Programado); });
+  /* Un árbol puede tener dos hitos pendientes (uno atrasado): se ofrece el más reciente que ya toca;
+     al registrarlo, el atrasado queda como «No se hizo» (igual que en marcarRevisita_) */
+  const porArbol = {};
+  pend.filter(r => r.Mes_Programado <= hasta).sort((a, b) => Number(b.Hito_Meses) - Number(a.Hito_Meses))
+    .forEach(r => { if (!porArbol[r.ID_Arbol]) porArbol[r.ID_Arbol] = r; });
+  const arboles = Object.keys(porArbol).map(id => {
+    const r = porArbol[id];
+    return { id: id, parque: r.Parque, especie: r.Nombre_Comun, lat: Number(r.Latitud), lon: Number(r.Longitud),
+      hito: Number(r.Hito_Meses), programado: r.Mes_Programado, vencida: r.Mes_Programado < hoy, foto: miniatura_(r.Foto_Frente_URL) };
+  });
+  const proxima = pend.filter(r => r.Mes_Programado > hasta).map(r => r.Mes_Programado).sort()[0] || '';
+  return { ok: true, parque: idParque, mes: hoy, arboles: arboles, proxima: proxima,
+    estado: estado ? { estado: estado.Estado, registrados: estado.Registrados, entregados: estado.Entregados, muestra: estado.Muestra } : null };
+}
+/* Foto de referencia pequeña para que el comité reconozca el árbol (las fotos de Drive son privadas) */
+function miniatura_(url) {
+  try {
+    const m = String(url || '').match(/\/d\/([\w-]+)/);
+    if (!m) return '';
+    const f = DriveApp.getFileById(m[1]);
+    const b = f.getThumbnail() || (f.getSize() <= 450000 ? f.getBlob() : null);
+    return b ? 'data:' + (b.getContentType() || 'image/jpeg') + ';base64,' + Utilities.base64Encode(b.getBytes()) : '';
+  } catch (err) { return ''; }
 }
 
 function prepararHoja_(h, cols) {
@@ -108,6 +302,14 @@ function prepararHoja_(h, cols) {
 /* GET: prueba de conexión. La app la usa para saber si hay red hacia el servidor. */
 function doGet(e) {
   const p = PropertiesService.getScriptProperties();
+  const q = (e && e.parameter) || {};
+  if (q.accion === 'revisitas') {
+    if (q.clave !== p.getProperty('CLAVE_ENVIO')) return json_({ ok: false, error: 'clave' });
+    const id = String(q.parque || '').replace(/[^\w-]/g, '').slice(0, 20);
+    if (!id) return json_({ ok: false, error: 'parque' });
+    try { return json_(revisitasDeParque_(id)); }
+    catch (err) { return json_({ ok: false, error: 'servidor', detalle: String(err).slice(0, 200) }); }
+  }
   const ok = !!p.getProperty('HOJA_ID');
   return json_({ ok: ok, servicio: 'Árboles PA', version: VERSION, configurado: ok });
 }
@@ -163,10 +365,12 @@ function recibirArbol_(pedido, prop) {
     if (c === 'Recibido') return new Date();
     if (c === 'Origen') return d.Origen === 'DEMO' ? 'DEMO' : 'APP';
     if (c === 'Tipo_Registro') return celda_(d.Tipo_Registro || 'Plantación');   // apps anteriores a v42 solo registran plantaciones
-    if (c === 'Mes_Plantacion') return celda_(d.Mes_Plantacion || String(d.Fecha || '').slice(0, 7));   // en una plantación, el mes del registro
+    if (c === 'Mes_Plantacion') { const mp = ym_(d.Mes_Plantacion || d.Fecha); return mp ? "'" + mp : ''; }   // texto: que Sheets no lo convierta en fecha
     return COLS_PLANTACION.indexOf(c) >= 0 ? celda_(d[c]) : '';
   });
   hoja.appendRow(fila);
+  /* s8-2: un fallo del sorteo nunca hace que la app reintente el árbol (ya quedó guardado) */
+  if (d.Origen !== 'DEMO') { try { revisarParque_(ss, d.ID_Parque); } catch (err) { console.error('sorteo', err); } }
   return { ok: true, uid: d.UID, fotos: (urlFrente ? 1 : 0) + (urlCenital ? 1 : 0) };
 }
 
@@ -179,9 +383,13 @@ function recibirRevisita_(pedido, prop) {
   const carpeta = carpetaDelDia_(prop, d.Fecha || hoyIso_(), 'Monitoreo');
   const f = pedido.fotos || {};
   const url = f.revision ? guardarFoto_(carpeta, f.revision, d.Foto || (d.ID_Arbol + '_revision.jpg'), d) : '';
-  hoja.appendRow(COLS_MONITOREO.map(c => c === 'Foto_URL' ? url : c === 'Dispositivo' ? texto_(pedido.dispositivo)
-    : c === 'Version_App' ? texto_(pedido.version) : c === 'Recibido' ? new Date() : c === 'Origen' ? 'APP' : celda_(d[c])));
-  return { ok: true, uid: d.UID };
+  let hito = '';
+  try { hito = marcarRevisita_(ss, d); } catch (err) { console.error('revisitas', err); }
+  const encabezados = asegurarEncabezados_(hoja, COLS_MONITOREO_S8);
+  hoja.appendRow(encabezados.map(c => c === 'Foto_URL' ? url : c === 'Dispositivo' ? texto_(pedido.dispositivo)
+    : c === 'Version_App' ? texto_(pedido.version) : c === 'Recibido' ? new Date() : c === 'Origen' ? 'APP'
+    : c === 'Hito_Meses' ? (hito || celda_(d.Hito_Meses)) : COLS_MONITOREO_S8.indexOf(c) >= 0 ? celda_(d[c]) : ''));
+  return { ok: true, uid: d.UID, hito: hito };
 }
 
 /* Al terminar de subir todos los árboles: un solo correo con el resumen, no uno por árbol. */
