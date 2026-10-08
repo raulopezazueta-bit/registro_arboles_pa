@@ -3329,14 +3329,21 @@ async function exportFotos(){
     if ((!r.foto1 || f1) && (!r.foto2 || f2)) completos.push(uidDe(r));
   }
   if (!items.length){ toast('Sin fotos guardadas','err'); return; }
-  toast('📷 Descargando '+items.length+' fotos…');
-  let i=0;
-  function next(){
-    if (i>=items.length){ marcarEnviados('f', completos); return; }
-    descargarFotoSellada(items[i].data, items[i].nombre, items[i].info);
-    i++; setTimeout(next,700);
-  }
-  next();
+  if (descargarFotosZip(items, 'Fotos_Arboles')) marcarEnviados('f', completos);
+}
+/* v41-3 · Chrome en Android conserva solo una de varias descargas seguidas: antes se bajaba
+   una foto cada 0.7 s y en el celular quedaba únicamente la última. Ahora todas las fotos van
+   en un solo .zip (con su nombre y su sello de ID), igual que el respaldo de la jornada. */
+function descargarFotosZip(items, prefijo){
+  try{
+    const archivos = items.map(it => ({ nombre: it.nombre, bytes: inyectarSello(dataUrlABytes(it.data), selloTexto(it.info)) }));
+    const blob = crearZip(archivos), nombre = prefijo+'_'+hoyLocal()+'_'+items.length+'fotos.zip';
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toast('📷 '+items.length+' fotos en '+nombre+' (Descargas)','ok');
+    return true;
+  }catch(e){ toast('❌ No se pudieron preparar las fotos: '+(e.message||e),'err'); return false; }
 }
 /* ---------- Compartir por correo, WhatsApp o Drive con los nombres correctos ----------
    Al adjuntar desde la galería los archivos pierden el nombre con el ID. Compartir desde la
@@ -3474,13 +3481,6 @@ async function sellarFotoMonitoreo(reg, dato){
   }catch(_){}
 }
 /* Descarga una foto ya sellada (los navegadores no dejan renombrar un dataURL con el sello) */
-function descargarFotoSellada(dataUrl, nombre, info){
-  const bytes = inyectarSello(dataUrlABytes(dataUrl), selloTexto(info));
-  const url = URL.createObjectURL(new Blob([bytes], { type:'image/jpeg' }));
-  const a = document.createElement('a');
-  a.href = url; a.download = nombre; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-}
 
 function dataUrlAFile(dataUrl, nombre, info){
   const [cab, b64] = dataUrl.split(',');
@@ -4600,13 +4600,7 @@ async function exportFotosMonitoreo(){
                            info:{ id:r.idArbol, tipo:'revision', lat:r.lat, lon:r.lon, fecha:r.fecha } });
   }
   if (!items.length){ toast('Sin fotos de verificación guardadas','err'); return; }
-  toast('📷 Descargando '+items.length+' fotos…');
-  let i=0;
-  (function next(){
-    if (i>=items.length) return;
-    descargarFotoSellada(items[i].data, items[i].nombre, items[i].info);
-    i++; setTimeout(next,700);
-  })();
+  descargarFotosZip(items, 'Fotos_Monitoreo');
 }
 function csvMonitoreo(){
   const nombres = nombresFotosMonitoreo();
