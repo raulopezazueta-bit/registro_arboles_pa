@@ -39,6 +39,12 @@ html[data-fs="2"] .foto-grid{grid-template-columns:1fr}
 html[data-fs="2"] .reg-stat__label{letter-spacing:0}
 /* v24 · opciones rápidas de medición, aviso de mes y medidor de memoria */
 .opciones{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:var(--s-2)}
+/* v42 · HU-46: tipo de registro y estado del árbol ya plantado */
+.opciones--2{grid-template-columns:repeat(2,1fr)}
+#sec-itree.itree--muerto .section__body > :not(#f-estadoEnc){display:none}
+.modo-inv .proto-item--solo-plant{display:none}
+.foto-slot--opcional::after{content:'Opcional';position:absolute;top:6px;left:6px;font-size:var(--fs-2xs);font-weight:700;background:var(--c-w);color:var(--c-n-600);padding:2px 8px;border-radius:var(--r-full)}
+.inv-aviso{font-size:var(--fs-sm);color:var(--c-p-800);background:var(--c-p-50);border-radius:var(--r-md);padding:8px 10px;margin-top:var(--s-2)}
 .opcion{min-height:44px;border:1.5px solid var(--c-n-300);background:var(--c-w);border-radius:var(--r-md);font:inherit;font-size:var(--fs-md);font-weight:650;color:var(--c-n-800);cursor:pointer;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
 .opcion small{font-size:var(--fs-xs);font-weight:500;color:var(--c-n-600)}
 .opcion[aria-pressed="true"]{border-color:var(--c-p-700);background:var(--c-p-50);color:var(--c-p-800);box-shadow:inset 0 0 0 1px var(--c-p-700)}
@@ -763,6 +769,14 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         <div class="jornada__linea" id="jorLinea2">—</div>
         <button type="button" class="jornada__cambiar" onclick="editarJornada()"><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg> Cambiar datos de la jornada</button>
       </div>
+      <div class="field" id="f-tipoReg"><span class="field__label" id="tipoRegLbl">¿Qué vas a registrar?</span>
+        <div class="opciones opciones--2" id="op-tipoReg" role="group" aria-labelledby="tipoRegLbl">
+          <button type="button" class="opcion" data-v="plantacion" aria-pressed="true" onclick="elegirTipo('plantacion')">Plantación de hoy<small>Árboles que se plantan hoy</small></button>
+          <button type="button" class="opcion" data-v="inventario" aria-pressed="false" onclick="elegirTipo('inventario')">Árbol ya plantado<small>Entregados antes (jun–sep)</small></button>
+        </div>
+        <input type="hidden" id="tipoReg" value="plantacion">
+        <p class="inv-aviso" id="invAviso" hidden>Registras árboles que ya estaban plantados. Elige el <b>mes en que se plantaron</b> y, en cada árbol, cómo lo encontraste.</p>
+      </div>
       <div class="field" id="f-idParque"><label class="field__label" for="idParque">ID de Parque <span class="req">*</span></label>
         <input type="text" id="idParque" inputmode="numeric" placeholder="Ej: 14664" autocomplete="off" oninput="buscarParque()">
         <div class="itree-bd" id="idParqueStatus" style="display:none;margin-top:6px"></div>
@@ -773,10 +787,10 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         </label>
       </div>
       <div class="field-row">
-        <div class="field" id="f-mes"><label class="field__label" for="mes">Mes <span class="req">*</span></label>
+        <div class="field" id="f-mes"><label class="field__label" for="mes"><span id="mesLbl">Mes</span> <span class="req">*</span></label>
           <select id="mes"><option value="">—</option><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select>
         </div>
-        <div class="field" id="f-ejecutor"><label class="field__label" for="ejecutor">Quién planta <span class="req">*</span></label>
+        <div class="field" id="f-ejecutor"><label class="field__label" for="ejecutor"><span id="ejecutorLbl">Quién planta</span> <span class="req">*</span></label>
           <select id="ejecutor"><option value="">—</option><option>Comité y vecinos</option><option>Voluntariado</option><option>Estudiantes</option></select>
         </div>
       </div>
@@ -928,6 +942,15 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     <button type="button" class="section__lock" tabindex="-1" onclick="irAPendiente()"><span class="section__lock-msg"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg> Completa la sección anterior</span></button>
     <div class="section__head section__head--itree"><div class="section__head__title"><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-ruler"/></svg></span> Mediciones del árbol</div><span class="section__head__status" id="stItree">0/5</span></div>
     <div class="section__body">
+      <div class="field" id="f-estadoEnc" hidden><span class="field__label" id="estadoEncLbl">¿Cómo encontraste el árbol? <span class="req">*</span></span>
+        <div class="opciones" id="op-estadoEnc" role="group" aria-labelledby="estadoEncLbl">
+          <button type="button" class="opcion" data-v="Vivo" aria-pressed="false" onclick="elegirEstadoEnc('Vivo')">Vivo<small>Sano o poco daño</small></button>
+          <button type="button" class="opcion" data-v="Dañado" aria-pressed="false" onclick="elegirEstadoEnc('Dañado')">Dañado<small>Vivo, lastimado</small></button>
+          <button type="button" class="opcion" data-v="Muerto" aria-pressed="false" onclick="elegirEstadoEnc('Muerto')">Muerto<small>Seco, sin hojas</small></button>
+        </div>
+        <input type="hidden" id="estadoEnc" value="">
+        <p class="field__hint" id="estadoEncHint">Vivo y Dañado cuentan para la meta. Si está muerto, regístralo igual: solo pide la foto de frente.</p>
+      </div>
       <div class="field" id="f-dap"><label class="field__label" for="dap">Grosor del tallo (DAP) <span class="req">*</span> <span class="opt">a 1.30 m</span></label>
           <div class="field-unit"><input type="number" id="dap" min="0.5" max="60" step="0.1" inputmode="decimal" placeholder="Toca una opción o escribe"><span class="field-unit__sufix">cm</span></div>
           <div class="opciones" id="op-dap" role="group" aria-label="Opciones rápidas de DAP">
@@ -982,16 +1005,16 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 
   <div class="section" id="sec-proto" data-group="proto" data-nombre="Protocolo de plantación">
     <button type="button" class="section__lock" tabindex="-1" onclick="irAPendiente()"><span class="section__lock-msg"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg> Completa la sección anterior</span></button>
-    <div class="section__head section__head--proto"><div class="section__head__title"><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-checkc"/></svg></span> <span>Protocolo de plantación <span class="head-opt">Opcional · marca solo lo que se hizo</span></span></div><span class="section__head__status" id="stProto">0/4</span></div>
+    <div class="section__head section__head--proto"><div class="section__head__title"><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-checkc"/></svg></span> <span><span id="protoTit">Protocolo de plantación</span> <span class="head-opt" id="protoSub">Opcional · marca solo lo que se hizo</span></span></div><span class="section__head__status" id="stProto">0/4</span></div>
     <div class="section__body">
       <div class="proto-list">
-        <label class="proto-item" id="protoHoyo-label">
+        <label class="proto-item proto-item--solo-plant" id="protoHoyo-label">
           <input type="checkbox" id="protoHoyo" onchange="onProto('Hoyo')">
           <span class="proto-item__num" aria-hidden="true">1</span>
           <div class="proto-item__txt"><div class="proto-item__title">Realizar un hoyo de 60 × 60 × 60 cm</div><div class="proto-item__sub">Excavación con dimensiones mínimas verificadas</div></div>
           <span class="proto-item__check" aria-hidden="true"></span>
         </label>
-        <label class="proto-item" id="protoCama-label">
+        <label class="proto-item proto-item--solo-plant" id="protoCama-label">
           <input type="checkbox" id="protoCama" onchange="onProto('Cama')">
           <span class="proto-item__num" aria-hidden="true">2</span>
           <div class="proto-item__txt"><div class="proto-item__title">Colocar una cama de tierra fertilizada</div><div class="proto-item__sub">Capa de tierra fertilizada en el fondo del hoyo</div></div>
@@ -999,17 +1022,18 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         </label>
         <label class="proto-item" id="protoTutor-label">
           <input type="checkbox" id="protoTutor" onchange="onProto('Tutor')">
-          <span class="proto-item__num" aria-hidden="true">3</span>
-          <div class="proto-item__txt"><div class="proto-item__title">Instalar un tutor de crecimiento</div><div class="proto-item__sub">Tutor firme, sujeto al tallo sin estrangularlo</div></div>
+          <span class="proto-item__num" aria-hidden="true" data-inv="1" data-plant="3">3</span>
+          <div class="proto-item__txt"><div class="proto-item__title" data-inv="Tiene tutor de crecimiento" data-plant="Instalar un tutor de crecimiento">Instalar un tutor de crecimiento</div><div class="proto-item__sub" data-inv="Se ve hoy: tutor firme junto al tallo" data-plant="Tutor firme, sujeto al tallo sin estrangularlo">Tutor firme, sujeto al tallo sin estrangularlo</div></div>
           <span class="proto-item__check" aria-hidden="true"></span>
         </label>
         <label class="proto-item" id="protoRiego-label">
           <input type="checkbox" id="protoRiego" onchange="onProto('Riego')">
-          <span class="proto-item__num" aria-hidden="true">4</span>
-          <div class="proto-item__txt"><div class="proto-item__title">Realizar el riego de asentamiento</div><div class="proto-item__sub">Aplicado inmediatamente después de la plantación</div></div>
+          <span class="proto-item__num" aria-hidden="true" data-inv="2" data-plant="4">4</span>
+          <div class="proto-item__txt"><div class="proto-item__title" data-inv="Tiene cajete y se ve regado" data-plant="Realizar el riego de asentamiento">Realizar el riego de asentamiento</div><div class="proto-item__sub" data-inv="Se ve hoy: cajete con tierra húmeda o agua" data-plant="Aplicado inmediatamente después de la plantación">Aplicado inmediatamente después de la plantación</div></div>
           <span class="proto-item__check" aria-hidden="true"></span>
         </label>
-        <p class="field__hint">Marca <strong>solo los pasos que realmente se hicieron</strong>, en cualquier orden. Si alguno no se hizo, déjalo sin marcar: ese dato explica después por qué un árbol pudo no sobrevivir. No es obligatorio para guardar.</p>
+        <p class="field__hint" id="protoHintInv" hidden>Marca <strong>solo lo que ves hoy</strong> junto al árbol. Si no lo ves, déjalo sin marcar. No es obligatorio para guardar.</p>
+        <p class="field__hint proto-item--solo-plant">Marca <strong>solo los pasos que realmente se hicieron</strong>, en cualquier orden. Si alguno no se hizo, déjalo sin marcar: ese dato explica después por qué un árbol pudo no sobrevivir. No es obligatorio para guardar.</p>
       </div>
     </div>
   </div>
@@ -1368,6 +1392,7 @@ const FIELDS = [
   { id:'registrante', label:'Registrado por', group:'datos' },
   { id:'parque', label:'Parque', group:'datos' },
   { id:'especie', label:'Especie', group:'especie' },
+  { id:'estadoEnc', label:'Cómo encontraste el árbol', group:'itree' },
   { id:'dap', label:'DAP', group:'itree' },
   { id:'altura', label:'Altura', group:'itree' },
   { id:'suelo', label:'Suelo circundante', group:'itree' },
@@ -1555,7 +1580,8 @@ window.addEventListener('load', () => {
   aplicarTamanoLetra();
   pintarCondicionSugerida();
   const lr=localStorage.getItem('lr'); if(lr) $('registrante').value=lr;
-  proponerMes();
+  if (localStorage.getItem('ltipo')==='inventario'){ $('tipoReg').value='inventario'; aplicarTipo(); }
+  if (esInventario()){ const lsv=localStorage.getItem('ls'); if (esMes(lsv)) $('mes').value=lsv; } else proponerMes();
   const le=localStorage.getItem('le'); if(le) $('ejecutor').value=le;
   const lp=localStorage.getItem('lp'); if(lp){ $('idParque').value=lp; buscarParque(); }
   /* v41 · HU-37: la jornada en una escuela (modo manual) también se conserva entre sesiones */
@@ -1830,8 +1856,53 @@ async function compartirEnLotes(items, titulo, t0, alEnviar){
    seguía en septiembre. Ahora se propone el mes en curso y, si el último árbol se
    guardó en otro mes, se pregunta una vez. La respuesta vale todo el mes.
    ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   v42 · HU-46 ÁRBOL YA PLANTADO (inventario de lo entregado de junio a septiembre)
+   Para la meta cuenta el árbol plantado y vivo. Los comités registran en campo los árboles
+   que ya estaban plantados: el mes es el de plantación, se anota cómo se encontró
+   (Vivo / Dañado / Muerto) y el protocolo se vuelve «lo que se ve hoy» (tutor y riego).
+   ════════════════════════════════════════════════════════════ */
+function esInventario(){ return $('tipoReg').value==='inventario'; }
+function elegirTipo(t){
+  if ($('tipoReg').value===t) return;
+  if (hayCaptura() && !confirm('Cambiar el tipo de registro deja el árbol en pantalla, pero revisa sus datos. ¿Cambiar?')) return;
+  $('tipoReg').value=t;
+  try{ localStorage.setItem('ltipo', t); }catch(_){}
+  /* El mes de plantación de un árbol ya plantado casi nunca es el mes en curso: se elige a mano */
+  if (t==='inventario'){ if ($('mes').value===mesActual()) $('mes').value=''; $('mesAviso').classList.remove('borrador--show'); }
+  else { $('estadoEnc').value=''; proponerMes(); }
+  aplicarTipo(); marcarEstadoEnc();
+  vibrate(10); actualizarValidacion(); anotarBorrador();
+}
+function aplicarTipo(){
+  const inv=esInventario();
+  document.querySelectorAll('#op-tipoReg .opcion').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v===$('tipoReg').value)));
+  $('invAviso').hidden=!inv; $('protoHintInv').hidden=!inv;
+  $('mesLbl').textContent = inv ? 'Mes en que se plantó' : 'Mes';
+  $('ejecutorLbl').textContent = inv ? 'Quién plantó' : 'Quién planta';
+  $('f-estadoEnc').hidden=!inv;
+  document.body.classList.toggle('modo-inv', inv);
+  $('protoTit').textContent = inv ? 'Lo que se ve hoy' : 'Protocolo de plantación';
+  $('protoSub').textContent = inv ? 'Opcional · marca solo lo que ves' : 'Opcional · marca solo lo que se hizo';
+  document.querySelectorAll('#sec-proto [data-inv]').forEach(el => { el.textContent = inv ? el.dataset.inv : el.dataset.plant; });
+  if (inv){ $('protoHoyo').checked=false; $('protoCama').checked=false; }
+  $('sec-itree').classList.toggle('itree--muerto', inv && $('estadoEnc').value==='Muerto');
+  pintarProtocolo();
+}
+function elegirEstadoEnc(v){
+  $('estadoEnc').value=v;
+  marcarEstadoEnc();
+  vibrate(10); actualizarValidacion(); anotarBorrador();
+}
+function marcarEstadoEnc(){
+  const v=$('estadoEnc').value;
+  document.querySelectorAll('#op-estadoEnc .opcion').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v===v)));
+  $('sec-itree').classList.toggle('itree--muerto', esInventario() && v==='Muerto');
+  $('slot2').classList.toggle('foto-slot--opcional', esInventario() && v==='Muerto');
+}
 function leerDecisionMes(){ try{ return JSON.parse(localStorage.getItem('mesDecision')||'null'); }catch(_){ return null; } }
 function proponerMes(){
+  if (esInventario()) return;
   const actual=mesActual(), ultimo=localStorage.getItem('ls'), dec=leerDecisionMes();
   if (dec && dec.calendario===actual && esMes(dec.mes)){ $('mes').value=dec.mes; return; }
   $('mes').value=actual;
@@ -2229,8 +2300,9 @@ function pintarProtocolo(){
   const st=$('stProto');
   if (st){
     const n=protoMarcados();
-    st.textContent = n+'/4';
-    st.classList.toggle('section__head__status--ok', n===4);
+    const tot = esInventario() ? 2 : 4;
+    st.textContent = n+'/'+tot;
+    st.classList.toggle('section__head__status--ok', n===tot);
   }
 }
 
@@ -2293,6 +2365,11 @@ document.addEventListener('input', e => {
   if (MEDIDAS.includes(id)){ medOrigen[id] = 'escrita'; marcarOpciones(id); }
 });
 function valOf(id){
+  /* v42 · HU-46: en «Árbol ya plantado» se pide cómo se encontró; si está muerto no se miden
+     DAP, altura, suelo, copa ni condición, y basta la foto de frente. En plantación no aplica. */
+  const inv=esInventario(), muerto=inv && $('estadoEnc').value==='Muerto';
+  if (id==='estadoEnc') return !inv || !!$('estadoEnc').value;
+  if (muerto && (id==='foto2' || ['dap','altura','suelo','copa','condicion'].includes(id))) return true;
   if (id==='gps') return !!gpsLocked;
   if (id==='foto1') return !!foto1;
   if (id==='foto2') return !!foto2;
@@ -2514,7 +2591,8 @@ function textoJornada(){
   const parque=$('parque').value.trim()||'—', id=$('idParque').value.trim();
   $('jorParque').textContent=parque;
   $('jorLinea1').textContent=[id?'ID '+id:'Sin ID (manual)', $('asesor').value?'Asesor '+$('asesor').value:'', $('mes').value].filter(Boolean).join(' · ');
-  $('jorLinea2').textContent='Planta: '+($('ejecutor').value||'—')+' · Registra: '+($('registrante').value.trim()||'—');
+  if (esInventario()) $('jorLinea1').textContent='Ya plantados · plantados en '+($('mes').value||'—')+' · '+(id?'ID '+id:'Sin ID (manual)');
+  $('jorLinea2').textContent=(esInventario()?'Plantó: ':'Planta: ')+($('ejecutor').value||'—')+' · Registra: '+($('registrante').value.trim()||'—');
 }
 function pintarJornada(groupOk){
   const sec=$('sec-datos'), completo=grupoCompleto('datos', groupOk);
@@ -2677,10 +2755,11 @@ function guardarRegistro(){
       dap:parseFloat($('dap').value), altura:parseFloat($('altura').value),
       suelo:$('suelo').value, copa:parseFloat($('copa').value), condicion:$('condicion').value,
       medOrigen:{...medOrigen},
-      protoHoyo:$('protoHoyo').checked, protoCama:$('protoCama').checked,
+      protoHoyo:esInventario()?undefined:$('protoHoyo').checked, protoCama:esInventario()?undefined:$('protoCama').checked,
       protoTutor:$('protoTutor').checked, protoRiego:$('protoRiego').checked,
       lat:gpsLocked.lat, lon:gpsLocked.lon, acc:gpsLocked.acc, prec:gpsLocked.prec, precMetodo:gpsLocked.metodo||'celular',
       foto1:!!foto1, foto2:!!foto2, estado:'Plantado',
+      tipoRegistro:esInventario()?'inventario':'plantacion', estadoEnc:esInventario()?$('estadoEnc').value:'',
       ts:new Date().toISOString(), fecha:new Date().toLocaleString('es-MX')
     };
     uidDe(reg);
@@ -2708,6 +2787,7 @@ function guardarRegistro(){
       try{localStorage.setItem('ls',reg.mes);}catch(_){}
       try{localStorage.setItem('le',reg.ejecutor);}catch(_){}
       try{localStorage.setItem('lp',reg.idParque);}catch(_){}
+      try{localStorage.setItem('ltipo',reg.tipoRegistro);}catch(_){}
       try{ if ($('manualToggle').checked) localStorage.setItem('lmanual', JSON.stringify({parque:reg.parque, colonia:reg.colonia, asesor:reg.asesor})); else localStorage.removeItem('lmanual'); }catch(_){}
     }
     pedirPersistencia();
@@ -2732,6 +2812,7 @@ function resetForm(idGuardado){
   $('obs').value='';
   $('dap').value=''; $('altura').value=''; $('suelo').value='';
   $('copa').value=''; $('condicion').value=''; pintarCondicionSugerida();
+  $('estadoEnc').value=''; marcarEstadoEnc();
   medOrigen={}; MEDIDAS.forEach(marcarOpciones);
   PROTO_PASOS.forEach(id => { $('proto'+id).checked=false; });
   pintarProtocolo();
@@ -2784,7 +2865,7 @@ function resetForm(idGuardado){
    solo con cada cambio y se ofrece al volver a abrir.
    ════════════════════════════════════════════════════════════ */
 const BORRADOR_KEY='borrador_v1';
-const CAMPOS_BORRADOR=['idParque','asesor','parque','colonia','mes','ejecutor','registrante',
+const CAMPOS_BORRADOR=['tipoReg','estadoEnc','idParque','asesor','parque','colonia','mes','ejecutor','registrante',
   'arbolNum','especie','nombreCientifico','obs','dap','altura','suelo','copa','condicion'];
 let borradorActivo=false, borradorTimer=null;
 
@@ -2851,6 +2932,7 @@ async function restaurarBorrador(){
   /* v41 · HU-37: el modo manual va antes que los campos (si no, el parque quedaba en solo lectura) */
   if (!!b.manual !== $('manualToggle').checked){ $('manualToggle').checked=!!b.manual; toggleManualParque(); }
   CAMPOS_BORRADOR.forEach(id => { const el=$(id); if (el && b.campos[id]!==undefined) el.value=b.campos[id]; });
+  aplicarTipo(); marcarEstadoEnc();
   if (b.campos.especie) selectEspecie(b.campos.especie);
   PROTO_PASOS.forEach(p => { $('proto'+p).checked=!!(b.proto&&b.proto[p]); });
   pintarProtocolo();
@@ -3153,9 +3235,13 @@ function renderImpacto(){
   box.hidden=false;
   const pct=x=>Math.round(100*x/n);
   const unicos=f=>new Set(registros.map(f).filter(Boolean)).size;
-  const conFotos=registros.filter(r=>r.foto1&&r.foto2).length;
+  const conFotos=registros.filter(r=>r.foto1&&(r.foto2||r.estadoEnc==='Muerto')).length;
   const gps1=registros.filter(r=>precDe(r)<=1).length;
-  const proto=registros.filter(r=>r.protoHoyo&&r.protoCama&&r.protoTutor&&r.protoRiego).length;
+  /* v42 · HU-46: para la meta cuenta el árbol plantado y vivo; el protocolo solo se mide en plantaciones */
+  const vivosMeta=registros.filter(r=>r.estadoEnc!=='Muerto').length, muertosInv=n-vivosMeta;
+  const inv=registros.filter(r=>r.tipoRegistro==='inventario').length;
+  const plant=registros.filter(r=>r.tipoRegistro!=='inventario');
+  const proto=plant.filter(r=>r.protoHoyo&&r.protoCama&&r.protoTutor&&r.protoRiego).length;
   const cuenta={}; registros.forEach(r=>{ const e=(r.especie||'Sin especie').split('(')[0].trim(); cuenta[e]=(cuenta[e]||0)+1; });
   const orden=Object.entries(cuenta).sort((a,b)=>b[1]-a[1]);
   const top=orden.slice(0,5), otras=orden.slice(5).reduce((t,x)=>t+x[1],0);
@@ -3164,15 +3250,16 @@ function renderImpacto(){
   const rev=monitoreoRegistros.length, vivos=monitoreoRegistros.filter(r=>r.estado!=='Muerto').length;
   box.innerHTML=
     '<div class="impacto__cab"><span class="impacto__tit">Impacto registrado</span><span class="impacto__ambito">'+(DEMO?'datos de ejemplo':'en este celular')+'</span></div>'+
-    '<div class="impacto__hero"><span class="impacto__num">'+n.toLocaleString('es-MX')+'</span><span class="impacto__meta">árbol'+(n===1?'':'es')+' de la meta de '+META_CAMPANA.toLocaleString('es-MX')+' para 2026</span></div>'+
-    '<div class="impacto__barra" role="img" aria-label="'+(100*n/META_CAMPANA).toFixed(1)+' % de la meta"><div style="width:'+Math.min(100,100*n/META_CAMPANA)+'%"></div></div>'+
+    '<div class="impacto__hero"><span class="impacto__num">'+vivosMeta.toLocaleString('es-MX')+'</span><span class="impacto__meta">árbol'+(vivosMeta===1?'':'es')+' vivo'+(vivosMeta===1?'':'s')+' de la meta de '+META_CAMPANA.toLocaleString('es-MX')+' para 2026</span></div>'+
+    '<div class="impacto__barra" role="img" aria-label="'+(100*vivosMeta/META_CAMPANA).toFixed(1)+' % de la meta"><div style="width:'+Math.min(100,100*vivosMeta/META_CAMPANA)+'%"></div></div>'+
+    (inv ? '<div class="impacto__nota">'+inv+' ya plantado'+(inv===1?'':'s')+' (junio a septiembre)'+(muertosInv ? ' · '+muertosInv+' encontrado'+(muertosInv===1?'':'s')+' muerto'+(muertosInv===1?'':'s')+': no cuenta'+(muertosInv===1?'':'n')+' para la meta' : '')+'.</div>' : '')+
     '<div class="impacto__tiles"><div class="impacto__tile"><b>'+unicos(r=>(r.especie||'').split('(')[0].trim())+'</b><span>especies</span></div>'+
     '<div class="impacto__tile"><b>'+unicos(r=>r.idParque||r.parque)+'</b><span>parques</span></div>'+
     '<div class="impacto__tile"><b>'+unicos(r=>r.colonia)+'</b><span>colonias</span></div></div>'+
     '<div class="impacto__sec">Evidencia de cada árbol</div>'+
     fila('Con sus 2 fotos', conFotos, conFotos/n, pct(conFotos)+' %')+
     fila('Ubicación ±1 m', gps1, gps1/n, pct(gps1)+' %')+
-    fila('Protocolo completo', proto, proto/n, pct(proto)+' %')+
+    (plant.length ? fila('Protocolo completo', proto, proto/plant.length, Math.round(100*proto/plant.length)+' %') : '')+
     (rev ? '<div class="impacto__sec" style="margin-top:10px">Sobrevivencia</div>'+fila('Vivos al revisar', vivos, vivos/rev, Math.round(100*vivos/rev)+' %')+
       '<div class="impacto__nota">'+vivos+' de '+rev+' árboles revisados en monitoreo.</div>' : '')+
     '<div class="impacto__sec" style="margin-top:10px">Especies más plantadas</div>'+
@@ -3230,13 +3317,14 @@ function renderRegistros(){
       <button type="button" class="reg-card__resumen" aria-expanded="false" onclick="toggleRegistro(this)">
         ${r.foto1 ? (typeof r.foto1==='string' ? '<img class="reg-card__mini" src="'+r.foto1+'" alt="">' : '<img class="reg-card__mini" data-ev="'+esc(claveFoto(r,1))+'" alt="">') : '<span class="reg-card__mini reg-card__mini--vacia" aria-hidden="true">📷</span>'}
         <span class="reg-card__id">${esc(r.id)}</span>
-        <span class="reg-card__linea"><span class="reg-card__esp">${esc(esp)}</span><span class="reg-card__hora">${esc(horaDe(r))}</span></span>
+        <span class="reg-card__linea"><span class="reg-card__esp">${esc(esp)}${r.estadoEnc==='Muerto' ? ' · <b style="color:var(--c-err,#C62828)">Muerto</b>' : r.tipoRegistro==='inventario' ? ' · ya plantado' : ''}</span><span class="reg-card__hora">${esc(horaDe(r))}</span></span>
         <span class="reg-card__estado"><span class="reg-foto-st" data-fst="${esc(u)}">📷 …</span>${mixto && !estaEnviado(r,env) ? '<span class="reg-env">Sin enviar</span>' : ''}</span>
       </button>
       <div class="reg-card__body" hidden>
         <div class="reg-row"><span class="reg-row__k">Científico</span><span class="reg-row__v" style="font-style:italic">${esc(r.nombreCientifico||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">Parque · Colonia</span><span class="reg-row__v">${esc(r.parque)} — ${esc(r.colonia||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">ID Parque · Asesor</span><span class="reg-row__v">${esc(r.idParque||'—')} · ${esc(r.asesor||'—')}</span></div>
+        ${r.tipoRegistro==='inventario' ? '<div class="reg-row"><span class="reg-row__k">Ya plantado</span><span class="reg-row__v">Plantado en '+esc(r.mes||'—')+' · se encontró '+esc(r.estadoEnc||'—')+'</span></div>' : ''}
         <div class="reg-row"><span class="reg-row__k">Mes · Planta</span><span class="reg-row__v">${esc(r.mes||'—')} · ${esc(r.ejecutor||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">Registrado por</span><span class="reg-row__v">${esc(r.registrante||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">GPS</span><span class="reg-row__v reg-gps">±${fmtPrec(precDe(r))} m · ${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}</span></div>
@@ -3287,8 +3375,9 @@ function nombreFotoZip(r, n){
   const k=iguales.indexOf(r);
   return base+(k>0?'_'+(k+1):'')+'.jpg';
 }
+function tipoRegistroTxt(r){ return r.tipoRegistro==='inventario' ? 'Ya plantado' : 'Plantación'; }
 function csvPlantacion(){
-  const cols=['ID_Arbol','Num','ID_Parque','Asesor','Mes','Ejecutor','Parque','Colonia','Nombre_Comun','Nombre_Cientifico','Codigo_iTree','iTree_En_BD','iTree_Alternativa','Registrado_Por','Latitud','Longitud','Precision_Estimada_m','Precision_Raw_m','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General','Proto_Hoyo','Proto_Riego_Asentamiento','Estado','Fecha_Hora','Observaciones','Foto','Proto_Cama_Tierra_Fertilizada','Proto_Tutor_Crecimiento','Foto_Cenital','Mediciones_Por_Opcion','Precision_Metodo','Fecha_ISO'];
+  const cols=['ID_Arbol','Num','ID_Parque','Asesor','Mes','Ejecutor','Parque','Colonia','Nombre_Comun','Nombre_Cientifico','Codigo_iTree','iTree_En_BD','iTree_Alternativa','Registrado_Por','Latitud','Longitud','Precision_Estimada_m','Precision_Raw_m','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General','Proto_Hoyo','Proto_Riego_Asentamiento','Estado','Fecha_Hora','Observaciones','Foto','Proto_Cama_Tierra_Fertilizada','Proto_Tutor_Crecimiento','Foto_Cenital','Mediciones_Por_Opcion','Precision_Metodo','Fecha_ISO','Tipo_Registro','Estado_Encontrado'];
   const rows=registros.map(r=>[
     csvTxt(r.id),r.num,csvTxt(r.idParque),csvTxt(r.asesor),csvTxt(r.mes),csvTxt(r.ejecutor),
     csvTxt(r.parque),csvTxt(r.colonia),csvTxt((r.especie||'').split('(')[0].trim()),
@@ -3297,14 +3386,15 @@ function csvPlantacion(){
     r.lat.toFixed(7),r.lon.toFixed(7),fmtPrec(precDe(r)),r.acc.toFixed(1),
     (r.dap||'').toString(),(r.altura||'').toString(),
     csvTxt(r.suelo), r.copa!==undefined?r.copa:'', csvTxt(r.condicion),
-    r.protoHoyo?'Sí':'No', r.protoRiego?'Sí':'No',
+    siNoNA(r.protoHoyo), r.protoRiego?'Sí':'No',
     csvTxt(r.estado), csvTxt(r.fecha), csvTxt(r.obs),
     r.foto1?csvTxt(nombreFotoZip(r,1)):'',
     siNoNA(r.protoCama), siNoNA(r.protoTutor),
     r.foto2?csvTxt(nombreFotoZip(r,2)):'',
     csvTxt(medidasPorOpcion(r)),
     r.precMetodo || 'celular',
-    r.ts || ''                      // v41 · HU-38: fecha y hora ISO para emparejar fotos en Monitoreo
+    r.ts || '',                     // v41 · HU-38: fecha y hora ISO para emparejar fotos en Monitoreo
+    tipoRegistroTxt(r), csvTxt(r.estadoEnc||'')
   ].join(','));
   return [cols.join(','),...rows].join('\n');
 }
@@ -3528,10 +3618,11 @@ function filaDirecto(r){
     iTree_En_BD:r.itreeInBD||'', iTree_Alternativa:r.itreeAlt||'', Latitud:r.lat, Longitud:r.lon,
     Precision_Estimada_m:precDe(r), Precision_Raw_m:numONada(r.acc), Precision_Metodo:r.precMetodo||'celular',
     DAP_cm:numONada(r.dap), Altura_m:numONada(r.altura), Suelo_Circundante:r.suelo||'', Copa_Viva_pct:numONada(r.copa), Condicion_General:r.condicion||'',
-    Proto_Hoyo:r.protoHoyo?'Sí':'No', Proto_Cama:siNoNA(r.protoCama), Proto_Tutor:siNoNA(r.protoTutor), Proto_Riego:r.protoRiego?'Sí':'No',
+    Proto_Hoyo:siNoNA(r.protoHoyo), Proto_Cama:siNoNA(r.protoCama), Proto_Tutor:siNoNA(r.protoTutor), Proto_Riego:r.protoRiego?'Sí':'No',
     Protocolo_Completo:(r.protoHoyo&&r.protoCama&&r.protoTutor&&r.protoRiego)?'Sí':'No',
     Foto_Frente:r.foto1?nombreFotoZip(r,1):'', Foto_Cenital:r.foto2?nombreFotoZip(r,2):'',
-    Observaciones:r.obs||'', Mediciones_Por_Opcion:medidasPorOpcion(r), Origen:'APP' };
+    Observaciones:r.obs||'', Mediciones_Por_Opcion:medidasPorOpcion(r),
+    Tipo_Registro:tipoRegistroTxt(r), Estado_Encontrado:r.estadoEnc||'', Origen:'APP' };
 }
 /* v40-1: los errores se distinguen (antes todo decía «se cortó la señal») y se guarda el detalle
    para diagnosticar: red, conexión con el servidor o respuesta que no es del script (permisos). */
@@ -3569,7 +3660,7 @@ async function enviarDirecto(opts){
   directoEnCurso=true; directoDetalle=''; try{ localStorage.setItem('envioPendiente','1'); }catch(_){}
   if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirReintentar').onclick=()=>enviarDirecto(); $('dirTit').textContent='📤 Enviando a Ecosistémica'; }
   pintarDirecto('Preparando '+pend.length+' árbol'+(pend.length===1?'':'es')+'…', 0, 'No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.');
-  let ok=0, fallo=null; const parques=new Set(), quien=new Set();
+  let ok=0, fallo=null, nInv=0, nMuertos=0; const parques=new Set(), quien=new Set();
   for (let i=0;i<pend.length;i++){
     const r=pend[i];
     pintarDirecto('Enviando árbol '+(i+1)+' de '+pend.length+' · '+r.id, i/pend.length);
@@ -3584,11 +3675,13 @@ async function enviarDirecto(opts){
       const llegaron = resp.duplicado || (resp.fotos||0) >= Object.keys(fotos).length;
       if (fotosCompletas && llegaron) marcarEnviados('c',[uidDe(r)]);
       ok++; parques.add(r.parque||r.idParque); quien.add(r.registrante||'');
+      if (r.tipoRegistro==='inventario'){ nInv++; if (r.estadoEnc==='Muerto') nMuertos++; }
     }catch(e){ fallo = e.tipo || 'preparar'; directoDetalle = e.message || String(e); break; }
   }
   if (ok){
     try{ await postDirecto({ tipo:'fin_jornada', datos:{ arboles:ok, brigada:[...quien].filter(Boolean).join(', '), parques:[...parques].filter(Boolean).join(', '),
-      fecha:new Date().toLocaleDateString('es-MX'), detalle:fallo?('incompleto: '+fallo):'' } }); }catch(_){}
+      fecha:new Date().toLocaleDateString('es-MX'), inventario:nInv, muertos:nMuertos,
+      detalle:[nInv ? nInv+' ya plantado'+(nInv===1?'':'s')+(nMuertos?' ('+nMuertos+' muerto'+(nMuertos===1?'':'s')+')':'') : '', fallo?('incompleto: '+fallo):''].filter(Boolean).join(' · ') } }); }catch(_){}
   }
   directoEnCurso=false;
   const faltan=sinEnviar().length;
@@ -4269,6 +4362,7 @@ function cargarBaseMonitoreo(input){
       const idxEsp=buscarCol(headers,['Nombre_Comun','Especie','Nombre comun']);
       const idxCol=buscarCol(headers,['Colonia']);
       const idxIso=buscarCol(headers,['Fecha_ISO']);
+      const idxEstEnc=buscarCol(headers,['Estado_Encontrado']);
       const idxFecha=buscarCol(headers,['Fecha_Hora','Fecha','Fecha_Plantacion','Fecha de plantacion']);
       if (idxId<0||idxLat<0||idxLon<0){
         toast('Faltan columnas: se necesitan ID_Arbol, Latitud y Longitud','err');
@@ -4279,6 +4373,7 @@ function cargarBaseMonitoreo(input){
         const cols=parseCSVLine(lines[i],SEP);
         const rc=revisarCoord(numCoord(cols[idxLat]), numCoord(cols[idxLon]));
         if (!cols[idxId] || !rc) continue;
+        if (idxEstEnc>=0 && /^muerto$/i.test((cols[idxEstEnc]||'').trim())) continue;   // v42: no se monitorea un árbol ya muerto
         if (rc.arreglo==='fuera'){ fuera.push(cols[idxId].trim()); continue; }
         if (rc.arreglo) corregidas++;
         const lat=rc.lat, lon=rc.lon;
@@ -4683,7 +4778,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v41';
+const APP_VERSION='v42';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));

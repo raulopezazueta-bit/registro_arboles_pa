@@ -9,9 +9,12 @@
  *
  * Primera vez: ejecuta configurar() desde el editor (crea carpeta, hoja y clave).
  * Para cambiar el correo de aviso (p. ej. a uno de Parques Alegres): ejecuta cambiarCorreo().
+ * s8-1 (HU-47): columnas Tipo_Registro y Estado_Encontrado para los árboles ya plantados.
+ *   La hoja existente se actualiza sola en el primer envío; también puedes ejecutar
+ *   actualizarEncabezados() una vez desde el editor. No se borra ni se mueve ningún dato.
  */
 
-const VERSION = 's7-3';
+const VERSION = 's8-1';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -19,7 +22,8 @@ const COLS_PLANTACION = ['ID_Arbol','UID','Fecha_ISO','Fecha','Mes','ID_Parque',
   'Nombre_Comun','Nombre_Cientifico','Codigo_iTree','iTree_En_BD','iTree_Alternativa','Latitud','Longitud',
   'Precision_Estimada_m','Precision_Raw_m','Precision_Metodo','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General',
   'Proto_Hoyo','Proto_Cama','Proto_Tutor','Proto_Riego','Protocolo_Completo','Fotos','Foto_Frente','Foto_Cenital','Foto_Frente_URL','Foto_Cenital_URL',
-  'Observaciones','Mediciones_Por_Opcion','Dispositivo','Version_App','Recibido','Origen'];
+  'Observaciones','Mediciones_Por_Opcion','Dispositivo','Version_App','Recibido','Origen',
+  'Tipo_Registro','Estado_Encontrado'];
 const COLS_MONITOREO = ['ID_Monitoreo','UID','ID_Arbol','Fecha_ISO','Fecha','Mes_Revision','Estado','DAP_Actual_cm','ID_Parque','Parque',
   'Nombre_Comun','Revisado_Por','Observaciones','Latitud','Longitud','Foto','Foto_URL','Dispositivo','Version_App','Recibido','Origen'];
 const COLS_ENVIOS = ['Recibido','Tipo','Dispositivo','Brigada','Parque','Arboles','Detalle'];
@@ -70,6 +74,26 @@ function resumenConfig_() {
          'Carpeta: https://drive.google.com/drive/folders/' + p.CARPETA_RAIZ_ID + '\n' +
          'Correo de aviso: ' + p.CORREO_AVISO + '\n' +
          'CLAVE_ENVIO (va dentro de la app, junto con la URL de la aplicación web): ' + p.CLAVE_ENVIO;
+}
+
+/* Agrega al final las columnas que falten y devuelve los encabezados en el orden de la hoja */
+function asegurarEncabezados_(hoja, cols) {
+  const n = Math.max(1, hoja.getLastColumn());
+  const actuales = hoja.getRange(1, 1, 1, n).getValues()[0].map(v => String(v).trim());
+  const faltan = cols.filter(c => actuales.indexOf(c) < 0);
+  if (faltan.length) {
+    const desde = actuales.filter(Boolean).length ? n + 1 : 1;
+    hoja.getRange(1, desde, 1, faltan.length).setValues([faltan]).setFontWeight('bold').setFontColor('#FFFFFF').setBackground('#1A5C20');
+    return (desde === 1 ? [] : actuales).concat(faltan);
+  }
+  return actuales;
+}
+/* Ejecutar una vez desde el editor después de pegar s8-1 (opcional: el primer envío lo hace solo) */
+function actualizarEncabezados() {
+  const hoja = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('HOJA_ID')).getSheetByName('Plantacion');
+  const antes = hoja.getLastColumn();
+  asegurarEncabezados_(hoja, COLS_PLANTACION);
+  Logger.log('Plantacion: ' + antes + ' → ' + hoja.getLastColumn() + ' columnas. Nada se movió ni se borró.');
 }
 
 function prepararHoja_(h, cols) {
@@ -125,7 +149,10 @@ function recibirArbol_(pedido, prop) {
   const urlFrente = f.frente ? guardarFoto_(carpeta, f.frente, d.Foto_Frente || (d.ID_Arbol + '_finalizado.jpg'), d) : '';
   const urlCenital = f.cenital ? guardarFoto_(carpeta, f.cenital, d.Foto_Cenital || (d.ID_Arbol + '_cenital.jpg'), d) : '';
 
-  const fila = COLS_PLANTACION.map(c => {
+  /* s8-1: la fila se arma según los encabezados reales de la hoja (si alguien agregó una
+     columna a mano, nada se recorre) y las columnas nuevas se agregan al final. */
+  const encabezados = asegurarEncabezados_(hoja, COLS_PLANTACION);
+  const fila = encabezados.map(c => {
     if (c === 'Foto_Frente_URL') return urlFrente;
     if (c === 'Foto_Cenital_URL') return urlCenital;
     if (c === 'Fotos') return (urlFrente ? 1 : 0) + (urlCenital ? 1 : 0);
@@ -133,7 +160,8 @@ function recibirArbol_(pedido, prop) {
     if (c === 'Version_App') return texto_(pedido.version);
     if (c === 'Recibido') return new Date();
     if (c === 'Origen') return d.Origen === 'DEMO' ? 'DEMO' : 'APP';
-    return celda_(d[c]);
+    if (c === 'Tipo_Registro') return celda_(d.Tipo_Registro || 'Plantación');   // apps anteriores a v42 solo registran plantaciones
+    return COLS_PLANTACION.indexOf(c) >= 0 ? celda_(d[c]) : '';
   });
   hoja.appendRow(fila);
   return { ok: true, uid: d.UID, fotos: (urlFrente ? 1 : 0) + (urlCenital ? 1 : 0) };
@@ -168,7 +196,8 @@ function cerrarJornada_(pedido, prop) {
       subject: 'Árboles PA · ' + (esMon ? 'Monitoreo recibido · ' : 'Jornada recibida · ') + n + ' ' + que + ' · ' + texto_(r.brigada),
       htmlBody: '<p>Se recibió ' + (esMon ? 'un envío de <b>monitoreo</b>' : 'una jornada') + ' de <b>Árboles PA</b>.</p><ul>' +
         '<li>' + (esMon ? 'Revisitas' : 'Árboles') + ': <b>' + n + '</b></li><li>' + (esMon ? 'Revisó' : 'Registró') + ': ' + esc_(r.brigada) + '</li>' +
-        '<li>Parques: ' + esc_(r.parques) + '</li><li>Fecha: ' + esc_(r.fecha) + '</li></ul>' +
+        '<li>Parques: ' + esc_(r.parques) + '</li><li>Fecha: ' + esc_(r.fecha) + '</li>' +
+        (Number(r.inventario) ? '<li>Ya plantados (jun–sep): ' + Number(r.inventario) + (Number(r.muertos) ? ', ' + Number(r.muertos) + ' encontrados muertos' : '') + '</li>' : '') + '</ul>' +
         '<p><a href="https://docs.google.com/spreadsheets/d/' + prop.getProperty('HOJA_ID') + '">Abrir la hoja maestra</a> · ' +
         '<a href="https://drive.google.com/drive/folders/' + prop.getProperty('CARPETA_FOTOS_ID') + '">Fotos</a></p>'
     });
