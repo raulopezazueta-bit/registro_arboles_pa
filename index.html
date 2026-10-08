@@ -1581,7 +1581,7 @@ window.addEventListener('load', () => {
   pintarCondicionSugerida();
   const lr=localStorage.getItem('lr'); if(lr) $('registrante').value=lr;
   if (localStorage.getItem('ltipo')==='inventario'){ $('tipoReg').value='inventario'; aplicarTipo(); }
-  if (esInventario()){ const lsv=localStorage.getItem('ls'); if (esMes(lsv)) $('mes').value=lsv; } else proponerMes();
+  if (esInventario()){ const lsv=localStorage.getItem('ls'); if (MESES_INVENTARIO.includes(lsv)) $('mes').value=lsv; } else proponerMes();
   const le=localStorage.getItem('le'); if(le) $('ejecutor').value=le;
   const lp=localStorage.getItem('lp'); if(lp){ $('idParque').value=lp; buscarParque(); }
   /* v41 · HU-37: la jornada en una escuela (modo manual) también se conserva entre sesiones */
@@ -1863,13 +1863,26 @@ async function compartirEnLotes(items, titulo, t0, alEnviar){
    (Vivo / Dañado / Muerto) y el protocolo se vuelve «lo que se ve hoy» (tutor y riego).
    ════════════════════════════════════════════════════════════ */
 function esInventario(){ return $('tipoReg').value==='inventario'; }
+/* v42-2: los árboles ya plantados son las entregas de junio a septiembre de 2026; ningún otro
+   mes se puede elegir, para que nadie registre por error el mes de la visita. */
+const MESES_INVENTARIO=['Junio','Julio','Agosto','Septiembre'], ANIO_CAMPANA=2026;
+function limitarMeses(){
+  const inv=esInventario();
+  Array.from($('mes').options).forEach(o => { const fuera = inv && o.value && !MESES_INVENTARIO.includes(o.value); o.disabled=fuera; o.hidden=fuera; });
+  if (inv && $('mes').value && !MESES_INVENTARIO.includes($('mes').value)) $('mes').value='';
+}
+/* Año-mes de plantación (AAAA-MM): el de la visita en una plantación, el elegido en un árbol ya plantado */
+function mesPlantacionISO(r){
+  if (r.tipoRegistro==='inventario'){ const i=MESES.indexOf(r.mes); return i<0 ? '' : ANIO_CAMPANA+'-'+String(i+1).padStart(2,'0'); }
+  const t=new Date(r.ts||Date.now()); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');
+}
 function elegirTipo(t){
   if ($('tipoReg').value===t) return;
   if (hayCaptura() && !confirm('Cambiar el tipo de registro deja el árbol en pantalla, pero revisa sus datos. ¿Cambiar?')) return;
   $('tipoReg').value=t;
   try{ localStorage.setItem('ltipo', t); }catch(_){}
   /* El mes de plantación de un árbol ya plantado casi nunca es el mes en curso: se elige a mano */
-  if (t==='inventario'){ if ($('mes').value===mesActual()) $('mes').value=''; $('mesAviso').classList.remove('borrador--show'); }
+  if (t==='inventario'){ $('mesAviso').classList.remove('borrador--show'); }
   else { $('estadoEnc').value=''; proponerMes(); }
   aplicarTipo(); marcarEstadoEnc();
   vibrate(10); actualizarValidacion(); anotarBorrador();
@@ -1878,7 +1891,8 @@ function aplicarTipo(){
   const inv=esInventario();
   document.querySelectorAll('#op-tipoReg .opcion').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v===$('tipoReg').value)));
   $('invAviso').hidden=!inv; $('protoHintInv').hidden=!inv;
-  $('mesLbl').textContent = inv ? 'Mes en que se plantó' : 'Mes';
+  $('mesLbl').textContent = inv ? 'Mes en que se plantó (jun–sep)' : 'Mes';
+  limitarMeses();
   $('ejecutorLbl').textContent = inv ? 'Quién plantó' : 'Quién planta';
   $('f-estadoEnc').hidden=!inv;
   document.body.classList.toggle('modo-inv', inv);
@@ -2369,6 +2383,7 @@ function valOf(id){
      DAP, altura, suelo, copa ni condición, y basta la foto de frente. En plantación no aplica. */
   const inv=esInventario(), muerto=inv && $('estadoEnc').value==='Muerto';
   if (id==='estadoEnc') return !inv || !!$('estadoEnc').value;
+  if (id==='mes' && inv) return MESES_INVENTARIO.includes($('mes').value);
   if (muerto && (id==='foto2' || ['dap','altura','suelo','copa','condicion'].includes(id))) return true;
   if (id==='gps') return !!gpsLocked;
   if (id==='foto1') return !!foto1;
@@ -3324,7 +3339,7 @@ function renderRegistros(){
         <div class="reg-row"><span class="reg-row__k">Científico</span><span class="reg-row__v" style="font-style:italic">${esc(r.nombreCientifico||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">Parque · Colonia</span><span class="reg-row__v">${esc(r.parque)} — ${esc(r.colonia||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">ID Parque · Asesor</span><span class="reg-row__v">${esc(r.idParque||'—')} · ${esc(r.asesor||'—')}</span></div>
-        ${r.tipoRegistro==='inventario' ? '<div class="reg-row"><span class="reg-row__k">Ya plantado</span><span class="reg-row__v">Plantado en '+esc(r.mes||'—')+' · se encontró '+esc(r.estadoEnc||'—')+'</span></div>' : ''}
+        ${r.tipoRegistro==='inventario' ? '<div class="reg-row"><span class="reg-row__k">Ya plantado</span><span class="reg-row__v">Plantado en '+esc(r.mes||'—')+' '+ANIO_CAMPANA+' · se encontró '+esc(r.estadoEnc||'—')+'</span></div>' : ''}
         <div class="reg-row"><span class="reg-row__k">Mes · Planta</span><span class="reg-row__v">${esc(r.mes||'—')} · ${esc(r.ejecutor||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">Registrado por</span><span class="reg-row__v">${esc(r.registrante||'—')}</span></div>
         <div class="reg-row"><span class="reg-row__k">GPS</span><span class="reg-row__v reg-gps">±${fmtPrec(precDe(r))} m · ${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}</span></div>
@@ -3377,7 +3392,7 @@ function nombreFotoZip(r, n){
 }
 function tipoRegistroTxt(r){ return r.tipoRegistro==='inventario' ? 'Ya plantado' : 'Plantación'; }
 function csvPlantacion(){
-  const cols=['ID_Arbol','Num','ID_Parque','Asesor','Mes','Ejecutor','Parque','Colonia','Nombre_Comun','Nombre_Cientifico','Codigo_iTree','iTree_En_BD','iTree_Alternativa','Registrado_Por','Latitud','Longitud','Precision_Estimada_m','Precision_Raw_m','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General','Proto_Hoyo','Proto_Riego_Asentamiento','Estado','Fecha_Hora','Observaciones','Foto','Proto_Cama_Tierra_Fertilizada','Proto_Tutor_Crecimiento','Foto_Cenital','Mediciones_Por_Opcion','Precision_Metodo','Fecha_ISO','Tipo_Registro','Estado_Encontrado'];
+  const cols=['ID_Arbol','Num','ID_Parque','Asesor','Mes','Ejecutor','Parque','Colonia','Nombre_Comun','Nombre_Cientifico','Codigo_iTree','iTree_En_BD','iTree_Alternativa','Registrado_Por','Latitud','Longitud','Precision_Estimada_m','Precision_Raw_m','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General','Proto_Hoyo','Proto_Riego_Asentamiento','Estado','Fecha_Hora','Observaciones','Foto','Proto_Cama_Tierra_Fertilizada','Proto_Tutor_Crecimiento','Foto_Cenital','Mediciones_Por_Opcion','Precision_Metodo','Fecha_ISO','Tipo_Registro','Estado_Encontrado','Mes_Plantacion'];
   const rows=registros.map(r=>[
     csvTxt(r.id),r.num,csvTxt(r.idParque),csvTxt(r.asesor),csvTxt(r.mes),csvTxt(r.ejecutor),
     csvTxt(r.parque),csvTxt(r.colonia),csvTxt((r.especie||'').split('(')[0].trim()),
@@ -3394,7 +3409,7 @@ function csvPlantacion(){
     csvTxt(medidasPorOpcion(r)),
     r.precMetodo || 'celular',
     r.ts || '',                     // v41 · HU-38: fecha y hora ISO para emparejar fotos en Monitoreo
-    tipoRegistroTxt(r), csvTxt(r.estadoEnc||'')
+    tipoRegistroTxt(r), csvTxt(r.estadoEnc||''), mesPlantacionISO(r)
   ].join(','));
   return [cols.join(','),...rows].join('\n');
 }
@@ -3622,7 +3637,7 @@ function filaDirecto(r){
     Protocolo_Completo:(r.protoHoyo&&r.protoCama&&r.protoTutor&&r.protoRiego)?'Sí':'No',
     Foto_Frente:r.foto1?nombreFotoZip(r,1):'', Foto_Cenital:r.foto2?nombreFotoZip(r,2):'',
     Observaciones:r.obs||'', Mediciones_Por_Opcion:medidasPorOpcion(r),
-    Tipo_Registro:tipoRegistroTxt(r), Estado_Encontrado:r.estadoEnc||'', Origen:'APP' };
+    Tipo_Registro:tipoRegistroTxt(r), Estado_Encontrado:r.estadoEnc||'', Mes_Plantacion:mesPlantacionISO(r), Origen:'APP' };
 }
 /* v40-1: los errores se distinguen (antes todo decía «se cortó la señal») y se guarda el detalle
    para diagnosticar: red, conexión con el servidor o respuesta que no es del script (permisos). */

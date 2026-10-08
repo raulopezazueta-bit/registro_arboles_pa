@@ -9,7 +9,9 @@
  *
  * Primera vez: ejecuta configurar() desde el editor (crea carpeta, hoja y clave).
  * Para cambiar el correo de aviso (p. ej. a uno de Parques Alegres): ejecuta cambiarCorreo().
- * s8-1 (HU-47): columnas Tipo_Registro y Estado_Encontrado para los árboles ya plantados.
+ * s8-1 (HU-47): columnas Tipo_Registro, Estado_Encontrado y Mes_Plantacion (AAAA-MM) para los
+ *   árboles ya plantados. Para monitoreo y tableros, la edad del árbol se cuenta desde Mes_Plantacion,
+ *   no desde Fecha (que es el día en que se registró).
  *   La hoja existente se actualiza sola en el primer envío; también puedes ejecutar
  *   actualizarEncabezados() una vez desde el editor. No se borra ni se mueve ningún dato.
  */
@@ -23,7 +25,7 @@ const COLS_PLANTACION = ['ID_Arbol','UID','Fecha_ISO','Fecha','Mes','ID_Parque',
   'Precision_Estimada_m','Precision_Raw_m','Precision_Metodo','DAP_cm','Altura_m','Suelo_Circundante','Copa_Viva_pct','Condicion_General',
   'Proto_Hoyo','Proto_Cama','Proto_Tutor','Proto_Riego','Protocolo_Completo','Fotos','Foto_Frente','Foto_Cenital','Foto_Frente_URL','Foto_Cenital_URL',
   'Observaciones','Mediciones_Por_Opcion','Dispositivo','Version_App','Recibido','Origen',
-  'Tipo_Registro','Estado_Encontrado'];
+  'Tipo_Registro','Estado_Encontrado','Mes_Plantacion'];
 const COLS_MONITOREO = ['ID_Monitoreo','UID','ID_Arbol','Fecha_ISO','Fecha','Mes_Revision','Estado','DAP_Actual_cm','ID_Parque','Parque',
   'Nombre_Comun','Revisado_Por','Observaciones','Latitud','Longitud','Foto','Foto_URL','Dispositivo','Version_App','Recibido','Origen'];
 const COLS_ENVIOS = ['Recibido','Tipo','Dispositivo','Brigada','Parque','Arboles','Detalle'];
@@ -161,6 +163,7 @@ function recibirArbol_(pedido, prop) {
     if (c === 'Recibido') return new Date();
     if (c === 'Origen') return d.Origen === 'DEMO' ? 'DEMO' : 'APP';
     if (c === 'Tipo_Registro') return celda_(d.Tipo_Registro || 'Plantación');   // apps anteriores a v42 solo registran plantaciones
+    if (c === 'Mes_Plantacion') return celda_(d.Mes_Plantacion || String(d.Fecha || '').slice(0, 7));   // en una plantación, el mes del registro
     return COLS_PLANTACION.indexOf(c) >= 0 ? celda_(d[c]) : '';
   });
   hoja.appendRow(fila);
