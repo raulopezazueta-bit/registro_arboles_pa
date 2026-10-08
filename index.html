@@ -4454,6 +4454,8 @@ async function descargarRevisitas(){
     clearTimeout(tm);
     const d=JSON.parse(await r.text());
     if (!d.ok) throw new Error(d.error==='clave' ? 'el servidor rechazó la clave de la app' : (d.detalle||d.error||'respuesta inválida'));
+    /* v43-2: un receptor anterior a s8-2 contesta el GET con su prueba de conexión, sin lista de árboles */
+    if (!Array.isArray(d.arboles)) throw new Error('el servidor todavía no tiene la función de revisitas'+(d.version?' (tiene la versión '+d.version+'; se necesita s8-2 o posterior)':'')+'. Avisa a Ecosistémica');
     try{ localStorage.setItem('monParque', id); }catch(_){}
     if (!d.arboles.length){
       const e=d.estado;
