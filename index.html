@@ -47,6 +47,7 @@ html[data-fs="2"] .reg-stat__label{letter-spacing:0}
 .mon-otra{margin-top:12px}.mon-otra summary{cursor:pointer;color:var(--c-p-700);font-weight:700;font-size:var(--fs-sm);min-height:44px;display:flex;align-items:center}
 .mon-hito{display:inline-block;font-size:var(--fs-2xs);font-weight:700;color:var(--c-p-800);background:var(--c-p-50);border-radius:var(--r-full);padding:2px 8px;margin-top:3px}
 .mon-hito--venc{color:#8A3B00;background:#FFF3E0}
+html.sitio-prueba body::before{content:'SITIO DE PRUEBAS · lo que envíes no cuenta';position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#E65100;color:#fff;font:700 11px/18px system-ui,sans-serif;text-align:center;pointer-events:none}
 .inv-aviso{font-size:var(--fs-sm);color:var(--c-p-800);background:var(--c-p-50);border-radius:var(--r-md);padding:8px 10px;margin-top:var(--s-2)}
 .opcion{min-height:44px;border:1.5px solid var(--c-n-300);background:var(--c-w);border-radius:var(--r-md);font:inherit;font-size:var(--fs-md);font-weight:650;color:var(--c-n-800);cursor:pointer;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
 .opcion small{font-size:var(--fs-xs);font-weight:500;color:var(--c-n-600)}
@@ -1505,6 +1506,10 @@ function entrarDemo(){ try{ sessionStorage.setItem('demo_v1','1'); }catch(_){ to
 function salirDemo(){ try{ sessionStorage.removeItem('demo_v1'); }catch(_){} location.reload(); }
 function alternarDemo(){ DEMO ? salirDemo() : entrarDemo(); }
 /* En la demostración no sale nada del celular */
+/* v43-3: el sitio de pruebas envía a la misma hoja maestra; todo lo que sale de ahí va marcado
+   «prueba» y el receptor lo guarda con Origen = PRUEBA, fuera de la meta, del sorteo y de las revisitas. */
+const SITIO_PRUEBA = /^raulopezazueta-bit\.github\.io$/i.test(location.hostname);
+if (SITIO_PRUEBA) document.documentElement.classList.add('sitio-prueba');
 function bloqueoDemo(){ if (!DEMO) return false; toast('En la demostración no se envía nada','err'); return true; }
 let registros = JSON.parse(localStorage.getItem('r11k_v2') || '[]');
 /* Papelera: los registros borrados se guardan 7 días por si el borrado fue un error.
@@ -3657,7 +3662,7 @@ async function postDirecto(cuerpo){
   const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(), 60000);
   let resp;
   try{
-    resp=await fetch(ENVIO_URL,{ method:'POST', body:JSON.stringify({ clave:ENVIO_CLAVE, dispositivo:deviceToken, version:APP_VERSION, ...cuerpo }),
+    resp=await fetch(ENVIO_URL,{ method:'POST', body:JSON.stringify({ clave:ENVIO_CLAVE, dispositivo:deviceToken, version:APP_VERSION, sitio:SITIO_PRUEBA?'prueba':'oficial', ...cuerpo }),
       headers:{'Content-Type':'text/plain;charset=utf-8'}, redirect:'follow', signal:ctl.signal });
   }catch(e){
     throw new ErrorEnvio(!navigator.onLine ? 'red' : e.name==='AbortError' ? 'tiempo' : 'conexion', (e.name||'')+': '+(e.message||''));

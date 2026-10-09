@@ -19,11 +19,13 @@
  *     crean sus revisitas a 3, 6, 12, 24 y 36 meses en la pestaña Revisitas.
  *   - El sorteo es verificable: ordena por SHA-256(semilla|UID), así que se puede repetir.
  *   - La app descarga las revisitas de un parque con doGet ?accion=revisitas.
+ * s8-3: lo que llega del sitio de pruebas (sitio = 'prueba') se guarda con Origen = PRUEBA y no
+ *   cuenta para el sorteo, las revisitas ni la meta. El correo lleva «[PRUEBA]» en el asunto.
  *   La hoja existente se actualiza sola en el primer envío; también puedes ejecutar
  *   actualizarEncabezados() una vez desde el editor. No se borra ni se mueve ningún dato.
  */
 
-const VERSION = 's8-2';
+const VERSION = 's8-3';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -170,6 +172,12 @@ function sumarMeses_(ym, n) {
   const a = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7)) - 1 + n;
   return (a + Math.floor(m / 12)) + '-' + String(m % 12 + 1).padStart(2, '0');
 }
+/* Origen de un registro: DEMO (modo demostración), PRUEBA (sitio de pruebas) o APP (sitio oficial) */
+function origen_(pedido, d) {
+  if (d && d.Origen === 'DEMO') return 'DEMO';
+  return pedido && pedido.sitio === 'prueba' ? 'PRUEBA' : 'APP';
+}
+function cuenta_(r) { return r.Origen !== 'DEMO' && r.Origen !== 'PRUEBA'; }
 function vivoAlRegistrar_(r) {
   const est = String(r.Estado_Encontrado || '');
   return est ? (est === 'Vivo' || est === 'Dañado') : true;   // una plantación de hoy está viva
@@ -190,7 +198,7 @@ function revisarParque_(ss, idParque) {
   const entregas = filas_(ss.getSheetByName('Entregas')).filter(r => String(r.ID_Parque).trim() === idParque);
   const entregados = entregas.reduce((t, r) => t + (Number(r.Cantidad) || 0), 0);
   if (!entregados) return;   // sin entrega registrada no hay contra qué comparar: sortearParque() a mano
-  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && r.Origen !== 'DEMO');
+  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && cuenta_(r));
   const vivos = arboles.filter(vivoAlRegistrar_);
   const fila = [idParque, (entregas[0].Parque || (arboles[0] && arboles[0].Parque) || ''), entregados, arboles.length, vivos.length, '',
     arboles.length >= entregados ? 'Sorteada' : 'Registrando', ''];
@@ -229,7 +237,7 @@ function sortearParque() {
   TZ_ = ss.getSpreadsheetTimeZone() || TZ_;
   const hMP = hojaCon_(ss, 'Muestra_Parques', COLS_MUESTRA_PARQUES);
   if (filas_(hMP).some(r => String(r.ID_Parque) === idParque && r.Estado === 'Sorteada')) { Logger.log('Ese parque ya tiene muestra.'); return; }
-  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && r.Origen !== 'DEMO');
+  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && cuenta_(r));
   const vivos = arboles.filter(vivoAlRegistrar_);
   const n = sortear_(ss, idParque, vivos);
   hMP.appendRow([idParque, arboles[0] ? arboles[0].Parque : '', '', arboles.length, vivos.length, n, 'Sorteada (manual)', new Date()]);
@@ -363,14 +371,14 @@ function recibirArbol_(pedido, prop) {
     if (c === 'Dispositivo') return texto_(pedido.dispositivo);
     if (c === 'Version_App') return texto_(pedido.version);
     if (c === 'Recibido') return new Date();
-    if (c === 'Origen') return d.Origen === 'DEMO' ? 'DEMO' : 'APP';
+    if (c === 'Origen') return origen_(pedido, d);
     if (c === 'Tipo_Registro') return celda_(d.Tipo_Registro || 'Plantación');   // apps anteriores a v42 solo registran plantaciones
     if (c === 'Mes_Plantacion') { const mp = ym_(d.Mes_Plantacion || d.Fecha); return mp ? "'" + mp : ''; }   // texto: que Sheets no lo convierta en fecha
     return COLS_PLANTACION.indexOf(c) >= 0 ? celda_(d[c]) : '';
   });
   hoja.appendRow(fila);
   /* s8-2: un fallo del sorteo nunca hace que la app reintente el árbol (ya quedó guardado) */
-  if (d.Origen !== 'DEMO') { try { revisarParque_(ss, d.ID_Parque); } catch (err) { console.error('sorteo', err); } }
+  if (origen_(pedido, d) === 'APP') { try { revisarParque_(ss, d.ID_Parque); } catch (err) { console.error('sorteo', err); } }
   return { ok: true, uid: d.UID, fotos: (urlFrente ? 1 : 0) + (urlCenital ? 1 : 0) };
 }
 
@@ -384,10 +392,10 @@ function recibirRevisita_(pedido, prop) {
   const f = pedido.fotos || {};
   const url = f.revision ? guardarFoto_(carpeta, f.revision, d.Foto || (d.ID_Arbol + '_revision.jpg'), d) : '';
   let hito = '';
-  try { hito = marcarRevisita_(ss, d); } catch (err) { console.error('revisitas', err); }
+  if (origen_(pedido, d) === 'APP') { try { hito = marcarRevisita_(ss, d); } catch (err) { console.error('revisitas', err); } }
   const encabezados = asegurarEncabezados_(hoja, COLS_MONITOREO_S8);
   hoja.appendRow(encabezados.map(c => c === 'Foto_URL' ? url : c === 'Dispositivo' ? texto_(pedido.dispositivo)
-    : c === 'Version_App' ? texto_(pedido.version) : c === 'Recibido' ? new Date() : c === 'Origen' ? 'APP'
+    : c === 'Version_App' ? texto_(pedido.version) : c === 'Recibido' ? new Date() : c === 'Origen' ? origen_(pedido, d)
     : c === 'Hito_Meses' ? (hito || celda_(d.Hito_Meses)) : COLS_MONITOREO_S8.indexOf(c) >= 0 ? celda_(d[c]) : ''));
   return { ok: true, uid: d.UID, hito: hito };
 }
@@ -398,13 +406,13 @@ function cerrarJornada_(pedido, prop) {
   const ss = SpreadsheetApp.openById(prop.getProperty('HOJA_ID'));
   const esMon = r.tipo === 'monitoreo';                  // s7-3: el cierre de un envío de monitoreo
   const n = Number(r.arboles) || 0, que = esMon ? (n === 1 ? 'revisita' : 'revisitas') : (n === 1 ? 'árbol' : 'árboles');
-  ss.getSheetByName('Envios').appendRow([new Date(), esMon ? 'monitoreo' : 'jornada', texto_(pedido.dispositivo), texto_(r.brigada), texto_(r.parques),
+  ss.getSheetByName('Envios').appendRow([new Date(), (pedido.sitio === 'prueba' ? 'prueba · ' : '') + (esMon ? 'monitoreo' : 'jornada'), texto_(pedido.dispositivo), texto_(r.brigada), texto_(r.parques),
     n, texto_(r.detalle)]);
   const correo = prop.getProperty('CORREO_AVISO');
   if (correo && MailApp.getRemainingDailyQuota() > 5) {
     MailApp.sendEmail({
       to: correo,
-      subject: 'Árboles PA · ' + (esMon ? 'Monitoreo recibido · ' : 'Jornada recibida · ') + n + ' ' + que + ' · ' + texto_(r.brigada),
+      subject: (pedido.sitio === 'prueba' ? '[PRUEBA] ' : '') + 'Árboles PA · ' + (esMon ? 'Monitoreo recibido · ' : 'Jornada recibida · ') + n + ' ' + que + ' · ' + texto_(r.brigada),
       htmlBody: '<p>Se recibió ' + (esMon ? 'un envío de <b>monitoreo</b>' : 'una jornada') + ' de <b>Árboles PA</b>.</p><ul>' +
         '<li>' + (esMon ? 'Revisitas' : 'Árboles') + ': <b>' + n + '</b></li><li>' + (esMon ? 'Revisó' : 'Registró') + ': ' + esc_(r.brigada) + '</li>' +
         '<li>Parques: ' + esc_(r.parques) + '</li><li>Fecha: ' + esc_(r.fecha) + '</li>' +
