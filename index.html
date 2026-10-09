@@ -1349,7 +1349,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
     <h2 class="guia__tit" id="guiaTit"></h2>
     <p class="guia__txt" id="guiaTxt"></p>
     <p class="guia__marca" id="guiaMarca" hidden><b>Parques Alegres I.A.P. y Fundación GC1</b><span>Iniciativa Cobertura Vegetal 2026</span><span>Desarrollo: Ecosistémica – Consultoría Ambiental Integral</span></p>
-    <div class="guia__puntos" id="guiaPuntos" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="guia__puntos" id="guiaPuntos" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
     <button type="button" class="btn-compartir" id="guiaSig" onclick="guiaSiguiente()">Siguiente</button>
     <button type="button" class="guia__saltar" id="guiaDemo" hidden onclick="cerrarGuia(); entrarDemo()">Ver una demostración con datos de ejemplo</button>
     <button type="button" class="guia__saltar" id="guiaSaltar" onclick="cerrarGuia()">Saltar</button>
@@ -4882,6 +4882,7 @@ function alternarSol(){
 const GUIA=[
   {logo:true, tit:'Cobertura Vegetal 2026', txt:'Cada árbol que se planta en los parques de Culiacán queda registrado con su ubicación, especie, medidas y 2 fotos de evidencia.', marca:true},
   {ico:'pin', tit:'Permite ubicación y cámara', txt:'La app usa el GPS para ubicar cada árbol y la cámara para sus 2 fotos. Cuando el celular pregunte, toca «Permitir».'},
+  {ico:'pencil', tit:'Cambia el ID en cada parque', txt:'La app recuerda el último ID de Parque que usaste. Al llegar a otro parque, antes del primer árbol toca «Cambiar datos de la jornada» y escribe el ID del parque nuevo. Si no lo cambias, los árboles quedan registrados en el parque anterior.'},
   {ico:'sun', tit:'Ajusta la pantalla', txt:'Con el botón Aa de arriba a la derecha agrandas la letra o activas el modo sol para leer a pleno sol.'},
   {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Enviar a Ecosistémica. Con señal se envía directo, árbol por árbol; si se corta, lo que falte se envía solo después.'}
 ];
