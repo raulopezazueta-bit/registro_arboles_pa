@@ -21,11 +21,13 @@
  *   - La app descarga las revisitas de un parque con doGet ?accion=revisitas.
  * s8-3: lo que llega del sitio de pruebas (sitio = 'prueba') se guarda con Origen = PRUEBA y no
  *   cuenta para el sorteo, las revisitas ni la meta. El correo lleva «[PRUEBA]» en el asunto.
+ * s8-4: los meses (Mes_Plantacion, Mes_Programado) se guardan como texto limpio «2026-07»
+ *   (celda en formato texto, sin apóstrofo). normalizarMeses() corrige lo que ya está en la hoja.
  *   La hoja existente se actualiza sola en el primer envío; también puedes ejecutar
  *   actualizarEncabezados() una vez desde el editor. No se borra ni se mueve ningún dato.
  */
 
-const VERSION = 's8-3';
+const VERSION = 's8-4';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -223,11 +225,16 @@ function sortear_(ss, idParque, vivos) {
       const prog = sumarMeses_(mp, h);
       /* Los plantados en junio y julio: su revisita de 3 meses es el registro inicial */
       const hecha = reg && prog <= reg;
-      nuevas.push([r.ID_Arbol + '|' + h, r.ID_Arbol, idParque, r.Parque, r.Nombre_Comun, r.Latitud, r.Longitud, "'" + mp, h, "'" + prog,
+      nuevas.push([r.ID_Arbol + '|' + h, r.ID_Arbol, idParque, r.Parque, r.Nombre_Comun, r.Latitud, r.Longitud, mp, h, prog,
         hecha ? 'Hecha (registro inicial)' : 'Pendiente', '', hecha ? r.Fecha : '', hecha ? (r.Estado_Encontrado || 'Vivo') : '', r.Foto_Frente_URL || '']);
     });
   });
-  if (nuevas.length) hRev.getRange(hRev.getLastRow() + 1, 1, nuevas.length, COLS_REVISITAS.length).setValues(nuevas);
+  if (nuevas.length) {
+    const desde = hRev.getLastRow() + 1;
+    /* Los meses van como texto: si no, Sheets los convierte en fecha */
+    ['Mes_Plantacion', 'Mes_Programado'].forEach(c => hRev.getRange(desde, COLS_REVISITAS.indexOf(c) + 1, nuevas.length, 1).setNumberFormat('@'));
+    hRev.getRange(desde, 1, nuevas.length, COLS_REVISITAS.length).setValues(nuevas);
+  }
   return nParque;
 }
 /* Para un parque sin entrega registrada o que no terminó: escribe el ID y ejecuta */
@@ -298,6 +305,28 @@ function miniatura_(url) {
     const b = f.getThumbnail() || (f.getSize() <= 450000 ? f.getBlob() : null);
     return b ? 'data:' + (b.getContentType() || 'image/jpeg') + ';base64,' + Utilities.base64Encode(b.getBytes()) : '';
   } catch (err) { return ''; }
+}
+
+/* s8-4 · Ejecutar una vez: deja como texto «AAAA-MM» los meses ya guardados (fechas de s8-1 y
+   textos con apóstrofo de s8-2/s8-3). No cambia ningún mes, solo su formato. */
+function normalizarMeses() {
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('HOJA_ID'));
+  TZ_ = ss.getSpreadsheetTimeZone() || TZ_;
+  let n = 0;
+  [['Plantacion', ['Mes_Plantacion']], ['Revisitas', ['Mes_Plantacion', 'Mes_Programado']]].forEach(([nombre, cols]) => {
+    const h = ss.getSheetByName(nombre);
+    if (!h || h.getLastRow() < 2) return;
+    const enc = h.getRange(1, 1, 1, h.getLastColumn()).getValues()[0].map(x => String(x).trim());
+    cols.forEach(c => {
+      const col = enc.indexOf(c) + 1;
+      if (!col) return;
+      const rango = h.getRange(2, col, h.getLastRow() - 1, 1);
+      const vals = rango.getValues().map(r => [r[0] === '' ? '' : ym_(r[0])]);
+      rango.setNumberFormat('@').setValues(vals);
+      n += vals.filter(v => v[0]).length;
+    });
+  });
+  Logger.log('Listo: ' + n + ' meses quedaron como texto AAAA-MM.');
 }
 
 function prepararHoja_(h, cols) {
@@ -373,10 +402,13 @@ function recibirArbol_(pedido, prop) {
     if (c === 'Recibido') return new Date();
     if (c === 'Origen') return origen_(pedido, d);
     if (c === 'Tipo_Registro') return celda_(d.Tipo_Registro || 'Plantación');   // apps anteriores a v42 solo registran plantaciones
-    if (c === 'Mes_Plantacion') { const mp = ym_(d.Mes_Plantacion || d.Fecha); return mp ? "'" + mp : ''; }   // texto: que Sheets no lo convierta en fecha
+    if (c === 'Mes_Plantacion') return '';   // se escribe después, como texto (abajo)
     return COLS_PLANTACION.indexOf(c) >= 0 ? celda_(d[c]) : '';
   });
   hoja.appendRow(fila);
+  /* s8-4: el mes de plantación como texto limpio «2026-07»: en formato de texto Sheets no lo convierte en fecha */
+  const mp = ym_(d.Mes_Plantacion || d.Fecha), colMp = encabezados.indexOf('Mes_Plantacion') + 1;
+  if (mp && colMp) hoja.getRange(hoja.getLastRow(), colMp).setNumberFormat('@').setValue(mp);
   /* s8-2: un fallo del sorteo nunca hace que la app reintente el árbol (ya quedó guardado) */
   if (origen_(pedido, d) === 'APP') { try { revisarParque_(ss, d.ID_Parque); } catch (err) { console.error('sorteo', err); } }
   return { ok: true, uid: d.UID, fotos: (urlFrente ? 1 : 0) + (urlCenital ? 1 : 0) };
