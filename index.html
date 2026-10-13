@@ -1098,7 +1098,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
         <div class="foto-slot" id="slot2"><img class="foto-slot__img" id="prev2" alt="Árbol finalizado desde arriba"><span class="foto-slot__icon"><svg class="ic" aria-hidden="true"><use href="#i-arrowdown"/></svg></span><span class="foto-slot__label">2 · Desde arriba<br>Cepa, tutor y riego vistos en vertical</span><span class="foto-slot__check"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><input type="file" accept="image/*" capture="environment" id="fi2" onchange="capturarFoto(2,this)"></div>
       </div>
       <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> Foto 1: de frente, árbol completo. Foto 2: con el celular sobre el árbol, apuntando hacia abajo.</p>
-      <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Para enviarlas usa <strong>Registros → Enviar a Ecosistémica</strong>: van solas con el ID de cada árbol. No las adjuntes desde la galería: ahí pierden el ID en el nombre.</p>
+      <p class="foto-nota"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> Para enviarlas usa <strong>Registros → Enviar a Parques Alegres</strong>: van solas con el ID de cada árbol. No las adjuntes desde la galería: ahí pierden el ID en el nombre.</p>
       <div class="field" style="margin-top:var(--s-3)"><label class="field__label" for="obs">Observaciones <span class="opt">opcional</span></label>
         <textarea id="obs" placeholder="Estado del árbol, condiciones del terreno, incidencias…"></textarea>
       </div>
@@ -1132,7 +1132,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
   <div id="regList"></div>
   <div class="reg-limpiar" id="regLimpiarBox">
     <button type="button" class="reg-limpiar__btn" onclick="limpiarRegistros()"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Limpiar registros de este celular</button>
-    <p class="reg-limpiar__txt">Úsalo solo cuando Ecosistémica confirme que recibió la jornada.</p>
+    <p class="reg-limpiar__txt">Úsalo solo cuando Parques Alegres confirme que recibió la jornada.</p>
   </div>
   <div class="papelera" id="papeleraBox" style="display:none">
     <button type="button" class="papelera__head" id="papeleraHead" onclick="togglePapelera()"></button>
@@ -1224,7 +1224,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
   <div class="section">
     <div class="section__head"><div class="section__head__title"><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Revisitas de hoy</div><span class="section__head__status" id="monHoyCount">0</span></div>
     <div class="section__body">
-      <button type="button" class="btn-compartir mon-enviar" id="btnMonEnviar" onclick="enviarMonitoreoDirecto()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> <span id="monEnviarTxt">Enviar a Ecosistémica</span></button>
+      <button type="button" class="btn-compartir mon-enviar" id="btnMonEnviar" onclick="enviarMonitoreoDirecto()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> <span id="monEnviarTxt">Enviar a Parques Alegres</span></button>
       <div class="reg-actions" style="margin-bottom:12px">
         <button class="btn-action btn-action--secondary" onclick="exportCSVMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> CSV</button>
         <button class="btn-action btn-action--secondary" onclick="exportFotosMonitoreo()"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg> Fotos</button>
@@ -1237,7 +1237,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 </section>
 
 <div class="envio-bar" id="envioBar" data-hidden="true">
-  <button type="button" class="btn-compartir" id="btnEnvioBar" onclick="enviarDirecto()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> <span id="envioBarTxt">Enviar a Ecosistémica</span></button>
+  <button type="button" class="btn-compartir" id="btnEnvioBar" onclick="enviarDirecto()"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg> <span id="envioBarTxt">Enviar a Parques Alegres</span></button>
   <div class="envio-bar__nota">Se envía directo con señal · <button type="button" class="envio-bar__alt" onclick="compartirJornada()">o en .zip por Gmail</button></div>
 </div>
 <div class="save-bar" id="saveBar">
@@ -1279,7 +1279,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
 <div class="hoja" id="directo" hidden>
   <div class="hoja__fondo" onclick="cerrarDirecto()"></div>
   <div class="hoja__panel" role="dialog" aria-modal="true" aria-labelledby="dirTit">
-    <h2 class="hoja__tit" id="dirTit">Enviando a Ecosistémica</h2>
+    <h2 class="hoja__tit" id="dirTit">Enviando a Parques Alegres</h2>
     <p class="dir-txt" id="dirTxt" aria-live="polite">Preparando…</p>
     <div class="dir-barra" role="progressbar" aria-labelledby="dirTxt"><div id="dirBarra"></div></div>
     <p class="dir-nota" id="dirNota">No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.</p>
@@ -1629,6 +1629,7 @@ window.addEventListener('load', () => {
   try{ if (!localStorage.getItem('guia_v1')) abrirGuia(0); }catch(_){}
   iniciarGPS();
   valTimer=setInterval(actualizarValidacion, 350);
+  setTimeout(abrirDesdeQR, 250);   // v44-2: QR de la ficha del parque
 });
 
 /* ════════════════════════════════════════════════════════════
@@ -1797,7 +1798,7 @@ async function actualizarMedidor(){
   el.classList.toggle('memoria--alerta', alerta);
   el.innerHTML = '<div class="memoria__barra"><div class="memoria__fill" style="width:'+Math.min(100,Math.max(2,m.pct)).toFixed(0)+'%"></div></div>'+
     '📦 Memoria usada: '+pctTxt+(registros.length ? ' · '+conFotos+' árbol'+(conFotos===1?'':'es')+' con sus 2 fotos en este celular' : ' · cabe la jornada completa')+
-    (alerta ? '<br>⚠️ Envía la jornada y, cuando Ecosistémica confirme que la recibió, usa Limpiar.' : '');
+    (alerta ? '<br>⚠️ Envía la jornada y, cuando Parques Alegres confirme que la recibió, usa Limpiar.' : '');
 }
 let avisoMemoria=false;
 async function revisarMemoria(){
@@ -2058,6 +2059,29 @@ function switchTab(tab) {
   $('saveBar').dataset.hidden = isReg ? 'false' : 'true';
   $('envioBar').dataset.hidden = (tab==='registros' && registros.length) ? 'false' : 'true';
   if (tab==='monitoreo') renderMonitoreoHoy();
+}
+
+/* v44-2 · HU-50: el QR de la ficha de cada parque abre la app con ?parque=ID.
+   Llena el ID de la jornada y el de Monitoreo; si la jornada ya tiene otro parque, pregunta antes. */
+function abrirDesdeQR(){
+  let id='';
+  try{ id=(new URLSearchParams(location.search).get('parque')||'').trim().replace(/[^\w-]/g,''); }catch(_){}
+  if (!id) return;
+  try{ history.replaceState(null,'',location.pathname+location.hash); }catch(_){}   // al recargar no vuelve a preguntar
+  const reg=PARQUES_DB[id], nombre=reg ? reg.nombre : 'ID '+id;
+  $('monParque').value=id;
+  try{ localStorage.setItem('monParque', id); }catch(_){}
+  const manual=$('manualToggle').checked, actual=$('idParque').value.trim();
+  if (actual===id && !manual){ toast('📍 '+nombre+' ya es el parque de tu jornada','ok'); return; }
+  if ((actual || manual) && !confirm('Este QR es del parque '+nombre+' (ID '+id+').\n\n'+
+      'Tu jornada tiene '+(manual ? 'un lugar capturado a mano' : 'el ID '+actual)+'. ¿Cambiar al parque del QR?')){
+    toast('Se quedó el parque que ya tenías','ok'); return;
+  }
+  if (manual){ $('manualToggle').checked=false; toggleManualParque(); try{localStorage.removeItem('lmanual');}catch(_){} }
+  $('idParque').value=id;
+  buscarParque();
+  try{ localStorage.setItem('lp', id); }catch(_){}
+  toast(reg ? '📍 Parque del QR: '+nombre : '⚠️ El ID '+id+' no está en la base de parques', reg?'ok':'err');
 }
 
 function buscarParque() {
@@ -2809,7 +2833,7 @@ function guardarRegistro(){
       registros.pop();
       evBorrar([claveFoto(reg,1),claveFoto(reg,2)]);
       reactivarGuardar();
-      toast('❌ Memoria llena. Envía la jornada a Ecosistémica y limpia los registros.','err');
+      toast('❌ Memoria llena. Envía la jornada a Parques Alegres y limpia los registros.','err');
       return;
     }
     if (guardado){
@@ -3241,7 +3265,7 @@ function pintarEnvio(){
   const total=registros.length, pend=sinEnviar().length;
   $('regLimpiarBox').style.display = total ? '' : 'none';
   if ($('envioBar')){
-    $('envioBarTxt').textContent = !total ? 'Enviar a Ecosistémica' : pend ? 'Enviar a Ecosistémica · '+pend+' sin enviar' : '✓ Todo enviado';
+    $('envioBarTxt').textContent = !total ? 'Enviar a Parques Alegres' : pend ? 'Enviar a Parques Alegres · '+pend+' sin enviar' : '✓ Todo enviado';
     $('btnEnvioBar').classList.toggle('btn-compartir--sec', total>0 && !pend);
     if ($('tab-registros').dataset.active==='true') $('envioBar').dataset.hidden = total ? 'false' : 'true';
   }
@@ -3686,10 +3710,10 @@ async function enviarDirecto(opts){
   if (bloqueoDemo()) return;
   if (directoEnCurso || monEnCurso) { if (!silencioso) $('directo').hidden=false; return; }
   const pend=sinEnviar();
-  if (!pend.length){ if (!silencioso) toast('✓ Todo está enviado a Ecosistémica','ok'); return; }
+  if (!pend.length){ if (!silencioso) toast('✓ Todo está enviado a Parques Alegres','ok'); return; }
   if (!navigator.onLine){ if (!silencioso) toast('Sin señal: se enviará solo al recuperarla','err'); try{ localStorage.setItem('envioPendiente','1'); }catch(_){} return; }
   directoEnCurso=true; directoDetalle=''; try{ localStorage.setItem('envioPendiente','1'); }catch(_){}
-  if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirReintentar').onclick=()=>enviarDirecto(); $('dirTit').textContent='📤 Enviando a Ecosistémica'; }
+  if (!silencioso){ $('directo').hidden=false; $('dirOk').hidden=true; $('dirReintentar').hidden=true; $('dirReintentar').onclick=()=>enviarDirecto(); $('dirTit').textContent='📤 Enviando a Parques Alegres'; }
   pintarDirecto('Preparando '+pend.length+' árbol'+(pend.length===1?'':'es')+'…', 0, 'No cierres la app hasta que termine. Si se corta la señal, lo que falte se envía solo al recuperarla.');
   let ok=0, fallo=null, nInv=0, nMuertos=0; const parques=new Set(), quien=new Set();
   for (let i=0;i<pend.length;i++){
@@ -3718,17 +3742,17 @@ async function enviarDirecto(opts){
   const faltan=sinEnviar().length;
   if (!faltan){ try{ localStorage.removeItem('envioPendiente'); }catch(_){} }
   $('dirTit').textContent = faltan ? '⚠️ Envío incompleto' : '✅ Jornada recibida';
-  pintarDirecto(faltan ? ok+' árbol'+(ok===1?'':'es')+' enviado'+(ok===1?'':'s')+' · faltan '+faltan : 'Ecosistémica recibió '+ok+' árbol'+(ok===1?'':'es')+' con sus fotos', faltan ? ok/(ok+faltan) : 1,
+  pintarDirecto(faltan ? ok+' árbol'+(ok===1?'':'es')+' enviado'+(ok===1?'':'s')+' · faltan '+faltan : 'Parques Alegres recibió '+ok+' árbol'+(ok===1?'':'es')+' con sus fotos', faltan ? ok/(ok+faltan) : 1,
     faltan ? (fallo==='clave' ? 'El servidor rechazó la clave de la app. Avisa a Ecosistémica; mientras, usa el .zip por Gmail.'
       : fallo==='red' ? 'Se cortó la señal. Lo que falta se envía solo al recuperarla, o toca «Reintentar ahora».'
       : fallo==='tiempo' ? 'El servidor tardó demasiado en responder. Toca «Reintentar ahora».'
-      : fallo==='conexion' ? 'Hay señal, pero no se pudo conectar con el servidor de Ecosistémica. Toca «Reintentar ahora»; si sigue, usa el .zip por Gmail y avisa a Ecosistémica.'
+      : fallo==='conexion' ? 'Hay señal, pero no se pudo conectar con el servidor. Toca «Reintentar ahora»; si sigue, usa el .zip por Gmail y avisa a Ecosistémica.'
       : fallo==='respuesta' ? 'El servidor respondió con una página en lugar de confirmar el árbol (revisar permisos de la implementación). Usa el .zip por Gmail y avisa a Ecosistémica.'
       : 'El servidor no respondió bien ('+fallo+'). Se reintentará solo; si sigue, usa el .zip por Gmail.')
       + (directoDetalle ? '\nDetalle técnico: '+directoDetalle : '')
-      : 'Usa «Limpiar» solo cuando ya no necesites estos árboles en el celular: la copia quedó en la hoja maestra de Ecosistémica.');
+      : 'Usa «Limpiar» solo cuando ya no necesites estos árboles en el celular: la copia quedó en la hoja maestra.');
   $('dirOk').hidden=false; $('dirReintentar').hidden=!faltan;
-  if (silencioso && !faltan) toast('✅ Se enviaron '+ok+' árbol'+(ok===1?'':'es')+' pendientes a Ecosistémica','ok');
+  if (silencioso && !faltan) toast('✅ Se enviaron '+ok+' árbol'+(ok===1?'':'es')+' pendientes a Parques Alegres','ok');
 }
 /* ════════════════════════════════════════════════════════════
    v41 · HU-45 ENVÍO DIRECTO DE MONITOREO (igual que la jornada)
@@ -3774,11 +3798,11 @@ async function enviarMonitoreoDirecto(opts){
   const faltan=monitoreoRegistros.filter(r=>!r.enviado).length;
   if (!faltan){ try{ localStorage.removeItem('envioPendienteMon'); }catch(_){} }
   $('dirTit').textContent = faltan ? '⚠️ Envío incompleto' : '✅ Revisitas recibidas';
-  pintarDirecto(faltan ? ok+' revisita'+(ok===1?'':'s')+' enviada'+(ok===1?'':'s')+' · faltan '+faltan : 'Ecosistémica recibió '+ok+' revisita'+(ok===1?'':'s')+' con su foto', faltan ? ok/(ok+faltan) : 1,
+  pintarDirecto(faltan ? ok+' revisita'+(ok===1?'':'s')+' enviada'+(ok===1?'':'s')+' · faltan '+faltan : 'Parques Alegres recibió '+ok+' revisita'+(ok===1?'':'s')+' con su foto', faltan ? ok/(ok+faltan) : 1,
     faltan ? (fallo==='clave' ? 'El servidor rechazó la clave de la app. Avisa a Ecosistémica; mientras, usa «Archivos sueltos».'
       : fallo==='red' ? 'Se cortó la señal. Lo que falta se envía solo al recuperarla, o toca «Reintentar ahora».'
       : fallo==='tiempo' ? 'El servidor tardó demasiado en responder. Toca «Reintentar ahora».'
-      : fallo==='conexion' ? 'Hay señal, pero no se pudo conectar con el servidor de Ecosistémica. Toca «Reintentar ahora»; si sigue, usa «Archivos sueltos» y avisa a Ecosistémica.'
+      : fallo==='conexion' ? 'Hay señal, pero no se pudo conectar con el servidor. Toca «Reintentar ahora»; si sigue, usa «Archivos sueltos» y avisa a Ecosistémica.'
       : fallo==='respuesta' ? 'El servidor respondió con una página en lugar de confirmar la revisita (revisar permisos de la implementación). Avisa a Ecosistémica.'
       : 'El servidor no respondió bien ('+fallo+'). Se reintentará solo; si sigue, usa «Archivos sueltos».')+(directoDetalle?'\nDetalle técnico: '+directoDetalle:'')
       : 'Usa «Limpiar» cuando ya no necesites estas revisitas en el celular: la copia quedó en la hoja maestra.');
@@ -3914,7 +3938,7 @@ function confirmarZipEnviado(){
   if (!zipEnvio) return;
   marcarEnviados('c', zipEnvio.uids.filter(u => registros.some(r => uidDe(r)===u)));
   cerrarZipEnvio();
-  toast('✅ Jornada marcada como enviada. Usa «Limpiar» cuando Ecosistémica confirme que la recibió','ok');
+  toast('✅ Jornada marcada como enviada. Usa «Limpiar» cuando Parques Alegres confirme que la recibió','ok');
 }
 function cerrarZipEnvio(){ $('zipEnvio').hidden=true; }
 document.addEventListener('keydown', e => { if (e.key==='Escape' && !$('zipEnvio').hidden) cerrarZipEnvio(); });
@@ -3967,7 +3991,7 @@ function limpiarRegistros(){
     : '';
   const pend=sinEnviar().length;
   const avisoEnvio = pend
-    ? '⚠️ '+pend+' de '+registros.length+' árbol(es) NO se han enviado. Usa «Enviar a Ecosistémica» antes de limpiar.\n\n'
+    ? '⚠️ '+pend+' de '+registros.length+' árbol(es) NO se han enviado. Usa «Enviar a Parques Alegres» antes de limpiar.\n\n'
     : '';
   if (!confirm(avisoEnvio+'¿Borrar '+registros.length+' registros de este celular?'+avisoPap)) return;
   evBorrar(registros.flatMap(r => [claveFoto(r,1), claveFoto(r,2)]));
@@ -4453,7 +4477,7 @@ async function descargarRevisitas(){
   const st=$('monDescStatus');
   if (!id){ toast('Escribe el ID de tu parque','err'); $('monParque').focus(); return; }
   if (!navigator.onLine){ st.textContent='Sin señal: busca señal y vuelve a tocar «Descargar».'; return; }
-  const btn=$('btnDescRev'); btn.disabled=true; st.textContent='⏳ Consultando a Ecosistémica…';
+  const btn=$('btnDescRev'); btn.disabled=true; st.textContent='⏳ Consultando el calendario de revisitas…';
   try{
     const ctl=new AbortController(), tm=setTimeout(()=>ctl.abort(), 60000);
     const r=await fetch(ENVIO_URL+'?accion=revisitas&parque='+encodeURIComponent(id)+'&clave='+encodeURIComponent(ENVIO_CLAVE)+'&t='+Date.now(),{cache:'no-store',redirect:'follow',signal:ctl.signal});
@@ -4735,14 +4759,14 @@ function renderMonitoreoHoy(){
       <strong>${esc(r.idArbol)}</strong> · ${esc(r.mes||'—')} · ${esc(r.estado)}${r.dap?' · DAP '+esc(r.dap)+' cm':''}<br>
       <span style="font-size:var(--fs-sm);color:var(--c-n-600)">${esc(r.parque||'—')} · Revisó: ${esc(r.revisor)} · ${esc(r.fecha)}</span>
       ${r.obs?'<div style="font-size:var(--fs-sm);margin-top:4px">'+esc(r.obs)+'</div>':''}
-      ${r.enviado?'<span class="mon-card__env">✓ Enviada a Ecosistémica</span>':''}
+      ${r.enviado?'<span class="mon-card__env">✓ Enviada a Parques Alegres</span>':''}
     </div>`).join('');
   pintarEnvioMon();
 }
 function pintarEnvioMon(){
   const pend=monitoreoRegistros.filter(r=>!r.enviado).length, btn=$('btnMonEnviar'); if (!btn) return;
   btn.hidden = !monitoreoRegistros.length;
-  $('monEnviarTxt').textContent = pend ? 'Enviar a Ecosistémica · '+pend+' sin enviar' : '✓ Revisitas enviadas';
+  $('monEnviarTxt').textContent = pend ? 'Enviar a Parques Alegres · '+pend+' sin enviar' : '✓ Revisitas enviadas';
   btn.classList.toggle('btn-compartir--sec', !pend);
 }
 
@@ -4801,7 +4825,7 @@ function exportCSVMonitoreo(){
 function limpiarMonitoreo(){
   if (!monitoreoRegistros.length) return;
   const pendM=monitoreoRegistros.filter(r=>!r.enviado).length;
-  if (!confirm((pendM ? '⚠️ '+pendM+' revisita(s) NO se han enviado a Ecosistémica.\n\n' : '')+'¿Borrar '+monitoreoRegistros.length+' revisitas de este celular?')) return;
+  if (!confirm((pendM ? '⚠️ '+pendM+' revisita(s) NO se han enviado a Parques Alegres.\n\n' : '')+'¿Borrar '+monitoreoRegistros.length+' revisitas de este celular?')) return;
   evBorrar(monitoreoRegistros.map(claveFotoMon));
   monitoreoRegistros=[]; localStorage.removeItem('monitoreo_v1'); renderMonitoreoHoy();
   toast('Revisitas eliminadas','ok');
@@ -4859,7 +4883,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v44';
+const APP_VERSION='v44-2';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));
@@ -4883,9 +4907,9 @@ function alternarSol(){
 const GUIA=[
   {logo:true, tit:'Cobertura Vegetal 2026', txt:'Cada árbol que se planta en los parques de Culiacán queda registrado con su ubicación, especie, medidas y 2 fotos de evidencia.', marca:true},
   {ico:'pin', tit:'Permite ubicación y cámara', txt:'La app usa el GPS para ubicar cada árbol y la cámara para sus 2 fotos. Cuando el celular pregunte, toca «Permitir».'},
-  {ico:'pencil', tit:'Cambia el ID en cada parque', txt:'La app recuerda el último ID de Parque que usaste. Al llegar a otro parque, antes del primer árbol toca «Cambiar datos de la jornada» y escribe el ID del parque nuevo. Si no lo cambias, los árboles quedan registrados en el parque anterior.'},
+  {ico:'pencil', tit:'Cambia el ID en cada parque', txt:'La app recuerda el último ID de Parque que usaste. Al llegar a otro parque, antes del primer árbol toca «Cambiar datos de la jornada» y escribe el ID del parque nuevo, o escanea el QR de la ficha del parque y la app lo llena sola. Si no lo cambias, los árboles quedan registrados en el parque anterior.'},
   {ico:'sun', tit:'Ajusta la pantalla', txt:'Con el botón Aa de arriba a la derecha agrandas la letra o activas el modo sol para leer a pleno sol.'},
-  {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Enviar a Ecosistémica. Con señal se envía directo, árbol por árbol; si se corta, lo que falte se envía solo después.'}
+  {ico:'share', tit:'Envía tu jornada', txt:'Al terminar: Registros → Enviar a Parques Alegres. Con señal se envía directo, árbol por árbol; si se corta, lo que falte se envía solo después.'}
 ];
 let guiaPaso=0;
 function abrirGuia(n){ guiaPaso=n||0; pintarGuia(); $('guia').hidden=false; setTimeout(()=>$('guiaSig').focus(),40); }
