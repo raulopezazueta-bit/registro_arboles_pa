@@ -23,11 +23,16 @@
  *   cuenta para el sorteo, las revisitas ni la meta. El correo lleva «[PRUEBA]» en el asunto.
  * s8-4: los meses (Mes_Plantacion, Mes_Programado) se guardan como texto limpio «2026-07»
  *   (celda en formato texto, sin apóstrofo). normalizarMeses() corrige lo que ya está en la hoja.
+ * s8-5 (HU-49): conciliación de lo entregado contra lo registrado como «Ya plantado».
+ *   Pestaña Conciliacion (parque × especie) y Avance_Comites (una fila por parque), al día con
+ *   cada árbol. recalcularConciliacion() la rehace completa (después de pegar Entregas).
+ *   Para el sorteo solo cuentan los árboles «Ya plantado»: una plantación nueva en el mismo
+ *   parque ya no adelanta la muestra.
  *   La hoja existente se actualiza sola en el primer envío; también puedes ejecutar
  *   actualizarEncabezados() una vez desde el editor. No se borra ni se mueve ningún dato.
  */
 
-const VERSION = 's8-4';
+const VERSION = 's8-5';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -43,6 +48,9 @@ const COLS_ENVIOS = ['Recibido','Tipo','Dispositivo','Brigada','Parque','Arboles
 const COLS_MONITOREO_S8 = COLS_MONITOREO.concat(['Hito_Meses']);
 const COLS_ENTREGAS = ['ID_Parque','Parque','Colonia','Especie','Cantidad','Fecha_Entrega','Comite','Asesor'];
 const COLS_MUESTRA_PARQUES = ['ID_Parque','Parque','Entregados','Registrados','Vivos_Primer_Registro','Muestra','Estado','Fecha_Sorteo'];
+const COLS_CONCILIACION = ['ID_Parque','Parque','Especie','Entregados','Registrados','Vivos','Dañados','Muertos','Faltan','Nota'];
+const COLS_AVANCE = ['ID_Parque','Parque','Comite','Entregados','Registrados','Vivos_y_Dañados','Muertos','Faltan','Avance_Registro',
+  'Sobrevivencia_Registro','Muestra','Estado','Actualizado'];
 const COLS_REVISITAS = ['Clave','ID_Arbol','ID_Parque','Parque','Nombre_Comun','Latitud','Longitud','Mes_Plantacion','Hito_Meses',
   'Mes_Programado','Estado','ID_Monitoreo','Fecha_Realizada','Resultado','Foto_Frente_URL'];
 /* Parámetros del muestreo: se editan en la pestaña Muestreo de la hoja (columna Valor) */
@@ -130,6 +138,8 @@ function actualizarEncabezados() {
 /* ─────────────── s8-2 · Muestra de monitoreo y revisitas (HU-51) ─────────────── */
 function prepararMuestreo_(ss) {
   hojaCon_(ss, 'Entregas', COLS_ENTREGAS);
+  hojaCon_(ss, 'Conciliacion', COLS_CONCILIACION);
+  hojaCon_(ss, 'Avance_Comites', COLS_AVANCE);
   const m = ss.getSheetByName('Muestreo');
   if (!m) {
     const h = ss.insertSheet('Muestreo');
@@ -180,6 +190,7 @@ function origen_(pedido, d) {
   return pedido && pedido.sitio === 'prueba' ? 'PRUEBA' : 'APP';
 }
 function cuenta_(r) { return r.Origen !== 'DEMO' && r.Origen !== 'PRUEBA'; }
+function yaPlantado_(r) { return String(r.Tipo_Registro || '') === 'Ya plantado'; }
 function vivoAlRegistrar_(r) {
   const est = String(r.Estado_Encontrado || '');
   return est ? (est === 'Vivo' || est === 'Dañado') : true;   // una plantación de hoy está viva
@@ -200,7 +211,7 @@ function revisarParque_(ss, idParque) {
   const entregas = filas_(ss.getSheetByName('Entregas')).filter(r => String(r.ID_Parque).trim() === idParque);
   const entregados = entregas.reduce((t, r) => t + (Number(r.Cantidad) || 0), 0);
   if (!entregados) return;   // sin entrega registrada no hay contra qué comparar: sortearParque() a mano
-  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && cuenta_(r));
+  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && cuenta_(r) && yaPlantado_(r));
   const vivos = arboles.filter(vivoAlRegistrar_);
   const fila = [idParque, (entregas[0].Parque || (arboles[0] && arboles[0].Parque) || ''), entregados, arboles.length, vivos.length, '',
     arboles.length >= entregados ? 'Sorteada' : 'Registrando', ''];
@@ -237,6 +248,72 @@ function sortear_(ss, idParque, vivos) {
   }
   return nParque;
 }
+/* ─────────────── s8-5 · Conciliación entregado contra registrado (HU-49) ─────────────── */
+function claveEsp_(e) { return String(e || '').split('(')[0].normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+/* Recalcula un parque (o todos, si idParque es null) y reescribe Conciliacion y Avance_Comites */
+function actualizarConciliacion_(ss, idParque) {
+  TZ_ = ss.getSpreadsheetTimeZone() || TZ_;
+  const entregas = filas_(ss.getSheetByName('Entregas')).filter(r => String(r.ID_Parque).trim());
+  const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => cuenta_(r) && yaPlantado_(r) && String(r.ID_Parque).trim());
+  const muestra = {};
+  filas_(ss.getSheetByName('Muestra_Parques')).forEach(r => { muestra[String(r.ID_Parque)] = r; });
+  const ids = idParque ? [String(idParque).trim()]
+    : Object.keys(entregas.concat(arboles).reduce((o, r) => { o[String(r.ID_Parque).trim()] = 1; return o; }, {}));
+  const conc = [], avance = [], ahora = new Date();
+  ids.forEach(id => {
+    const ent = entregas.filter(r => String(r.ID_Parque).trim() === id), reg = arboles.filter(r => String(r.ID_Parque).trim() === id);
+    if (!ent.length && !reg.length) return;
+    const porEsp = {};
+    const de = (k, nombre) => porEsp[k] || (porEsp[k] = { nombre: nombre, ent: 0, reg: 0, vivo: 0, dan: 0, muerto: 0 });
+    ent.forEach(r => { de(claveEsp_(r.Especie), r.Especie).ent += Number(r.Cantidad) || 0; });
+    reg.forEach(r => {
+      const x = de(claveEsp_(r.Nombre_Comun), r.Nombre_Comun); x.reg++;
+      const e = String(r.Estado_Encontrado || 'Vivo');
+      if (e === 'Muerto') x.muerto++; else if (e === 'Dañado') x.dan++; else x.vivo++;
+    });
+    const parque = (ent[0] && ent[0].Parque) || (reg[0] && reg[0].Parque) || '';
+    const tot = { ent: 0, reg: 0, vivo: 0, dan: 0, muerto: 0 };
+    Object.keys(porEsp).sort().forEach(k => {
+      const x = porEsp[k];
+      ['ent', 'reg', 'vivo', 'dan', 'muerto'].forEach(c => { tot[c] += x[c]; });
+      conc.push([id, parque, x.nombre, x.ent, x.reg, x.vivo, x.dan, x.muerto, Math.max(0, x.ent - x.reg),
+        !ent.length ? 'Parque sin entrega registrada' : !x.ent ? 'Especie no entregada a este parque' : x.reg > x.ent ? 'Registrados de más' : '']);
+    });
+    const m = muestra[id] || {};
+    const sorteada = String(m.Estado || '').indexOf('Sorteada') === 0;
+    const estado = !tot.reg ? 'Sin registros' : tot.reg < tot.ent ? 'Registrando' : 'Completo';
+    avance.push([id, parque, (ent[0] && ent[0].Comite) || '', tot.ent, tot.reg, tot.vivo + tot.dan, tot.muerto, Math.max(0, tot.ent - tot.reg),
+      tot.ent ? Math.min(1, tot.reg / tot.ent) : '', tot.reg ? (tot.vivo + tot.dan) / tot.reg : '', sorteada ? m.Muestra : '',
+      estado + (sorteada ? ' · muestra sorteada' : ''), ahora]);
+  });
+  reescribir_(hojaCon_(ss, 'Conciliacion', COLS_CONCILIACION), COLS_CONCILIACION, conc, idParque);
+  const hA = hojaCon_(ss, 'Avance_Comites', COLS_AVANCE);
+  reescribir_(hA, COLS_AVANCE, avance, idParque);
+  if (hA.getLastRow() > 1) hA.getRange(2, COLS_AVANCE.indexOf('Avance_Registro') + 1, hA.getLastRow() - 1, 2).setNumberFormat('0%');
+}
+/* Sustituye las filas de un parque (o todas) conservando las de los demás, ordenadas por ID */
+function reescribir_(hoja, cols, nuevas, idParque) {
+  const previas = hoja.getLastRow() > 1 ? hoja.getRange(2, 1, hoja.getLastRow() - 1, cols.length).getValues() : [];
+  const quedan = idParque ? previas.filter(r => String(r[0]).trim() !== String(idParque).trim()) : [];
+  const todas = quedan.concat(nuevas).sort((a, b) => String(a[0]).localeCompare(String(b[0]), 'es', { numeric: true }));
+  if (previas.length) hoja.getRange(2, 1, previas.length, cols.length).clearContent();
+  if (todas.length) {
+    hoja.getRange(2, 1, todas.length, 1).setNumberFormat('@');   // los ID como texto, igual que en Entregas
+    hoja.getRange(2, 1, todas.length, cols.length).setValues(todas.map(r => [String(r[0])].concat(r.slice(1))));
+  }
+}
+/* Ejecutar después de pegar o corregir la pestaña Entregas: rehace la conciliación completa */
+function recalcularConciliacion() {
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('HOJA_ID'));
+  actualizarConciliacion_(ss, null);
+  /* y revisa si algún parque ya registró todo lo entregado (sorteo pendiente) */
+  const ids = {};
+  filas_(ss.getSheetByName('Entregas')).forEach(r => { if (String(r.ID_Parque).trim()) ids[String(r.ID_Parque).trim()] = 1; });
+  Object.keys(ids).forEach(id => { try { revisarParque_(ss, id); } catch (err) { console.error('sorteo ' + id, err); } });
+  actualizarConciliacion_(ss, null);
+  Logger.log('Conciliación lista: ' + Object.keys(ids).length + ' parques con entrega.');
+}
+
 /* Para un parque sin entrega registrada o que no terminó: escribe el ID y ejecuta */
 function sortearParque() {
   const idParque = '00000';   // ← ID del parque
@@ -246,7 +323,7 @@ function sortearParque() {
   if (filas_(hMP).some(r => String(r.ID_Parque) === idParque && r.Estado === 'Sorteada')) { Logger.log('Ese parque ya tiene muestra.'); return; }
   const arboles = filas_(ss.getSheetByName('Plantacion')).filter(r => String(r.ID_Parque).trim() === idParque && cuenta_(r));
   const vivos = arboles.filter(vivoAlRegistrar_);
-  const n = sortear_(ss, idParque, vivos);
+  const n = sortear_(ss, idParque, vivos);   // a mano cuentan todos los árboles del parque (también plantaciones nuevas)
   hMP.appendRow([idParque, arboles[0] ? arboles[0].Parque : '', '', arboles.length, vivos.length, n, 'Sorteada (manual)', new Date()]);
   Logger.log('Parque ' + idParque + ': ' + n + ' árboles en la muestra.');
 }
@@ -410,7 +487,10 @@ function recibirArbol_(pedido, prop) {
   const mp = ym_(d.Mes_Plantacion || d.Fecha), colMp = encabezados.indexOf('Mes_Plantacion') + 1;
   if (mp && colMp) hoja.getRange(hoja.getLastRow(), colMp).setNumberFormat('@').setValue(mp);
   /* s8-2: un fallo del sorteo nunca hace que la app reintente el árbol (ya quedó guardado) */
-  if (origen_(pedido, d) === 'APP') { try { revisarParque_(ss, d.ID_Parque); } catch (err) { console.error('sorteo', err); } }
+  if (origen_(pedido, d) === 'APP') {
+    try { revisarParque_(ss, d.ID_Parque); } catch (err) { console.error('sorteo', err); }
+    if (d.Tipo_Registro === 'Ya plantado') { try { actualizarConciliacion_(ss, d.ID_Parque); } catch (err) { console.error('conciliacion', err); } }
+  }
   return { ok: true, uid: d.UID, fotos: (urlFrente ? 1 : 0) + (urlCenital ? 1 : 0) };
 }
 
