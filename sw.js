@@ -88,7 +88,8 @@
 /* v40 (07-oct-2026): HU-29 envío directo a Ecosistémica (Apps Script). */
 /* v40-1: errores de envío diferenciados con detalle técnico. */
 /* v44-2 (13-oct-2026): el QR de la ficha del parque (?parque=ID) llena el ID; los envíos dicen «Enviar a Parques Alegres». */
-const CACHE_VERSION = 'apa-2026-10-13-v44-2';
+/* v44-3 (14-oct-2026): «Árbol ya plantado» vuelve a junio–septiembre (la UAS no se registra en la app). */
+const CACHE_VERSION = 'apa-2026-10-14-v44-3';
 const CORE = [
   './',
   './index.html',

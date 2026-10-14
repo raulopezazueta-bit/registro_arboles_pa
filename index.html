@@ -776,7 +776,7 @@ html[data-sol="1"] .especie-card__name{background:rgba(0,0,0,.85)}
       <div class="field" id="f-tipoReg"><span class="field__label" id="tipoRegLbl">¿Qué vas a registrar?</span>
         <div class="opciones opciones--2" id="op-tipoReg" role="group" aria-labelledby="tipoRegLbl">
           <button type="button" class="opcion" data-v="plantacion" aria-pressed="true" onclick="elegirTipo('plantacion')">Plantación de hoy<small>Árboles que se plantan hoy</small></button>
-          <button type="button" class="opcion" data-v="inventario" aria-pressed="false" onclick="elegirTipo('inventario')">Árbol ya plantado<small>Entregados antes (abr–sep)</small></button>
+          <button type="button" class="opcion" data-v="inventario" aria-pressed="false" onclick="elegirTipo('inventario')">Árbol ya plantado<small>Entregados antes (jun–sep)</small></button>
         </div>
         <input type="hidden" id="tipoReg" value="plantacion">
         <p class="inv-aviso" id="invAviso" hidden>Registras árboles que ya estaban plantados. Elige el <b>mes en que se plantaron</b> y, en cada árbol, cómo lo encontraste.</p>
@@ -1881,8 +1881,8 @@ async function compartirEnLotes(items, titulo, t0, alEnviar){
 function esInventario(){ return $('tipoReg').value==='inventario'; }
 /* v42-2: los árboles ya plantados son las entregas del vivero Kaavar de 2026; ningún otro mes se
    puede elegir, para que nadie registre por error el mes de la visita.
-   v44: también abril (entrega a la UAS, 20-abr-2026). Mayo no tuvo entregas. */
-const MESES_INVENTARIO=['Abril','Junio','Julio','Agosto','Septiembre'], ANIO_CAMPANA=2026;
+   v44: también abril (entrega a la UAS). v44-3: se quita; la UAS no se registra en la app. */
+const MESES_INVENTARIO=['Junio','Julio','Agosto','Septiembre'], ANIO_CAMPANA=2026;   // v44-3: sin abril (la UAS no se registra en la app)
 function limitarMeses(){
   const inv=esInventario();
   Array.from($('mes').options).forEach(o => { const fuera = inv && o.value && !MESES_INVENTARIO.includes(o.value); o.disabled=fuera; o.hidden=fuera; });
@@ -1908,7 +1908,7 @@ function aplicarTipo(){
   const inv=esInventario();
   document.querySelectorAll('#op-tipoReg .opcion').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v===$('tipoReg').value)));
   $('invAviso').hidden=!inv; $('protoHintInv').hidden=!inv;
-  $('mesLbl').textContent = inv ? 'Mes en que se plantó (abr, jun–sep)' : 'Mes';
+  $('mesLbl').textContent = inv ? 'Mes en que se plantó (jun–sep)' : 'Mes';
   limitarMeses();
   $('ejecutorLbl').textContent = inv ? 'Quién plantó' : 'Quién planta';
   $('f-estadoEnc').hidden=!inv;
@@ -3307,7 +3307,7 @@ function renderImpacto(){
     '<div class="impacto__cab"><span class="impacto__tit">Impacto registrado</span><span class="impacto__ambito">'+(DEMO?'datos de ejemplo':'en este celular')+'</span></div>'+
     '<div class="impacto__hero"><span class="impacto__num">'+vivosMeta.toLocaleString('es-MX')+'</span><span class="impacto__meta">árbol'+(vivosMeta===1?'':'es')+' vivo'+(vivosMeta===1?'':'s')+' de la meta de '+META_CAMPANA.toLocaleString('es-MX')+' para 2026</span></div>'+
     '<div class="impacto__barra" role="img" aria-label="'+(100*vivosMeta/META_CAMPANA).toFixed(1)+' % de la meta"><div style="width:'+Math.min(100,100*vivosMeta/META_CAMPANA)+'%"></div></div>'+
-    (inv ? '<div class="impacto__nota">'+inv+' ya plantado'+(inv===1?'':'s')+' (abril a septiembre)'+(muertosInv ? ' · '+muertosInv+' encontrado'+(muertosInv===1?'':'s')+' muerto'+(muertosInv===1?'':'s')+': no cuenta'+(muertosInv===1?'':'n')+' para la meta' : '')+'.</div>' : '')+
+    (inv ? '<div class="impacto__nota">'+inv+' ya plantado'+(inv===1?'':'s')+' (junio a septiembre)'+(muertosInv ? ' · '+muertosInv+' encontrado'+(muertosInv===1?'':'s')+' muerto'+(muertosInv===1?'':'s')+': no cuenta'+(muertosInv===1?'':'n')+' para la meta' : '')+'.</div>' : '')+
     '<div class="impacto__tiles"><div class="impacto__tile"><b>'+unicos(r=>(r.especie||'').split('(')[0].trim())+'</b><span>especies</span></div>'+
     '<div class="impacto__tile"><b>'+unicos(r=>r.idParque||r.parque)+'</b><span>parques</span></div>'+
     '<div class="impacto__tile"><b>'+unicos(r=>r.colonia)+'</b><span>colonias</span></div></div>'+
@@ -4883,7 +4883,7 @@ new MutationObserver(ms => { ms.forEach(m => {
    HU-24 menú de pantalla y modo sol · HU-25 guía de primer uso
    HU-27 «Hoy: N» en el encabezado · HU-28 versión visible y «Actualizar ahora»
    ════════════════════════════════════════════════════════════ */
-const APP_VERSION='v44-2';
+const APP_VERSION='v44-3';
 let focoPantalla=null;
 function pintarPantalla(){
   document.querySelectorAll('.seg__op').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.fs===fsLevel)));
