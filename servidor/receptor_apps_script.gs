@@ -32,7 +32,7 @@
  *   actualizarEncabezados() una vez desde el editor. No se borra ni se mueve ningún dato.
  */
 
-const VERSION = 's8-5';
+const VERSION = 's8-6';
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;   // una foto de la app pesa ~150–400 KB
 const CORREO_INICIAL = 'ecosistemicaconsultoria@gmail.com';
 
@@ -46,7 +46,7 @@ const COLS_MONITOREO = ['ID_Monitoreo','UID','ID_Arbol','Fecha_ISO','Fecha','Mes
   'Nombre_Comun','Revisado_Por','Observaciones','Latitud','Longitud','Foto','Foto_URL','Dispositivo','Version_App','Recibido','Origen'];
 const COLS_ENVIOS = ['Recibido','Tipo','Dispositivo','Brigada','Parque','Arboles','Detalle'];
 const COLS_MONITOREO_S8 = COLS_MONITOREO.concat(['Hito_Meses']);
-const COLS_ENTREGAS = ['ID_Parque','Parque','Colonia','Especie','Cantidad','Fecha_Entrega','Comite','Asesor'];
+const COLS_ENTREGAS = ['ID_Parque','Parque','Colonia','Especie','Cantidad','Fecha_Entrega','Comite','Asesor','Num_Arbol'];   // s8-6: Num_Arbol = números de árbol del parque (ej. «1 a 5»)
 const COLS_MUESTRA_PARQUES = ['ID_Parque','Parque','Entregados','Registrados','Vivos_Primer_Registro','Muestra','Estado','Fecha_Sorteo'];
 const COLS_CONCILIACION = ['ID_Parque','Parque','Especie','Entregados','Registrados','Vivos','Dañados','Muertos','Faltan','Nota'];
 const COLS_AVANCE = ['ID_Parque','Parque','Comite','Entregados','Registrados','Vivos_y_Dañados','Muertos','Faltan','Avance_Registro',
@@ -58,7 +58,7 @@ const MUESTREO_DEFECTO = [
   ['Z', 1.96, 'Nivel de confianza 95 % (90 % = 1.645 · 99 % = 2.576)'],
   ['Proporcion_p', 0.5, 'Proporción esperada; 0.5 da la muestra más conservadora'],
   ['Margen_e', 0.03, 'Margen de error ±3 %'],
-  ['Poblacion_N', '', 'Vacío = suma de Cantidad en Entregas (3,747 en 2026)'],
+  ['Poblacion_N', '', 'Vacío = suma de Cantidad en Entregas (sin la UAS, que no se monitorea)'],
   ['Hitos_Meses', '3,6,12,24,36', 'Revisitas en meses desde Mes_Plantacion'],
   ['Semilla', 'APA2026', 'No cambiar después del primer sorteo: con ella se puede repetir y verificar']
 ];
@@ -132,7 +132,8 @@ function actualizarEncabezados() {
   asegurarEncabezados_(hoja, COLS_PLANTACION);
   asegurarEncabezados_(ss.getSheetByName('Monitoreo'), COLS_MONITOREO_S8);
   prepararMuestreo_(ss);
-  Logger.log('Plantacion: ' + antes + ' → ' + hoja.getLastColumn() + ' columnas. Pestañas Entregas, Muestreo, Muestra_Parques y Revisitas listas. Nada se movió ni se borró.');
+  const ent = ss.getSheetByName('Entregas');
+  Logger.log('Plantacion: ' + antes + ' → ' + hoja.getLastColumn() + ' columnas. Entregas: ' + ent.getLastColumn() + ' columnas (' + ent.getRange(1, 1, 1, ent.getLastColumn()).getValues()[0].join(', ') + '). Pestañas Muestreo, Muestra_Parques y Revisitas listas. Nada se movió ni se borró.');
 }
 
 /* ─────────────── s8-2 · Muestra de monitoreo y revisitas (HU-51) ─────────────── */
